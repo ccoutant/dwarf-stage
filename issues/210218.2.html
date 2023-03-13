@@ -1,0 +1,148 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>210218.2</td>
+      <td>Tom Tromey</td>
+      <td>Generalize complex number support</td>
+      <td>Enhancement</td>
+      <td>Accepted</td>
+      <td>Zoran Zaric</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+PROBLEM DESCRIPTION
+
+GCC can handle complex integers as well as complex floating-point types.
+A complex type can be defined using type qualifier '_Complex' with any
+floating point or integral type:
+
+    _Complex int x;
+
+This extension is GNU specific and not part of ISO C99.
+
+However, DWARF has no way to represent these types, as there is only
+DW_ATE_complex_float and DW_ATE_imaginary_float (Section 5.1.1.4 page 106).
+
+Another example of a language that uses integer based complex types is Rust
+through the type trait mechanism.
+
+In both cases, the complex type data can be represented with either
+floating-point, signed integral or unsigned integral numbers.
+
+PROPOSED RESOLUTION
+
+In section 5.1.1.2, &quot;Encoding attribute values&quot;, p 105, table 5.1,
+&quot;Base type encoding values&quot;, add new encoding group at the end of the
+table:
+
+    Name                     | Meaning
+-----------------------------------------------------------
+ Complex integral encodings
+                             |
+ DW_ATE_complex_signed       | complex binary integral number
+ DW_ATE_imaginary_signed     | imaginary binary integral number
+ DW_ATE_complex_unsigned     | complex unsigned binary integral number
+ DW_ATE_imaginary_unsigned   | imaginary unsigned binary integral number
+
+In section 5.1.1, &quot;Base Type Encodings&quot;, p 108, line 11, add a new
+section with text:
+
+  &quot;5.1.1.6 Complex Integral Encodings
+
+   Complex types with binary integral encodings (DW_ATE_complex_signed,
+   DW_ATE_imaginary_signed, DW_ATE_complex_unsigned and
+   DW_ATE_imaginary_unsigned) are supported in some programming
+   languages (GNU C and Rust) and are not discussed further.&quot;
+
+In section 7.8, &quot;Base Type Attribute Encodings&quot;, p 227, table 7.11,
+&quot;Base type encoding values&quot;, add new encoding values at the end of the
+table:
+
+  -------------------------------------------------------
+    Base type encoding name    |  Value
+  -------------------------------------------------------
+    DW_ATE_complex_signed      |  0x0e
+    DW_ATE_imaginary_signed    |  0x0f
+    DW_ATE_complex_unsigned    |  0x10
+    DW_ATE_imaginary_unsigned  |  0x11
+
+-- 
+2022-03-03: Revised.
+2022-07-18: Revised, defining additional base type encodings.
+            Previous version: http://dwarfstd.dev/issues/210218.2-1.html
+2023-01-23: Accepted.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

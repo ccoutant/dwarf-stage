@@ -1,0 +1,133 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>200519.1</td>
+      <td>Igor Kudrin</td>
+      <td>Missing comments for some links in figure B.2</td>
+      <td>Editorial</td>
+      <td>Accepted with modification</td>
+      <td>Ron Brender</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section B.2, pg 281
+
+The notes for links in figure B.2 &quot;Split DWARF Section Relationships&quot; after
+(k) are missing, in particular:
+* (lo): from &quot;.debug_str_offsets.dwo&quot; to &quot;.debug_str.dwo&quot;
+* (lmo): from &quot;.debug_line.dwo&quot; to &quot;.debug_str_offsets.dwo&quot;
+* (mo): from &quot;.debug_macro.dwo&quot; to &quot;.debug_str_offsets.dwo&quot;
+* (po): from &quot;.debug_macro.dwo&quot; to &quot;.debug_str.dwo&quot;
+
+There is a note for a link (fo) which is missing in the figure.
+
+RESOLUTION
+
+Add the following text at the end of Section B.2:
+
+(lo)      .debug_str_offsets to .debug_str.dwo
+Entries in the string offsets table are offsets to the corresponding string text
+in the .debug_str.dwo section.
+
+(lmo)   .debug_line.dwo to .debug_str_offsets.dwo
+The value of a DW_FORM_line_strp form refers to a string section specific
+to the line number table. This form can be used in a .debug_line.dwo section
+(as well as in a .debug_info.dwo section).
+
+(mo)    .debug_macro.dwo to .debug_str_offsets.dwo
+Within the .debug_macro.dwo sections, the second operand of DW_MACRO_define_strx
+and DW_MACRO_undef_strx operations is an unsigned LEB128 value interpreted as an
+index into the .debug_str_offsets.dwo section.
+
+(po)     .debug_macro.dwo to .debug_str.dwo
+Within the .debug_macro.dwo sections, the second operand of DW_MACRO_define_strp
+and DW_MACRO_undef_strp operations is an unsigned LEB128 value interpreted as an
+index into the .debug_str.dwo section.
+
+For the missing arrow that goes with (fo), add an arrow directed 210 degrees (SSW)
+from .debug_info.dwo to a small circle containing an asterask (implicitly 
+something external).
+
+There is also a missing arrow from .debug_macro.dwo back to inself, for DW_MACRO_import...
+
+See figure:  http://dwarfstd.dev/doc/Issue_200519.1_Draft_Figure_B.2.pdf
+
+--
+03/14/21 -- Updated
+06/13/21 -- Added link to figure
+06/14/20 -- Accepted with modification: Add text to explain diagram style.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

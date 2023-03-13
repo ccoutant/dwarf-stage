@@ -1,0 +1,175 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>170105.1</td>
+      <td>Paul Robinson</td>
+      <td>Fixed-size variants of DW_FORM_addrx</td>
+      <td>Enhancement</td>
+      <td>Accepted with modification</td>
+      <td>Paul Robinson</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section Many, pg Many
+Background:
+
+Taking an action item from the DWARF committee as a result of the
+discussion of issue 161122.1, I investigated the usefulness of having
+fixed-size variants of DW_FORM_addrx.  Using the same two applications
+(clang built with gcc, and a game built with clang) I found that something
+under 4% of DIEs would become variable-size by switching from DW_FORM_addr
+to DW_FORM_addrx.  While not as impressive as the case for fixed-size
+variants of DW_FORM_strx, it still seems worthwhile to pursue this.
+
+A bit more data crunching showed that over 90% of the CUs in the game
+would be able to use a 1-byte index for all of their FORM_addrx needs,
+and no CU in either application would need more than a 2-byte fixed size
+index.  (Only 6 CUs out of over 4000 in the samples would have required 
+using a 3-byte ULEB index).
+
+So, while DW_FORM_addr is not as popular as DW_FORM_strp (by an order of
+magnitude or more) it still seems worthwhile to devote a couple of forms
+to fixed-size indexes into the address table.
+
+
+Textual changes (referencing the DWARF 5 public review draft):
+
+(This is the substantive bit:)
+
+Section 7.5.5 p.211 (class address) 2nd sub-bullet
+    Rewrite the bullet as follows:
+    - An indirect index into a table of addresses (as described in the
+      previous bullet) in the .debug_addr section of the object file.
+      Each index is interpreted as a zero-based index into this table,
+      relative to the value of the DW_AT_addr_base attribute of the
+      associated compilation unit.  There are three forms for this index:
+      a one-byte index (DW_FORM_addrx1), a two-byte index (DW_FORM_addrx2),
+      and a variable length unsigned LEB128 index (DW_FORM_addrx).
+
+
+(Everything else is an editorial/mechanical change to list the new forms.)
+
+Section 1.4 p.9 (list of Version 5 changes) 2nd bullet:
+    Add DW_FORM_addrx1 and DW_FORM_addrx2 after DW_FORM_addrx.
+
+Section 3.1.1 p.65 item 14 (DW_AT_addr_base description)
+    Add DW_FORM_addrx1 and DW_FORM_addrx2 after DW_FORM_addrx.
+
+Section 7.3.2.1 p.187 second bullet (&quot;An address table...&quot;)
+    'via the DW_FORM_addrx form'
+ =&gt; 'via the DW_FORM_addrx, DW_FORM_addrx1, and DW_FORM_addrx2 forms'
+
+Section 7.3.2.2 p.188 first bullet
+    'using the DW_FORM_addrx form, which accesses'
+ =&gt; 'using the DW_FORM_addrx, DW_FORM_addrx1, or DW_FORM_addrx2 forms,
+     which access'
+
+Section 7.5.6 table 7.6 p.219
+    Add DW_FORM_addrx1 and DW_FORM_addrx2 (class address)
+
+Appendix B figure B.1 p.272
+    Somehow squeeze DW_FORM_addrx1 and DW_FORM_addrx2 into the box
+    where DW_FORM_addrx is now, or defer the list to note (k)
+
+Appendix B, note (k) to figure B.1, p.274
+    Add DW_FORM_addrx1 and DW_FORM_addrx2 after DW_FORM_addrx.
+
+Appendix B, note (k) to figure B.2, p.279
+    Add DW_FORM_addrx1 and DW_FORM_addrx2 after DW_FORM_addrx.
+
+Appendix F.1 p.391 second bullet (.debug_addr)
+    Add DW_FORM_addrx1 and DW_FORM_addrx2 after DW_FORM_addrx.
+
+Appendix F.1 p.392 item 3
+    'the DW_FORM_addrx form'
+ =&gt; 'the DW_FORM_addrx, DW_FORM_addrx1, or DW_FORM_addrx2 forms'
+
+Appendix F.2.2 p.399 first paragraph
+    There's a sentence in the middle of that paragraph starting
+    'All attributes in demo1.dwo that use DW_FORM_addrx...'
+ =&gt; '...use DW_FORM_addrx, DW_FORM_addrx1, or DW_FORM_addrx2...'
+
+Appendix F.2.3 p.400 third bullet
+    'use the form code DW_FORM_addrx,'
+ =&gt; 'use one of the form codes DW_FORM_addrx, DW_FORM_addrx1, or
+     DW_FORM_addrx2,'
+
+
+--
+Accepted with modification - 1/24/2017.
+Extend to also define DW_FORM_addrx3 and DW_FORM_addrx4.  
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

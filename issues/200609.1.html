@@ -1,0 +1,234 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>200609.1</td>
+      <td>Paul T Robinson</td>
+      <td>Reserve an address value for &quot;not present&quot;</td>
+      <td>Enhancement</td>
+      <td>Accepted</td>
+      <td>Tom Russell</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section Several, pg 25, 43, 44, 51, 52, 53, 148, 164
+
+Motivation:
+
+The DWARF standard generally assumes that described entities exist in
+the final executable; however, various linker operations may result in
+cases where this is not true, leaving addresses pointing to unfriendly
+places.  In most cases linkers will fix up undefined symbols to 0x0,
+however this is a valid address on many targets.  We should have a way
+to indicate that an address is invalid, i.e., a &quot;tombstone&quot; value that
+is not interpreted as a real address.
+
+Discussion:
+
+Section 2.17 &quot;Code Addresses, Ranges and Base Addresses&quot; p.51 line 29
+says:
+  If an entity has no associated machine code, none of these attributes
+  are specified.
+(&quot;These attributes&quot; are DW_AT_low_pc, DW_AT_high_pc, or DW_AT_ranges.)
+
+That's fine for a compiler emitting an entry for something that has no
+associated code (e.g., declaration or abstract instance).  But there
+are cases where the compiler emits code, and the linker strips it. I'm
+aware of three situations where this can occur:
+- functions emitted in COMDAT sections, typically C++ template
+  instantiations or inline functions from a header file;
+- deduplicating different functions with identical content; GNU refers
+  to this as ICF (Identical Code Folding);
+- functions with no callers; sometimes called dead-stripping or
+  garbage collection.
+
+In the first two cases, multiple copies of the &quot;same&quot; function will
+be removed, and only one copy retained in the final executable; in the
+third case, no copies are retained.
+
+In these cases, the compiler will of course emit attributes pointing
+to each function's code, and it's the linker who strips the code.  It
+seems unrealistic to ask the linker to rewrite the DWARF to remove the
+attributes; instead, the linker will simply &quot;do something&quot; with the
+relocations associated with the address/range attributes.
+
+One can argue that all DIE references to deduplicated functions can be
+fixed up to the one retained copy; however, that leaves entries in
+multiple CUs pointing to the same code, including the DW_AT_ranges for
+the CUs themselves.  It does not seem like a good idea to have multiple
+CUs claiming ownership of the same range of instructions.  Similarly the
+.debug_aranges section could be left in an unfortunate state; it is not
+supposed to have overlapping or duplicate ranges.
+
+And of course in the dead-stripping case, there is no retained copy to
+point to.
+
+The solution that Sony has adopted in its proprietary linker, and the
+solution we have proposed for the LLVM project's 'LLD' linker, is to
+fix up references to removed functions to &quot;-1&quot;, or as prior DWARF
+versions described it in the base-address-selection entry of a range,
+&quot;The value of the largest representable address offset (for example,
+0xffffffff when the size of an address is 32 bits).&quot;
+
+DWARF v5 no longer uses this special value for ranges, but it seems
+very useful to have a standard &quot;tombstone&quot; value for the above cases.
+
+
+Proposal:
+
+
+At the end of page 25, add:
+
+2.4.1 Reserved Target Address for a Non-Existent Entity
+
+  The target address consisting of the largest representable address
+  value (for example, 0xffffffff for a 32-bit address) is reserved to
+  indicate that there is no entity designated by that address.
+
+  <i>In some cases a producer may emit machine code or allocate
+  storage for an entity, but a linker or other subsequent processing
+  step may remove that entity. In that case, rather than be required
+  to rewrite the DWARF description to eliminate the relevant DWARF
+  construct that contains the address of that entity, the processing
+  step may simply update the address value to the reserved value.</i>
+
+Section 2.6.2, &quot;Location Lists&quot;, page 43, line 28, insert the following:
+
+  In the case of a bounded location description where the range is defined
+  by a starting address and either an ending address or a length, a
+  starting address consisting of the reserved address value (see Section
+  2.4.1) indicates a non-existent range, which is equivalent to omitting
+  the description.
+
+Section 2.6.2, &quot;Location Lists&quot;, page 44, following line 9 insert:
+
+  If the base address is the reserved target address, either explicitly
+  or by default, then the range of any bounded location description
+  defined relative to that base address is non-existent, which is
+  equivalent to omitting the description.
+
+Section 2.17 &quot;Code Addresses, Ranges and Base Addresses&quot;, page 51, line 29
+Replace the paragraph:
+
+  If an entity has no associated machine code, none of these attributes
+  are specified.
+
+with the following:
+
+  If a producer emits no machine code for an entity, none of these
+  attributes are specified. Equivalently, a producer may emit such an
+  attribute using the reserved target address (see Section 2.4.1) for the
+  non-existent entity.
+
+Section 2.17.3, &quot;Non-Contiguous Address Ranges&quot;, page 52, insert following
+line 33:
+
+  In the case of a range list entry where the range is defined by a
+  starting address and either an ending address or a length, a starting
+  address consisting of the reserved address value (see Section 2.4.1)
+  indicates a non-existent range, which is equivalent to omitting the
+  description.
+
+Section 2.17.3, &quot;Non-Contiguous Address Ranges&quot;, page 53, following line 9
+insert:
+
+  If the base address is the reserved target address, either explicitly or
+  by default, then the range of any range list entry defined relative to
+  that base address is non-existent, which is equivalent to omitting the
+  range list entry.
+
+Section 6.1.2, &quot;Lookup By Address&quot;, page 148, following line 18, insert:
+
+  A range description entry whose address is the reserved address (see
+  Section 2.4.1), indicates a non-existent range, which is equivalent to
+  omitting the range description.
+
+Section 6.2.5.3, &quot;Extended Opcodes&quot;, page 164, following line 32 append:
+
+  If the address value is the reserved target address (see Section 2.4.1
+  on page 25), no instructions are associated with subsequent rows up to
+  but not including the subsequent DW_LNE_set_address or
+  DW_LNE_end_sequence opcode, which is equivalent to omitting that range
+  of opcodes.
+
+--
+2022-02-04:  Revised:  Extend to describe range for non-existent entities.
+   Incorporate 210113.1.  Reorganized.  
+   Previous version: http://dwarfstd.dev/issues/200609.1-1.html
+2022-02-28:  Revised:  Remove zero length to indicate removed range. 
+   Previous version: http://dwarfstd.dev/issues/200609.1-2.html
+2022-03-07:  Accepted.  
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

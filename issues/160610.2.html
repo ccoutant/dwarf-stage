@@ -1,0 +1,108 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>160610.2</td>
+      <td>Phil Mason</td>
+      <td>Why is there a confusing gap in the list of attribute form encodings</td>
+      <td>Clarification</td>
+      <td>Rejected</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 7.5.4, pg 161
+
+In the table of attribute form encodings table (Figure 21 page 161) in the 
+specification for DWARF4 there is a gap. The entries go
+
+Form name            Value   Class
+DW_FORM_ref_udata    0x15    reference
+DW_FORM_indirect     0x16    (see Section 7.5.3)
+DW_FORM_sec_offset   0x17    lineptr, loclistptr, macptr, rangelistptr
+DW_FORM_exprloc      0x18    exprloc
+DW_FORM_flag_present 0x19    flag
+DW_FORM_ref_sig8     0x20    reference 
+
+Note the value counts from 0x19 to 0x20, not 0x1a as might be expected. I 
+wondered if this the gap was left intentionally (perhaps to allow for future 
+expansion) or by mistake but I can't find an answer one way or the other?
+
+-- 
+
+12/06/2016 -- Rejected.  Comment is about previous version of standard.  
+   No gap exists in DWARF Version 5.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

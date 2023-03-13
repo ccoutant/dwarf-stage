@@ -1,0 +1,142 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>050718.1</td>
+      <td>Jim Cownie</td>
+      <td>FORTRAN extensions</td>
+      <td>Extension</td>
+      <td>Accepted with modification</td>
+      <td>Ron Brender</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Problem
+-------
+
+DWARF has no way to express the &quot;elemental&quot;, &quot;pure&quot; and &quot;recursive&quot; properties
+of Fortran 95 subroutines or functions.
+
+To allow debuggers correctly to call such subroutines/functions at least
+the &quot;elemental&quot; property must be known to the debugger. If we're adding
+one property we may as well fix all of them at one go.
+
+Proposed Text
+-------------
+
+In section 3.3.1 (&quot;General Subroutine and Entrypoint Information&quot;) add
+(on page 44, at the end of the section)
+
+  A subprogram entry may have the DW_AT_elemental attribute, whose value
+  is a flag. If the flag is true, then the subprogram should have scalar
+  formal arguments, but apply Fortran elemental conversions to allow
+  it to be called with array actuals.
+
+  A subprogram entry may have the DW_AT_pure attribute, whose value
+  is a flag. If the flag is true, then the subprogram should obey the
+  rules for a Fortran &quot;pure&quot; subprogram.
+
+  A subprogram entry may have the DW_AT_recursive attribute, whose value
+  is a flag. If the flag is true, then the subprogram is recursive, if
+  the flag is false the subprogram is not recursive. If the attribute is
+  not present then the recursiveness of the subprogram is determined by
+  the default for the language of the compilation unit. 
+
+  <i>So, in C, C++ or Java the recursive attribute would never need
+  to be specified since all subprograms are recursive by default in these
+  languages, whereas in Fortran the recursive attribute with flag value
+  &quot;true&quot; should be specified for subprograms which were declared
+  with the recursive keyword, since the default in Fortran is for
+  subprograms not to be recursive.
+  </i>
+
+In section 2.2 (the table of attributes), the new attributes need to be
+added in the appropriate places.
+
+In the appendix &quot;Attribute values by tag&quot;, the new attributes need to be
+added to the table for DW_TAG_subprogram.
+
+The new attributes need index entries.
+
+The new attributes need to be added to the table on p135, and assigned
+appropriate values.
+
+==============================
+
+Accepted with the following change:
+   Replace &quot;is recursive&quot; with &quot;is declared recursive&quot; in the description of
+   DW_AT_recursive.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

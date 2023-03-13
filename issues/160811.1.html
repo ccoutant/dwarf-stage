@@ -1,0 +1,106 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>160811.1</td>
+      <td>Jakub Jelinek</td>
+      <td>Allow reference class for DW_AT_string_length attribute</td>
+      <td>Enhancement</td>
+      <td>Open</td>
+      <td>Jakub Jelinek</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 5.11, pg 117
+
+While for most of the type attributes with integral value (see 2.19 section 
+Static and Dynamic Value of Attributes) the attribute can be constant class, 
+exprloc or reference (the last one reference to another DIE that provides 
+the integral value in its DW_AT_location), DW_AT_string_length only allows
+exprloc or loclistptr.
+
+constant class isn't needed for it, because constant string length is 
+expressed by DW_AT_byte_size, but it would be nice to just point to a DIE of
+the var holding the string length, without having to worry to propagate its
+location back to the DW_AT_string_length attribute (and especially hard if 
+the types are emitted earlier by separate compilation step).  Using DW_OP_call4 
+in the DW_AT_string_length works for this purpose only if the variable is 
+going to have DWARF expression in its DW_AT_location, but not if it is a 
+location description (DW_OP_stack_value ending, DW_OP_reg*, etc.).
+
+--
+12/06/2016 -- Accepted.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

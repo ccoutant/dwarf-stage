@@ -1,0 +1,133 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>020118.1</td>
+      <td>Ron Brender</td>
+      <td>Opcode_base Value</td>
+      <td>Editorial</td>
+      <td>Accepted with modifications</td>
+      <td>Ron Brender</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Keith Walker wrote:
+&gt;DWARF3 Draft 7Section 6.2.4, Definition of opcode_base states the following:
+&gt;
+&gt;	8. opcode_base (ubyte)
+&gt;
+&gt;	The number assigned to the first special opcode.
+&gt;
+&gt;	This number may be larger or smaller than the number of standard
+&gt;	opcodes defined for the specified version of the line number
+&gt;	information (12 in DWARF V3, 9 in DWARF V2).  If smaller, then the
+&gt;	higher numbered opcodes are not used in the line number table
+&gt;	of this unit (and the codes are treated as special opcodes).  If
+&gt;	greater, then the numbers between that of the highest standard
+&gt;	opcode and the first special opcode (not inclusive) are necessarily
+&gt;	code for vendor extensions.
+&gt;
+&gt;It appears to me that the description in the 2nd paragraph suffers from an
+&gt;&quot;off by one&quot; error in that the field contains the number assigned to the
+&gt;first special opcode and not the number of standard (+ user defined)
+&gt;opcodes in use.
+
+Yes, Keith is entirely correct.
+
+Perhaps the simplest repair is to change the latter paragraph to read
+
+	This number may be larger or smaller than the number of standard
+	opcodes defined for the specified version of the line number
+	information plus one, that is, larger or smaller than 13 in
+	DWARF V3 or 10 in DWARF V2.  If smaller, then the ...
+
+The grammar is a touch awkward, but I think clear and unambiguous.
+
+=====================================================================
+5/17/2004:  Accepted with modifications:
+ 8. opcode_base (ubyte) 
+    The number assigned to the first special opcode.
+
+    <i>This number is typically the next higher number after the  number    |
+    of standard opcodes defined for the specified version of the line
+    number information (12 in DWARF Version 3, 9 in DWARF Version 2).
+    If smaller, then the higher numbered standard  opcodes are not	    |
+    used in the line number table of this unit (and the codes are
+    treated as special opcodes). If greater, then the numbers between
+    that of the highest standard opcode and the first special opcode
+    (not inclusive) are used for vendor specific extensions.		    |
+    </i>
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

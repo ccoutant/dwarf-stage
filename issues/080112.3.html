@@ -1,0 +1,125 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>080112.3</td>
+      <td>Cary Coutant</td>
+      <td>FORM Reform Proposal 3: Implicit Flag Form</td>
+      <td>Extension</td>
+      <td>Approved with changes</td>
+      <td>Cary Coutant</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Background
+
+One study showed that attributes with DW_FORM_flag contribute 2-5% of the 
+total size of the .debug_info section by requiring the flag to be explicitly 
+represented in the debug info.
+
+This proposal adds a new form, DW_FORM_implicit_flag, which by its very 
+presence in the abbrev table entry, means that the flag is set -- it would 
+consume no bytes from the .debug_info section. This would allow the producer 
+a choice of using DW_FORM_flag in situations where it didn't want to create 
+a new abbreviation code, or using implicit_flag in a separate abbreviation code.
+
+
+Proposal
+
+In Section 7.5.4, &quot;Attribute Encodings,&quot; replace the description of class 
+flag with the following:
+
+ flag
+
+   A flag may be represented explicitly as a single byte of
+   data (DW_FORM_flag), or implicitly (DW_FORM_implicit_flag).
+   In the first case, if the flag has the value zero, it
+   indicates the absence of the attribute; if the flag has
+   a non-zero value, it indicates the presence of the
+   attribute. In the second case, the attribute is considered
+   present, and no value is encoded the debugging information
+   entry itself.
+
+In Figure 21, add the following row:
+
+ Form name                Value    Class
+
+ DW_FORM_implicit_flag    0x19     flag
+
+--
+
+Approved changing DW_FORM_implicit_flag to DW_FORM_flag_present.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

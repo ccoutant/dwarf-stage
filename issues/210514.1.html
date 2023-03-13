@@ -1,0 +1,143 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>210514.1</td>
+      <td>Stuart Brady</td>
+      <td>Add GPU shading and kernel languages</td>
+      <td>Enhancement</td>
+      <td>Incomplete</td>
+      <td>Michael Eager</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 7.12, pg 231
+Please add the following GPU shading and kernel language names:
+
+DW_LANG_GLSL    | OpenGL Shading Language
+DW_LANG_GLSL_ES | OpenGL ES Shading Language
+DW_LANG_HLSL    | High-Level Shading Language
+
+DW_LANG_OpenCL_CPP     | OpenCL C++
+DW_LANG_CPP_for_OpenCL | C++ for OpenCL
+DW_LANG_SYCL           | SYCL
+
+
+Minor side-request
+------------------
+
+DW_LANG_OpenCL is unfortunately a misnomer.  The correct name would have
+been DW_LANG_OpenCL_C, as OpenCL refers to the host API and C-based kernel
+language collectively, rather than the kernel language alone, which would
+be more properly referred to as &quot;OpenCL C&quot;.
+
+It would be incorrect to use DW_LANG_OpenCL to refer to C++ for OpenCL
+code, regardless of whether the OpenCL host API is used.  Also, OpenCL C
+can be used with other host APIs, e.g. a subset of the language can be
+used with the Vulkan API.
+
+If possible, it would therefore be desirable to rename DW_LANG_OpenCL to
+DW_LANG_OpenCL_C, and to add DW_LANG_OpenCL as a (possibly deprecated)
+alias for compatibility purposes, to avoid potential confusion.
+
+
+Exposition and rationale
+------------------------
+
+Note that &quot;C++ for OpenCL&quot; and &quot;OpenCL C++&quot; are distinct languages.
+Although the latter is deprecated in OpenCL 3.0, its language ID within
+the SPIR-V specification can still occur in the SPIR-V representation of
+DWARF information provided by SPIR-V's &quot;NonSemantic.Shader.DebugInfo.100&quot;
+and &quot;OpenCL.DebugInfo.100&quot; specifications, and so requires a corresponding
+DWARF language ID.
+
+GLSL ES is often known as ESSL (and is referred to as ESSL within the
+SPIR-V specification).  However, the name &quot;GLSL ES&quot; may be more meaningful
+to those not deeply familiar with these languages.
+
+GLSL ES could be considered to be its own set of GLSL language versions,
+but it seems beneficial to treat GLSL and GLSL ES as separate languages,
+given that they have separate version histories.
+
+This request does not list specific versions of each of the shading and
+kernel languages, partly on the basis that 210419.1 (or a refinement of
+that proposal) may be accepted.  There are a great many versions of GLSL,
+in particular, and so adding separate language IDs for each language
+version does not seem practical.  However, it would be desirable if a
+source language could be specified as being one of the shading or kernel
+languages without implicitly specifying a specific default version.
+
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

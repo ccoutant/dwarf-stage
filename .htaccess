@@ -1,0 +1,36 @@
+# Direct php to html redirects
+Redirect /Comment.php /Comment.html
+Redirect /Download.php /Download.html
+Redirect /Dwarf3Std.php /Dwarf3Std.html
+Redirect /Dwarf4Std.php /Dwarf4Std.html
+Redirect /DWARF5PressRelease.php /DWARF5PressRelease.html
+Redirect /Dwarf5Std.php /Dwarf5Std.html
+Redirect /Languages.php /Languages.html
+Redirect /LanguagesV6.php /Languages.html
+Redirect /Members.php /Members.html
+Redirect /Organization.php /Organization.html
+Redirect /Submissions.php /Submissions.html
+
+# There used to be a form to collect names and addresses
+# to download the spec, just redirect directly to the spec.
+Redirect /DownloadDwarf5.php /doc/DWARF5.pdf
+
+# Home.php is just the root (index.html) page
+Redirect /Home.php /
+
+# Issues.php?issues=closed(2|3|4) are lists of issues for Dwarf[3|4|5]
+RewriteEngine On
+RewriteCond %{QUERY_STRING} ^type=closed([234]) [NC]
+RewriteRule ^Issues\.php$ /issues-closed%1.html [L,NE,QSD,R=302]
+
+# Issues.php?type=open is just the (current) issues list.
+RewriteCond %{QUERY_STRING} ^type=open [NC]
+RewriteRule ^Issues\.php$ /issues.html [L,NE,QSD,R=302]
+
+# And finally the (open) issues page itself
+Redirect /Issues.php /issues.html
+
+# Redirect ShowIssue.php?issue=xyz to issues/xyz.html
+RewriteCond %{QUERY_STRING} ^issue=(.+) [NC]
+RewriteRule ^ShowIssue\.php$ /issues/%1.html [L,NE,QSD,R=302]
+

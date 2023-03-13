@@ -1,0 +1,116 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>161109.2</td>
+      <td>Jakub Jelinek</td>
+      <td>Add DW_OP_call* alternative to refer to variable value</td>
+      <td>Enhancement</td>
+      <td>Incomplete</td>
+      <td>Jakub Jelinek</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 2.5.1.5, pg 36
+With the link time optimization debug info generation where we want to emit 
+debug info for types/variables etc. early and only afterwards ammend it with 
+additional information (locations etc.), we ran into a problem similar to 
+http://www.dwarfstd.dev/issues/160811.1.html, but where we need the 
+value of some local variable (in http://gcc.gnu.org/PR77589 for 
+DW_AT_byte_stride location expression that is on a type).  
+DW_OP_call4/call_ref aren't IMHO usable here, because to use those in the 
+middle of DWARF expressions it is needed that the referenced DIE's 
+DW_AT_location is actually a valid DWARF expression (and additionally that 
+it as a result adds exactly one new value on the DWARF stack and ideally 
+doesn't use any earlier stack slots).
+That is not the case in many cases though, the variable could have DW_OP_reg* 
+as its location description, or DWARF expression followed by DW_OP_stack_value,
+or could not have DW_AT_location at all and have instead DW_AT_const_value, 
+etc.  When the producer can see the DW_AT_location of the DIE referenced by 
+DW_OP_call* together with the DWARF expression where it wants to use DW_OP_call*, 
+it can either inline the expression there, tweak it for the DW_OP_stack_value 
+removal, transform DW_OP_reg* into DW_OP_breg* 0, etc.  But if it is different 
+producer that emits the DW_OP_call* and different one that adds DW_AT_location 
+for the referenced var, then this doesn't really work.
+
+I think it would be useful to have a DW_OP_call* like operator that would not 
+evaluate the expression from the referenced DIE, but where the producer would 
+compute the variable's value and push that value into DWARF stack.  Most 
+likely it would make sense only for integral variables, but that is most 
+likely all where it is needed.
+
+
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

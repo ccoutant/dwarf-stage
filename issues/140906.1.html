@@ -1,0 +1,246 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>140906.1</td>
+      <td>Cary Coutant</td>
+      <td>Two-Level Line Tables</td>
+      <td>Enhancement</td>
+      <td>Open</td>
+      <td>Cary Coutant</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 6.2, pg 128
+This proposal introduces a new two-level line number table to
+DWARF, splitting the current line number table into two parts: a
+&quot;logicals&quot; table, and an &quot;actuals&quot; table. The actuals table would
+be optional, and when omitted, the logicals table would
+correspond to the DWARF v4 line number table.
+
+In a two-level line number table, the logicals table would
+provide a mapping from each logical statement in a program to a
+recommended breakpoint location, and the actuals table would
+provide a mapping from PC location to a logical statement
+represented in the logicals table. The separation allows the line
+number table to represent directly the nesting of inline
+functions so that consumers would not need to parse the DIE tree
+in order to show inlined calls.
+
+For further background information and possible future
+extensions, see the DWARF Wiki page:
+
+   http://wiki.dwarfstd.dev/index.php?title=TwoLevelLineTables
+
+In Section 6.2 (&quot;Line Number Information&quot;), add the following
+non-normative text at the end of the section:
+
+    For optimized code, where instruction scheduling may reorder
+    instructions across statement boundaries, where loop
+    optimizations may clone code and move instructions across
+    loop iterations, and where inlining may introduce
+    instructions from an inlined call into the instruction
+    stream, an alternate representation with two matrices may be
+    used. One matrix (the &quot;logical line table&quot;) would have a row
+    for each &quot;logical&quot; source statement. If the emitted object
+    code for a source statement has been cloned into two
+    different locations, there would be a separate row for each.
+    The code for a source statement in an inlined function would
+    have a separate row for each instance, and would refer to its
+    calling context -- i.e., the logical source statement within
+    which it was called. The matrix would have columns for:
+
+      * the source file name
+      * the source line number
+      * the source column number
+      * the function name
+      * recommended breakpoint location for this statement
+      * the calling context (a reference to another row)
+      * and so on
+
+    A second matrix (the &quot;actual line table&quot;) would have a row
+    for each instruction in the emitted object code, and would
+    have columns for:
+
+      * the logical statement (a reference to a row in the first
+        matrix)
+      * whether this instruction is the beginning of a basic
+        block
+      * and so on
+
+    Both of these matrices can be stored using the same byte-code
+    language mentioned above.
+
+In Section 6.2.2 (&quot;State Machine Registers&quot;), add the following
+rows to Table 6.2:
+
+    Register name    Meaning
+    ------------------------------------------------------------
+    context          An unsigned integer indicating a row number
+                     in the logical line table that represents
+                     the calling context for the current
+                     logical statement. Rows are numbered
+                     beginning at 1. The value 0 indicates that
+                     the current logical statement is not part
+                     of an inlined call.
+
+    function_name    An unsigned integer representing the name
+                     of the function containing the current
+                     logical statement. This value is either a
+                     string offset relative to the start of the
+                     .debug_str section, or the index of an
+                     entry in the .debug_str_offsets section,
+                     depending on a flag in the line number
+                     program header (see Section 6.2.4).
+    ------------------------------------------------------------
+
+Following Table 6.2, add the following notes:
+
+    When only a single line number table is used, the context
+    register is not used.
+
+    When both a logical line table and an actual line table are
+    used, the basic_block and isa registers are not used in the
+    logical line table. The file, column, is_stmt, prologue_end,
+    epilogue_begin, discriminator, context, and function_name
+    registers are not used in the actual line table. In the
+    actual line table, the line register represents a row in the
+    logicals table rather than an actual line number. Rows in the
+    logical line table are numbered starting at 1.
+
+Following Table 6.2, add the following rows to the (unnumbered)
+table showing the state of the registers at the beginning of each
+sequence:
+
+    context          0
+    function_name    0
+
+In Section 6.2.4 (&quot;The Line Number Program Header&quot;), modify
+item 3, insert items 4 and 5, and renumber all subsequent items:
+
+    3.  header_length
+        The number of bytes following the header_length field to
+        the first byte of the line number program for the logical
+        line table (or for the line number table is there is no
+        actuals table). In the 32-bit DWARF format, this field is
+        a 4-byte unsigned length; in the 64-bit DWARF format,
+        this field is an 8-byte unsigned length (see Section 7.4).
+
+    4.  actuals_table_offset
+        The offset in bytes from the end of the header to the
+        first byte of the line number program for the actual line
+        table. If there is only one line number table, this field
+        is 0. In the 32-bit DWARF format, this field is a 4-byte
+        unsigned length; in the 64-bit DWARF format, this field
+        is an 8-byte unsigned length (see Section 7.4).
+
+    5.  function_name_form (ubyte)
+        The format of the function_name register. If this value
+        is DW_FORM_strp, the function_name register contains an
+        offset relative to the start of the .debug_str section.
+        If this value  is DW_FORM_strx, the function_name
+        register contains an index of an entry in the
+        .debug_str_offsets table.
+
+(In Section 6.2.5.1, &quot;Special Opcodes&quot;, no change is necessary,
+unless we want to explicitly point out that the new context and
+function_name registers are left unchanged by the special
+opcodes.)
+
+In Section 6.2.5.2 (&quot;Standard Opcodes&quot;), add the following new
+opcode:
+
+    13. DW_LNS_inlined_call
+        The DW_LNS_inlined_call opcode takes two unsigned LEB128
+        operands. It sets the context register to the value of
+        the first operand, and the function_name register to the
+        value of the second operand.
+
+        <i>This opcode may also be used to set the context register
+        to zero, to indicate that a logical statement is not part
+        of an inlined call.</i>
+
+In Section 6.2.5.3 (&quot;Extended Opcodes&quot;), add the following new
+opcode:
+
+    6.  DW_LNE_set_function_name
+        The DW_LNE_set_function_name opcode takes a single
+        unsigned LEB128 operand. It sets the function_name
+        register to the new value.
+
+--
+10/21/2014 - Deferred to DWARF Version 6
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

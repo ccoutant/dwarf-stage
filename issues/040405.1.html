@@ -1,0 +1,126 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>040405.1</td>
+      <td>David Anderson</td>
+      <td>DW_AT_decl_file signedness</td>
+      <td>Editorial</td>
+      <td>Accepted as modified</td>
+      <td>Jason Molenda</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+I think there is a bit of a clarity problem in the
+DW_AT_decl_file definition.
+
+ Sec 2.13, Declaration Coordinates
+ just says 'integer'. But 2.13 references section 6.2,
+ which explicitly says that the 'file' is an unsigned integer
+ (see the &quot;State Machine Registers&quot;, sec 6.2.2)
+
+
+The &quot;problem&quot; being that the 'unsignedness' mentioned in 6.2.2
+(dwarf3 version) is rather far afield from the 6.2 mention
+in 2.13.  Some app writers have missed this and
+thought the value was signed. Thus I'm mentioning it...
+
+
+There is no mention of unsignedness in chapter 7 (just a listing
+in a table as a 'constant')
+
+Also mentioned in 6.3.1.2
+
+
+PROPOSAL:
+
+Section 2.13 Declaration coordinates
+paragraph changed to:
+
+value of the DW_AT_decl_file attribute is an unsigned
+number corresponding to a
+file number from the line number information table for the
+compilation unit containing the debugging information entry and
+represents the source file in which the declaration appeared
+(see Section 6.2). The value 0 indicates that no source file
+has been specified.
+
+=============================================
+
+Revised proposal:
+  Change &quot;integer constant&quot; to &quot;unsigned integer constant&quot;
+  in the second paragraph in 2.13.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

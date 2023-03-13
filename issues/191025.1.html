@@ -1,0 +1,138 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>191025.1</td>
+      <td>Paul T Robinson</td>
+      <td>DW_OP_bit_piece offset operand mostly does matter</td>
+      <td>Editorial</td>
+      <td>Accepted</td>
+      <td>Paul T Robinson</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 2.6.1.2, pg 42
+The description of DW_OP_bit_piece lists several cases for the preceding 
+location description:
+- empty (no location description)
+- register
+- implicit or stack value
+- memory address
+
+For the empty case, the spec explicitly says the bit offset operand 
+&quot;doesn't matter.&quot;  For implicit value or stack value, the piece must 
+use the least significant bits; in these cases, the bit offset again 
+doesn't matter, although the spec doesn't say so in so many words.
+
+In fact, there is an argument that for the implicit value descriptions
+(implicit value, stack value, implicit pointer), the offset operand
+could be useful, as a substitute for an explicit shift operation.
+
+PROPOSED REPLACEMENT PARAGRAPH STARTING AT PAGE 42 LINE 25
+
+(For clarity in discussing the changes, I've presented each sentence
+individually, and indicated whether the proposal changes it.  I feel
+that presenting the entire paragraph is helpful, but presenting it in
+one lump made it hard to identify the proposed changes.)
+
+Interpretation of the offset depends on the location description.
+(unchanged)
+
+If the location description is empty, the DW_OP_bit_piece operation
+describes a piece consisting of the given number of bits whose values
+are undefined, and the offset is ignored.
+(reworded, no semantic change)
+
+(third sentence [register case] removed)
+
+If the location is a memory address, the DW_OP_bit_piece operation
+describes a sequence of bits relative to the location whose address is
+on the top of the DWARF stack using the bit numbering and direction
+conventions that are appropriate to the current language on the target
+system.
+(unchanged)
+
+In all other cases, the source of the piece is either a register or an
+implicit value description (section 2.6.1.1.4); the offset is from the
+least significant bit of the register or implicit value.
+(new) 
+
+-- 
+2021-02-22 Revised.
+2021-03-23 Revised.  Previous version: http://dwarfstd.dev/issues/191025.1-1.html
+2021-04-19 Revised.  Previous version: http://dwarfstd.dev/issues/191025.1-2.html
+2021-05-17 Accepted.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

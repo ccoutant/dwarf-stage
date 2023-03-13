@@ -1,0 +1,169 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>130412.1</td>
+      <td>Paul Robinson</td>
+      <td>Non-integral non-type template parameters</td>
+      <td>Clarification</td>
+      <td>Accepted</td>
+      <td>Paul Robinson</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 5.5.8, pg 93
+C++11 14.1 [temp.param]p4 says:
+A non-type template-parameter shall have one of the following (optionally
+cv-qualified) types:
+- integral or enumeration type,
+- pointer to object or pointer to function,
+- lvalue reference to object or lvalue reference to function,
+- pointer to member,
+- std::nullptr_t.
+
+C++11 14.3.2 [temp.arg.nontype]p1 says:
+A template-argument for a non-type, non-template template-parameter
+shall be one of:
+- for a non-type template-parameter of integral or enumeration type,
+  a converted constant expression (5.19) of the type of the
+  template-parameter; or
+- the name of a non-type template-parameter; or
+- a constant expression (5.19) that designates the address of an object
+  with static storage duration and external or internal linkage or a
+  function with external or internal linkage, including function templates
+  and function template-ids but excluding non-static class members,
+  expressed (ignoring parentheses) as &quot;&amp; id-expression&quot;, except that the
+  &amp; may be omitted if the name refers to a function or array and shall be
+  omitted if the corresponding template-parameter is a reference; or
+- a constant expression that evaluates to a null pointer value (4.10); or
+- a constant expression that evaluates to a null member pointer value
+  (4.11); or
+- a pointer to member expressed as described in 5.3.1.
+
+The first kind is a &quot;normal&quot; constant value; all the rest are
+addresses that are load-time constant but not necessarily compile-time
+constant.
+
+DWARF's existing DW_TAG_template_value_parameter handles the first
+case, integral/enumeration type, by specifying that the actual value
+is described using DW_AT_const_value.  The descriptions of that
+attribute allow it to be a string, to have a constant data form, or
+a data block form.  None of these are appropriate for describing the
+load-time constant address of a non-type template argument.
+
+I tried compiling some examples with GCC 4.7.2, and it uses
+DW_AT_location (DW_OP_addr, DW_OP_stack_value) to describe arguments
+that are object addresses, and DW_AT_const_value=0 to describe an
+argument that is a null pointer.  (Although I didn't try the
+pointer-to-member case as I don't really understand them.)
+
+
+Proposal:
+
+Revise section 5.5.8 to include non-type template parameters
+that are run-time constant but not compile-time constant.
+
+Section 5.5.8, non-normative text at the beginning, second sentence
+was:
+    The generic description of the class may include both
+    parameterized types and parameterized constant values.
+
+Replace this with:
+    The generic description of the class may include
+    parameterized types, parameterized compile-time constant
+    values, and/or parameterized run-time constant addresses.
+
+
+Section 5.5.8, item 2, last sentence was:
+    Finally, the template value parameter entry has a
+    DW_AT_const_value attribute, whose value is the actual constant
+    value of the value parameter for this instantiation as
+    represented on the target architecture.
+
+Replace that sentence with:
+    Finally, the template value parameter entry has an attribute
+    giving the actual compile-time or run-time constant value of
+    the value parameter for this instantiation.  This can be a
+    DW_AT_const_value attribute, whose value is the compile-time
+    constant value as represented on the target architecture; or,
+    a DW_AT_location attribute, whose value is a single location
+    description giving the run-time constant address.
+
+---
+
+Revised 7/22/13.
+Accepted 7/23/13.  
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

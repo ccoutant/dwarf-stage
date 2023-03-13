@@ -1,0 +1,132 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>100805.1</td>
+      <td>David Gross</td>
+      <td>dynamic properties of types: reference interpretation</td>
+      <td>Clarification</td>
+      <td>Accepted with modification</td>
+      <td>Michael Eager</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 2.19, pg 40
+This was raised on dwarf-discuss by Mathieu Lacage
+&lt;mathieu.lacage@gmail.com&gt; 2 Aug 2010 in the thread &quot;decoding of form
+entries&quot;.
+
+If one of the &quot;applicable attributes&quot; listed in 2.19 has a reference
+form, how do we obtain the value of the attribute?
+
+Two interpretations were suggested on the thread.
+
+Michael Eager wrote:
+
+  generally you would search the referenced DIE to find the same
+  attribute.  In some cases, like DW_AT_specification, there are
+  multiple attributes in the referenced DIE.
+
+David Gross wrote:
+
+  I see a different pattern in D.2.2 (Ada Example): 13$ contains a
+  DW_AT_upper_bound whose value is a reference to a variable.  The
+  variable does not contain a DW_AT_upper_bound; the value of the
+  variable itself is the value of the DW_AT_upper_bound.  That's the
+  pattern that I expected to see; I wasn't aware that the standard
+  intends to support the delegation pattern you describe above.
+
+The standard should be explicit about the intended interpretation(s).
+
+---
+
+Accepted with modification -- Sept. 18, 2012
+Revised text corrected -- March 31, 2014
+
+The second bullet in Section 2.19, pg. 40, reads as follows:
+
+  - For a reference, the value is a reference to another
+    entity which specifies the value of the attribute.
+
+Revised text:
+
+  - For a reference, the value is a reference to another DIE.  This DIE may
+     -- describe a variable which contains the attribute value
+     -- describes a constant which is the attribute value
+     -- contain a DWARF expression which computes the attribute value
+        or is a dwarf procedure which computes the attribute value
+
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

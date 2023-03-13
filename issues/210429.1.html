@@ -1,0 +1,133 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>210429.1</td>
+      <td>Ron Brender</td>
+      <td>Clarify Description of Line Number Table Extended Opcodes</td>
+      <td>Editorial</td>
+      <td>Accepted</td>
+      <td>Ron Brender</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 6.2.3, pg 153
+Some of the discussion of Issue 180426.2 regarding the proposed extended
+DW_LNE_comment revealed that the description of line number table extended
+opcodes as a group is not very clear in the document. The following proposes
+an alternative description that is hopefully clearer.
+
+1) In Section 6.2.3, p153, add a second paragraph to bullet 2 which introduces
+standard opcodes:
+
+    One standard opcode (DW_LNS_extended_op) serves as an escape that allows
+    additional opcodes without reducing the number of special opcodes.
+
+2) In Section 6.2.3, p153, bullet 3 which introduces extended opcodes, replace
+the word &quot;zero&quot; with &quot;DW_LNS_extended_op&quot; (twice). The resulting paragraph
+then reads
+
+    These have a multiple byte format. The first byte is DW_LNS_extended_op;
+    the next bytes are an unsigned LEB128 integer giving the number of bytes
+    in the instruction (not including the initial DW_LNS_extended_op or the
+    size). The remaining bytes are the instruction itself (which begins with
+    a ubyte extended opcode).
+
+3) In Section 6.2.5.2, p164, add a new code at the end of the list:
+
+    13. DW_LNS_extended_op
+         The DW_LNS_extended_op opcode takes two operands. The first is an
+         unsigned LEB128 value that gives the size of the operand that follows.
+         The second begins with an extended opcode which is followed by
+         operands appropriate to that opcode.
+
+4) In Section 6.2.5.3, p164, insert this new paragraph at the beginning of
+the section:
+
+     Extended opcodes are used as part of a DW_LNS_extended_op operation
+     (see Section 6.2.3).
+
+5) In Section 7.22, p236, Table 7.25, add the following at the beginning
+of the table:
+
+      DW_LNS_extended_op        0x00
+
+Mark this entry as &quot;New in DWARF Version 6&quot; as usual.
+ 
+
+-- 
+2022-03-22:  Accepted.  Recategorized to editorial.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

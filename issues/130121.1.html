@@ -1,0 +1,192 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>130121.1</td>
+      <td>Ron Brender</td>
+      <td>Default Location List Entry</td>
+      <td>Improvement</td>
+      <td>Accepted with modifications</td>
+      <td>Ron Brender</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 2.6.2
+
+Introduction
+------------
+
+Recent discussions regarding &quot;Address computation overflow&quot; in
+location lists (Issue 110120.1) have concluded that the example
+location list entry considered, which has beginning and ending
+addresses of 0 and -1, respectfully, is not valid DWARF because
+it purports to express entity location information that applies
+outside of its containing compilation module.
+
+However, there is utility in defining this form as a special
+case &quot;idiom&quot; that expresses a default location that applies if
+no earlier entry in a location list entry includes an address
+of interest (provided that address is within the containing
+module).
+
+Proposal
+--------
+
+1)  In Section 2.6.2, in the third paragraph, replace &quot;A location
+list entry consists of:&quot; with
+
+    &quot;A location list entry has two forms: a normal location list
+    entry and a default location list entry.
+
+    &quot;A normal location list entry consists of:&quot;
+
+2)  Following bullet 3 on page 31, insert &quot;normal&quot; in the next
+sentence so that it begins &quot;The applicable base address of a
+normal location list entry...&quot;
+
+3)  In paragraph 5 on page 31, replace &quot;Address ranges may overlap.&quot;
+with
+
+    &quot;Address ranges defined by normal location list entries may
+    overlap.&quot;
+
+4)  Following that same paragraph and before the paragraph that
+defines base selection entry, insert the following:
+
+    &quot;A default location list entry consists of:
+
+    1.  The value 0.
+    2.  The value of the largest representable address offset (for
+        example, 0xffffffff when the size of an address is 32 bits).
+    3.  A single location description describing the location of the
+        object when there is no prior normal location list entry
+        that applies in the same location list.
+
+    &quot;A default location list entry is independent of any applicable
+    base address (except to the extent to which base addresses
+    affect prior normal location list entries).
+
+    &quot;A default location list entry must be the last location list
+    entry of a location list except for the terminating end of list
+    entry.
+
+    &quot;A default location list entry describes an unlimited number
+    (zero, one or more) of address ranges, none of which overlap
+    any of the address ranges defined earlier in the same location
+    list. Further, all such address ranges have the same simple
+    location.&quot;
+
+5)  Prior to the last (italics) paragraph on page 32, insert the
+    following:
+
+    &quot;<i>When a DWARF consumer is parsing and decoding a location
+    list, it must recognize the beginning and ending address
+    offsets of (0, 0) for an end of list entry and (0, &quot;-1&quot;) for
+    a default location list entry prior to applying any base
+    address. Any other pair of offsets beginning with 0 is a
+    valid normal location list entry. Next, it must recognize the
+    beginning address offset of &quot;-1&quot; for a base address selection
+    entry prior to applying any base address. The current base
+    address is not applied to the subsequent value (although there
+    may be an underlying object language relocation that affects
+    that value).</i>&quot;
+
+Discussion
+----------
+
+There is considerable discussion of related issues, including the
+possibility of this interpretation, in emails under the subject
+&quot;[Issue 110120.1] Address computation overflow&quot; dating back to at
+least September 2012 (authors Coutant, Anderson, Eager, et al). I
+will not try to recapitulate those discussions here.
+
+There is one minor backward imcompatibility to note: The (0, -1)
+address range is redefined from what nominally used to be a (normal)
+location list entry (now judged to be &quot;bad DWARF&quot;) to be a new kind
+of entry, namely, a default location list entry. This seems not a
+problem.
+
+I do note that the default location list concept was implemented
+in the DWARF on Itanium VMS (using exactly the representation above)
+as well in vendor-specific predecessor debugging representations
+for VAX/Alpha VMS and Ladebug on Alpha Unix during my tenure at
+DEC/Compaq/HP.
+
+---
+
+Accepted 2/12/2013 with change of &quot;simple location&quot; to &quot;single location&quot;
+in item 4..
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

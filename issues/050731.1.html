@@ -1,0 +1,121 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>050731.1</td>
+      <td>Todd Allen</td>
+      <td>Change D.2.2 Ada example to reference upper bound memory directly</td>
+      <td>Editorial</td>
+      <td>Accepted</td>
+      <td>Todd Allen</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+The way in which the D.2.2 Ada example describes VEC2's upper bound is not
+ideal, because it isn't clear how a consumer would describe the type.  It
+would require some reverse-engineering to discover that it corresponds to the
+discriminant N.  That GNAT developers believe there should be a better way.
+
+The Concurrent MAXAda compiler references a member.  This does require the
+consumer to notice that the referenced member *is* a member, so that it can
+evaluate it.  But this not a terrible burden.  Furthermore, the existing
+descriptive form would not be able to describe multiple members (e.g. VEC3,
+VEC4, etc.) with bounds determined by discriminant(s) -- at least not with
+the MAXAda implementation.  The GNAT developers voice concerns about the form
+in D.2.2 with their implementation, too.
+
+Ron wrote up some text for changing the example, but since I'm submitting the
+proposal, I've taken the liberty of modifying it a bit in the hopes that it
+makes it clearer:
+
+  In Section D.2.2, second bullet, at the bottom of page 187 in Draft 8 or 9,
+  replace the second sentence (&quot;It is located...&quot;)  with:
+ 
+      It is described as a reference to a member, and the location of the
+      upper bound is determined as for any member.  That is, using an address
+      calculation relative to the base of the containing object.
+  
+      <i>A consumer must notice that the referenced bound is a member of the
+      same containing object and implicitly push the base address of the
+      containing object just as for accessing a data member generally.</i>
+  
+  In Section D.2.2, Figure 49, page 189 in Draft 8 or 9, replace the upper
+  bound attribute contained in the subrange type at 29$ with:
+  
+      DW_AT_upper_bound(reference to member N at 27$)
+
+Accepted.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

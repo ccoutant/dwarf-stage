@@ -1,0 +1,116 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>230103.1</td>
+      <td>Fangrui Song</td>
+      <td>Clarify that DW_CFA_remember_state includes the current CFA</td>
+      <td>Clarification</td>
+      <td>Open</td>
+      <td>Fangrui Song</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 6.4.2.4, pg 181
+p181 6.4.2.4 Row State Instructions describes the required actions for 
+DW_CFA_remember_state and DW_CFA_restore_state:
+
+  DW_CFA_remember_state
+  The DW_CFA_remember_state instruction takes no operands. The required 
+  action is to push the set of rules for every register onto an implicit stack.
+  
+  DW_CFA_restore_state
+  The DW_CFA_restore_state instruction takes no operands. The required action
+  is to pop the set of rules off the implicit stack and place them in the current row.
+
+The description of DW_CFA_remember_state should take the current CFA into 
+account. Suggested change:
+
+  DW_CFA_remember_state
+  The DW_CFA_remember_state instruction takes no operands. The required 
+  action is to push the set of rules for **the current CFA and** every 
+  register onto an implicit stack.
+
+The description of DW_CFA_restore_state can remain as is as &quot;the set of 
+rules&quot; clearly includes the current CFA described by DW_CFA_remember_state.
+
+The stack implementations of libunwind src/dwarf/Gparser.c, gcc 
+libgcc/unwind-dw2.c, and llvm-project libunwind/src/DwarfParser.hpp all 
+include the current CFA in the implicit stack.
+
+:set noendofline binary
+
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

@@ -1,0 +1,162 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>230206.1</td>
+      <td>Michael Buch</td>
+      <td>Add DW_AT_imported_declaration entries to name index</td>
+      <td>Improvement</td>
+      <td>Open</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 6.1.1.1, pg 137
+Proposal 
+========
+
+Add DW_AT_imported_declaration entries to name index for accelerated lookup.
+
+Background
+==========
+
+C++ supports the ability to create aliases for namespaces.
+
+Example &mdash; C++ namespace alias
+
+namespace A {                 
+  namespace B {                 
+    namespace C {                 
+      int a = 1;                    
+    }                              
+  }  // namespace B             
+                              
+  namespace C = B::C;           
+}  // namespace A             
+                              
+int main() { return A::C::a; }
+
+&lt;1&gt; DW_TAG_namespace            
+         DW_AT_name &quot;A&quot;            
+                                
+&lt;2&gt;   DW_TAG_namespace          
+           DW_AT_name &quot;B&quot;          
+                                
+&lt;3&gt;     DW_TAG_namespace        
+              DW_AT_name &quot;C&quot;        
+                                
+&lt;4&gt;       DW_TAG_variable       
+                DW_AT_name &quot;a&quot;      
+                                
+                                
+&lt;5&gt;  DW_TAG_imported_declaration
+          DW_AT_import &lt;3&gt;         
+          DW_AT_name &quot;C&quot;           
+                                       
+In DWARF, the namespace alias &ldquo;C&rdquo; declared in namespace &ldquo;A&rdquo; is represented 
+using a DW_TAG_imported_declaration whose name is that of the alias in the 
+source program. However, compliant DWARF producers skip emitting 
+DW_TAG_import_declaration for the namespace alias into the name index. This 
+is problematic for consumers that need to perform lookup by name on the 
+namespace alias (for example during LLDB&rsquo;s expression evaluation) because 
+there is nothing linking the import declaration and the namespace DIEs to 
+each other, forcing the consumer to perform expensive scans through the 
+DWARF tree or complicated bookkeeping.
+
+This proposal extends the list of tags that may be put into the name 
+index further to include DW_TAG_import_declaration to simplify
+the work consumers have to do to find namespace alias DIEs by name.
+
+Document changes
+================
+
+6.1.1.1 Contents of the Name Index
+&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;
+
+[ORIGINAL TEXT]
+&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
+The name index must contain an entry for each debugging information entry that 
+defines a named subprogram, label, variable, type, or namespace, subject to the 
+following rules: 
+
+[NEW TEXT]
+==========
+The name index must contain an entry for each debugging information entry that 
+defines a named subprogram, label, variable, type, namespace, or import declaration
+subject to the following rules: 
+&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;
+
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

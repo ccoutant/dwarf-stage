@@ -1,0 +1,118 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>100316.1</td>
+      <td>David Anderson</td>
+      <td>Errors in 6.4.2.2, 6.4.3.3</td>
+      <td>Editorial</td>
+      <td>Accepted</td>
+      <td>David Anderson</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 6.4.2, pg 133,134
+Sec 6.4.2.2.  pdf page 133, acroread page 147.
+
+The content of point 6 is odd.
+
+6. The DW_CFA_def_cfa_offset_sf instruction takes a signed LEB128 
+   operand representing a factored offset. This instruction is 
+   identical to DW_CFA_def_cfa_offset except that the operand is 
+   signed and factored. The resulting offset is factored_offset * 
+   data_alignment_factor.DW_CFA_def_cfa_expression 
+   The DW_CFA_def_cfa_expression instruction takes a single operand 
+   encoded as a DW_FORM_exprloc value representing a DWARF expression. 
+   The required action is to establish that expression as the means 
+   by which the current CFA
+
+It seems that point 5 content got jammed into point 6 somehow.  
+
+This seemingly happened in adding explicit calculations to the description of point 5.  
+
+And 6.4.3.3:
+pdf page 134,  acroread page 148.
+
+The content of point  6 gets separated out into point 7.
+
+6. DW_CFA_val_offset
+7. The DW_CFA_val_offset instruction takes two unsigned LEB128 operands 
+   representing a register number and a factored offset. The required 
+   action is to change the rule for the register indicated by the register 
+   number to be a val_offset(N) rule where the value of N is factored_offset 
+   * data_alignment_factor.
+
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

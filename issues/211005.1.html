@@ -1,0 +1,135 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>211005.1</td>
+      <td>Allen Webster</td>
+      <td>Interaction of DW_OP_piece (and similar) and DW_OP_call2 (and similar)</td>
+      <td>Clarification</td>
+      <td>Open</td>
+      <td>Adrian Prantl</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 2.6, pg various
+The specification does not say much about how the concept of pieces interact 
+with the ability of a DWARF expression to encode &quot;calls&quot;.
+
+The only thing it does say that seems possibly definitive is in 2.6.1:
+&quot;Each simple location description that is a DWARF expression is evaluated 
+independently of any others.&quot;
+
+Which would suggest that the intended meaning of a &quot;piece&quot; op is to mark 
+the boundaries between completely separate expressions that do not share 
+a stack at all. Under this interpretation implementations would be able 
+to decode the opcode stream once to mark the ranges of each simple location 
+within the composite location and then handle them independently. Further 
+under this interpretation a &quot;piece&quot; op in a &quot;call&quot; would be illegal, as 
+that would imply that a call from a DWARF expression calls into a compound 
+location, and the spec claims that a &quot;call&quot; op is transferring control at 
+the level of DWARF expressions.
+
+(2.5.1.5 &quot;These operations transfer control of DWARF expression evaluation ...&quot;)
+
+This would be great, but the problem is that in practice this doesn't seem 
+to be how it's being used.
+
+Looking just at GDB:
+&quot;&quot;&quot;
+        case DW_OP_piece:
+          {
+            ULONGEST size;
+            /* Record the piece.  */
+            op_ptr = read_uleb128 (op_ptr, op_end, &amp;size);
+	    add_piece (ctx, 8 * size, 0);
+            /* Pop off the address/regnum, and reset the location
+	       type.  */
+	    if (ctx-&gt;location != DWARF_VALUE_LITERAL
+		&amp;&amp; ctx-&gt;location != DWARF_VALUE_OPTIMIZED_OUT)
+	      dwarf_expr_pop (ctx);
+            ctx-&gt;location = DWARF_VALUE_MEMORY;
+          }
+          goto no_push;
+&quot;&quot;&quot;
+
+Here the interpretation of the &quot;piece&quot; op is just to pop one value from the 
+stack, not to fully reset the stack. Under this interpretation a composite 
+location has been treated as the same thing as a DWARF expression. Callees 
+can emit pieces into the same composite location as callers, and the &quot;simple 
+location&quot; after the first &quot;piece&quot; op is not necessarily isolated from the 
+work that was done in first &quot;simple location&quot;.
+
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

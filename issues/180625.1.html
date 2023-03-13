@@ -1,0 +1,127 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>180625.1</td>
+      <td>Andrew Cagney</td>
+      <td>Inconsistent initial length description - missing reference and/or TMI</td>
+      <td>Editorial</td>
+      <td>Accepted</td>
+      <td>Andrew Cagney</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 6.1.2, pg 147
+
+For the most part the description of &quot;*length (initial length)&quot; look something like:
+
+    1. unit_length (initial length)
+       The size in bytes of the line number information for this compilation unit, not
+       including the length field itself (see Section 7.2.2 on page 184).
+
+there are some inconsistencies.  These are the ones I noticed:
+
+- some definitions don't include a reference to &quot;Section 7.2.2 on page 184&quot;:
+
+  .debug_names: 6.1.1.4.1 Section Header
+  .debug_aranges: 6.1.2 Lookup by Address
+
+- some definitions add an additional (now redundant?) note:
+
+  .debug_frame: 6.4.1 Structure of Call Frame Information, page 174 (CIE), page 175 (FDE)
+      ... The size of the length field plus the value of length must be an integral multiple of the address size.
+
+- and some, to me, just provide too much information:
+
+  .debug_info et.al.: 7.5.1.1 Full and Partial Compilation Unit Headers, page 200
+                      7.5.1.2 Skeleton and Split Compilation Unit Headers, Page 201
+                      7.5.1.3 Type Unit Headers, Page 202
+  .debug_aranges: 7.21 Address Range Table
+  .debug_str_offsets: 7.26 String Offsets Table, Page 240
+  .debug_addr: 7.27 Address Table, Page 241
+  .debug_rnglists: 7.28 Range List Table, 242
+  .debug_loglists: 2.19 Location List Table, 243
+
+      A 4-byte or 12-byte unsigned integer representing the length of the
+      .debug_info contribution for that compilation unit, not including the length
+      field itself. In the 32-bit DWARF format, this is a 4-byte unsigned integer
+      (which must be less than 0xfffffff0 ); in the 64-bit DWARF format, this
+      consists of the 4-byte value 0xffffffff followed by an 8-byte unsigned
+      integer that gives the actual length (see Section 7.4 on page 196).
+
+--
+2021-09-20: Accepted.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

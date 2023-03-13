@@ -1,0 +1,129 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>200427.1</td>
+      <td>Paul T Robinson</td>
+      <td>Missing link in section relationships</td>
+      <td>Editorial</td>
+      <td>Accepted with modification</td>
+      <td>Ron Brender</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+ISSUE
+
+In Section B.1, pg 274:
+
+1) Figure B.1 &quot;Debug section relationships&quot; is missing an arc from
+.debug_rnglists to .debug_addr; the arc should be there because of a
+couple of DW_RLE entry types that use .debug_addr indexes.
+
+2) Along the same lines, the arc from .debug_loclists to .debug_addr
+and note (o) to the figure mention only two DW_OP expression opcodes,
+there are also a couple of DW_LLE entry types that use .debug_addr
+indexes.
+
+PROPOSED RESOLUTION
+
+The issue statement is correct. To fix things:
+
+1) Add a new link (t) with a new note at the end of page 275:
+
+(t) .debug_rnglists to .debug_addr
+    Some operands of DW_RLE_base_addressx, DW_RLE_startx_endx and
+    DW_RLE_startx_length range list entries are an index into the
+    .debug_addr section.
+
+2) Add the following to Note (o) on page 274:
+
+    Also, some operands of DW_LLE_base_addressx, DW_LLE_startx_endx and
+    DW_LLE_startx_length location list entries are an
+    index into the .debug_addr section.
+ 
+3) Add the new link (t) in Figure B.1 by rearranging the lower right
+corner of the figure. Briefly, the circled A, the (r,s) link and the
+.debug_line_str section are moved up to make room to place the new link.
+This is not shown here but will be available when the next draft of the
+document is available. 
+
+See figure: http://dwarfstd.dev/doc/Issue_200427.1_Draft_Figure_B.1.pdf
+
+-- 
+03/16/21 -- Updated
+06/13/21 -- Added link to figure
+06/14/20 -- Accepted with modification: Add text to explain diagram style.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

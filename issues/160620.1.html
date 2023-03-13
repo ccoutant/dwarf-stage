@@ -1,0 +1,148 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>160620.1</td>
+      <td>Michael Eager</td>
+      <td>Define generic type for stack operations</td>
+      <td>Clarification</td>
+      <td>Accepted</td>
+      <td>Michael Eager</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 2.5, pg 24-34
+Background
+
+The use of the terminology &quot;special address type&quot; is confusing.  It isn't clear what is 
+special about the addresses with this type and the values with this type do not need to be 
+addresses,  
+
+Additionally, there are references to &quot;pushing a type&quot; or &quot;pushing a type identifier&quot; onto 
+the stack, which may appear to imply that this is a separate operation than pushing a value
+with a specified type onto the stack, or that DWARF defines a type identifier.
+
+Proposal
+
+The proposal replaces the use of &quot;special address type&quot; with &quot;generic type&quot;.  The generic 
+type is the same address-sized integral value with unspecified sign used as the stack vaue 
+in DWARF V4 and earlier.  (Page and line references are to draft of 5/20/2016.)
+
+pg. 24 (97-99):  
+  Instead of a base type, elements can have a special address type, which is an integral 
+  type that has the size of an address on the target machine and unspecified signedness.
+==&gt;
+  Instead of a base type, elements can have the generic type, which is an integral 
+  type that has the size of an address on the target machine and unspecified signedness. 
+  <i>The generic type is the same as the type of stack operations in DWARF Version 4.</i>
+
+pg. 24 (105):  &quot;special address type&quot; ==&gt; &quot;generic type&quot;
+
+pg. 26 (156-158):
+  DW_OP_regval_type pushes the contents of the register together with the given
+  base type, while the other operations push the result of adding the contents of a
+  register to a given signed offset together with the special address type.
+==&gt;
+  DW_OP_regval_type pushes the contents of the register together with the given
+  base type, while the other operations push the result of adding the contents of a
+  register to a given signed offset and have the generic type.
+
+pg. 27 (210, 217, 220):  &quot;special address type&quot; ==&gt; &quot;generic type&quot;
+
+pg. 28 (245):  &quot;together with the special address type identifier&quot; ==&gt; &quot;with the generic type&quot;
+
+pg. 28 (247):  &quot;special address type&quot; ==&gt; &quot;generic type&quot;
+
+pg. 28 (260-261):  &quot;together with the special address type identifier&quot; ==&gt; &quot;with the generic type&quot;
+
+pg. 29 (288):  &quot;together with the special address type identifier&quot; ==&gt; &quot;with the generic type&quot;
+
+pg. 30 (320):  &quot;both the special address type&quot; ==&gt; &quot;the generic type&quot;
+
+pg. 30 (322, 328):  &quot;special address type&quot; ==&gt; &quot;generic type&quot;
+
+pg. 32 (392):  &quot;both the special address type&quot; ==&gt; &quot;generic type&quot;
+
+pg. 32 (397, 398):  &quot;special address type&quot; ==&gt; &quot;generic type&quot;
+
+pg. 34 (443, 451):  &quot;special address type&quot; ==&gt; &quot;generic type&quot;
+
+
+
+--
+
+06/21/2016 -- Accepted.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

@@ -1,0 +1,157 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>041108.1</td>
+      <td>David Anderson</td>
+      <td>Is Extra Padding Allowed</td>
+      <td>Clarification</td>
+      <td>Closed with no change</td>
+      <td>Matthew Gretton-Dann</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+See Draft 8 dwarf3 sec 7.19.
+
+The Name Lookup Table has
+        unit_length
+giving the net length of the entries for a CU.
+
+The Tuple set describes how a final offset-of-0
+defines the end of the Tuple set.
+
+Question:  Is it legal for a compiler to emit a
+unit_length which 'goes past' the end of the final offset-of-0.
+(ie, which  counts some padding-bytes at the end)
+In other words, is it legal for a compiler to have padding
+bytes at the end of the Name Lookup Table for a CU?
+
+Apparently
+        armcc ARM C Compiler , ADS 1.2 [Build 805]
+does have such padding. Is it legal dwarf2/3?
+
+I cannot find anything forbidding such padding.
+
+
+Ron Bender writes:
+
+
+I agree the DWARF spec is not clear in this regard.
+Moreover, it appears that such an inflated length is quite
+benign.
+
+I suppose the same answer should apply to .debug_aranges.
+
+Also .debug_info, which explicitly allows zero padding.
+I think it also &quot;works&quot; OK for .debug_line?
+
+Chris Quenelle writes:
+
+I had a similar problem.  For us, the padding was
+inserted by the linker in between blocks generated
+by the compiler.  I think the wording in the standard
+is pretty clear.  Exactly one zero entry should be included
+in the length.
+
+Unfortunately this is redundant information.
+There seem to be several places where the boundary
+of a data block is described by both a length and
+a terminating entry.
+
+It is left up to the implementation to decide what
+to do when the two pieces of information conflict with
+each other.
+
+To deal with our linker padding problem, I had to
+teach libdwarf to accept a zero value for
+the initial length, and skip over that looking for
+the next block.
+
+I also had to pad the .debug_info blocks generated
+by the compiler so they were all a multiple for 4 bytes.
+This was needed to guarantee that the padding was always
+in units of 4 bytes so that they could be skipped.
+
+In answer to your question, it seems like a good idea
+to extend the definition of Name Tables so that
+any number of zero offsets can occur at the end
+of the block (within the bounds defined by the
+inital length field).
+
+==============================
+
+Closed:  It was felt that the standard is clear.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

@@ -1,0 +1,354 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>130313.5</td>
+      <td>Tobias Burnus</td>
+      <td>Add support for Fortran assumed-rank arrays</td>
+      <td>Enhancement</td>
+      <td>Accepted with (pending) modifications</td>
+      <td>Adrian Prantl</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Background for the discussion
+=============================
+ 
+The Technical Specification ISO/IEC TS 29113:2012 on &quot;Further
+Interoperability of Fortran with C&quot; [1] added assumed-rank arrays.
+They are similar to assumed-shape and deferred-shape arrays in Fortran
+or variable-length arrays in C99. The rank (dimensionality) of an
+assumed-rank array is only known at run time. It is determined by the
+argument that was passed to the assumed rank dummy argument.
+
+This can currently not be handled by DWARF4. At least some means
+should be provided to tag those variables and to extract the rank, but
+possibly also the bounds.
+
+For an assumed-rank array, a typical Fortran compiler will generate an
+array descriptor that contains at least the following information::
+
+    struct array_descriptor {
+      void *base_addr;
+      int rank; /* Could also be a different data type or only some bits in that field. */
+      struct dim dims[]; 
+    }
+
+    struct dim {
+       int lower_bound;
+       int upper_bound /* or extent */;
+       int stride;
+       int other_data;
+    }
+
+where ``dim`` has (at least) ``rank`` elements. The layout of the
+array descriptor is not specified by the Fortran standard unless the
+array is explicitly marked as C-interoperable.
+
+[1] ftp://ftp.nag.co.uk/sc22wg5/N1901-N1950/N1942.pdf
+
+Modification to the standard
+============================
+
+Changes from version 4 to version 5.
+-----------------------
+Added a new attribute, DW_AT_rank, to describe the dimensionality of
+an array.  Added a new tag, DW_TAG_generic_subrange, to describe the
+bounds of Fortran assumed-rank arrays.
+
+Table 2.1: Tag names
+--------------------
+DW_TAG_generic_subrange
+
+Table 2.2: Attribute names
+--------------------
+DW_AT_rank -- Number of dimensions of an array
+
+Section 2.19, Static and Dynamic Values of Attributes
+-----------------------------------------------------
+The applicable attributes include: 
+DW_AT_rank
+
+Section 5.5, Array Type Entries
+-------------------------------
+[insert at the end of the Section]
+
+Alternatively, the array dimensions can also be described with the
+DW_TAG_generic_subrange, which contains only a single, generic
+expression describing each of the attributes. If
+DW_TAG_generic_subrange is used, the number dimensions must be stored
+in the DW_AT_rank attribute. See also Section 5.15.X, Dynamic Type
+Properties: Array Rank.
+
+Section 5.12, Subrange Type Entries
+----------------------------------- 
+
+The tag DW_TAG_generic_subrange is used to describe arrays with a
+dynamic rank. See Section 5.15.X.
+
+
+Section 5.15.X, Dynamic Type Properties: Array Rank
+---------------------------------------------------
+
+<i>The Fortran language supports &quot;assumed-rank arrays&quot;. The rank (number
+of dimensions) of an assumed-rank array is unknown at compile
+time. The Fortran runtime stores the rank in the array descriptor
+metadata.</i>
+
+The presence of DW_AT_rank indicates that an array's rank
+(dimensionality) is dynamic, and therefore unknown at compile
+time. DW_AT_rank contains an expression that can be evaluated to look
+up the dynamic rank from the array descriptor.
+
+The dimensions of an array with dynamic rank are described using the
+DW_TAG_generic_subrange tag. The DW_TAG_generic_subrange tag is the
+dynamic rank array equivalent of DW_TAG_subrange_type. The difference
+is that a DW_TAG_generic_subrange contains generic lower/upper bound
+and stride expressions that need to be evaluated for each dimension:
+Before any expression contained in a DW_TAG_generic_subrange can be
+evaluated, the dimension for which the expression should be evaluated
+needs to be pushed onto the stack. The expression will use it to find
+the offset of the respective field in the array descriptor metadata.
+
+<i>The Fortran compiler is free to choose any layout for the array
+descriptor. In particular, the upper/lower bound and stride values do
+not need to be bundled into a structure/record, but could be laid end
+to end in the containing descriptor, pointed to by the descriptor, or
+even allocated independently of the descriptor.</i>
+
+Dimensions are enumerated 0 to rank-1 in a left-to-right fashion.
+<i>For an example in Fortran 2008, see Section D.2.X.</i>
+
+
+Table 7.1: Tag Encodings
+------------------------
+DW_TAG_generic_subrange | 0x44 ?
+
+
+Table 7.3: Attribute encodings
+------------------------------
+DW_AT_rank | 0x2d ? | constant, exprloc.
+
+
+Table A.1: Attributes by Tag (Informative)
+------------------------------------------
+DW_TAG_generic_subrange
+   
+  DW_AT_bit_size
+  DW_AT_bit_stride
+  DW_AT_byte_size
+  DW_AT_byte_stride
+  DW_AT_count
+  DW_AT_lower_bound
+  DW_AT_upper_bound
+  DW_AT_type
+  DW_AT_sibling
+
+
+Section D.2.X, Fortran 2008 Example
+-----------------------------------
+
+Consider the following example of an assumed-rank array in Fortran
+2008 (with supplement 29113)::
+
+  subroutine foo(x)
+    real :: x(..)
+
+  ! usage for n dimensions
+  
+  end subroutine
+
+Let's assume the Fortran compiler used an array descriptor that looks like this::
+
+  struct array_descriptor {
+    void *base_addr;
+    int rank;
+    struct dim dims[]; 
+  }
+
+  struct dim {
+     int lower_bound;
+     int upper_bound;
+     int stride;
+     int flags;
+  }
+
+The DWARF type for the array `x` can be described as follows::
+
+  DW_TAG_array_type
+    DW_AT_type(reference to real)
+    DW_AT_rank(expression=
+	DW_OP_push_object_address
+	DW_OP_lit&lt;offset of rank in descriptor&gt;
+	DW_OP_plus
+	DW_OP_deref)
+    DW_AT_data_location(expression=
+	DW_OP_push_object_address
+	DW_OP_lit&lt;offset of data in descriptor&gt;
+	DW_OP_plus
+	DW_OP_deref)
+    DW_TAG_generic_subrange
+	DW_AT_type(reference to integer)
+	DW_AT_lower_bound(expression=
+	!   Looks up the lower bound of dimension i.
+
+	!   Operation				    ! Stack effect
+						    ! i (implicit)
+	    DW_OP_lit&lt;byte size of struct dim&gt;	    ! i sizeof(dim)
+	    DW_OP_mult				    ! dim[i]
+	    DW_OP_lit&lt;offset of dim in descriptor&gt;  ! dim[i] offset
+	    DW_OP_plus				    ! dim[i]+offset
+	    DW_OP_push_object_address		    ! dim[i]+offset objptr
+	    DW_OP_plus				    ! objptr.dim[i]
+	    DW_OP_lit&lt;offset of lower_bound in dim&gt; ! objptr.dim[i] offset
+	    DW_OP_plus				    ! objptr.dim[i].lower_bound
+	    DW_OP_deref)			    ! *objptr.dim[i].lower_bound
+	DW_AT_upper_bound(expression=
+	!   Looks up the upper bound of dimension i.
+	    DW_OP_lit&lt;byte size of dim&gt;
+	    DW_OP_mult
+	    DW_OP_lit&lt;offset of dim in descriptor&gt;
+	    DW_OP_plus
+	    DW_OP_push_object_address
+	    DW_OP_plus
+	    DW_OP_lit&lt;offset of upper_bound in dim&gt;
+	    DW_OP_plus
+	    DW_OP_deref)
+	DW_AT_byte_stride(expression=
+	!   Looks up the byte stride of dimension i.
+	    DW_OP_lit&lt;byte size of dim&gt;
+	    DW_OP_mult
+	    DW_OP_lit&lt;offset of dim in descriptor&gt;
+	    DW_OP_plus
+	    DW_OP_push_object_address
+	    DW_OP_plus
+	    DW_OP_lit&lt;offset of stride in dim&gt;
+	    DW_OP_plus
+	    DW_OP_deref)
+
+The layout of the array descriptor is not specified by the Fortran
+standard unless the array is explicitly marked as C-interoperable. To
+get the bounds of an assumed-rank array, the expressions in the
+DW_TAG_generic_subrange type need to be evaluated for each of the
+DW_AT_rank dimensions as shown in the following pseudocode::
+
+    typedef struct {
+        int lower, upper, stride;
+    } dims_t;
+
+    typedef struct {
+        int rank;
+	struct dims_t *dims;
+    } array_t;
+
+    array_t get_dynamic_array_dims(DW_TAG_array a) {
+      array_t result;
+
+      // Evaluate the DW_AT_rank expression to get the number of dimensions.
+      dwarf_stack_t stack;
+      dwarf_eval(stack, a.rank_expr);
+      result.rank = dwarf_pop(stack); 
+      result.dims = new dims_t[rank];
+
+      // Iterate over all dimensions and find their bounds.
+      for (int i = 0; i &lt; result.rank; i++) {
+        // Evaluate the generic subrange's DW_AT_lower expression for dimension i.
+	dwarf_push(stack, i);
+	assert( stack.size == 1 );
+        dwarf_eval(stack, a.generic_subrange.lower_expr);
+	result.dims[i].lower = dwarf_pop(stack);
+	assert( stack.size == 0 );
+
+	dwarf_push(stack, i);
+        dwarf_eval(stack, a.generic_subrange.upper_expr);
+	result.dims[i].upper = dwarf_pop(stack);
+	
+	dwarf_push(stack, i);
+        dwarf_eval(stack, a.generic_subrange.byte_stride_expr);
+	result.dims[i].stride = dwarf_pop(stack);
+      }
+      return result;
+    }
+       
+
+--
+
+Revised 7/08/2013.  Previous version: 
+http://dwarfstd.dev/issues/130313.5-2.html
+Revised 8/16/2013.
+Accepted 8/20/2013 pending modifications.
+Revised 8/20/2013.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

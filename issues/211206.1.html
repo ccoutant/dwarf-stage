@@ -1,0 +1,385 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>211206.1</td>
+      <td>Markus Metzger</td>
+      <td>SIMD location expressions</td>
+      <td>Enhancement</td>
+      <td>Open</td>
+      <td>Markus Metzger</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 2.5.1.3, pg 29ff
+
+Implicitly vectorized code executes multiple instances of a source code
+loop body or of a source code kernel function simultaneously in a single
+sequence of instructions operating on a vector of data elements (cf. SIMD:
+Single Instruction Multiple Data).
+
+This can be used to implement a SIMT (cf. Single Instruction Multiple
+Threads) execution model on SIMD hardware such as GPUs, e.g. for the
+OpenCL, SYCL, or HIP languages.
+
+It can also be used to implement SIMD loops on SIMD hardware such as GPUs
+or on traditional CPU hardware with vector extensions like Intel AVX,
+e.g. for OpenMP or for automatically vectorized code.
+
+In all these cases, the original source code has been written for a single
+thread in the case of SIMT or for a single vector element in the case of
+SIMD.  The remainder of this text uses the term 'lane' to refer to a
+single SIMT thread or a single SIMD vector element.
+
+The number of lanes inside a vectorized code region is fixed.  For SIMT,
+this typically covers an entire function.  For SIMD, this typically covers
+an instance of a loop body.  For example, the following OpenCL kernel
+function &quot;vec_add&quot; is logically invoked by a separate language thread for
+each index in a range of indices specified when the kernel is dispatched:
+
+~~~
+__kernel void vec_add (__global char *dst, __global char *src)
+{
+  int i = get_global_id(0);
+  dst[i] += src[i];
+}
+~~~
+
+The following code fragment dispatches the &quot;vec_add&quot; kernel:
+
+~~~
+  size_t global_offset[1] = { 0 };
+  size_t global_size[1] = { NITEMS };
+  size_t group_size[1] = { NLANES };
+  clEnqueueNDRangeKernel(queue, vec_add_kernel, 1, global_offset,
+                         global_size, group_size, 0, NULL, NULL);
+~~~
+
+Each invocation calls 'get_global_id()' to determine the index it is
+assigned to work on, which returns a different value in each OpenCL
+thread.
+
+When compiling for GPUs, the compiler may map one OpenCL thread to one
+lane on the SIMD hardware.  To do that, the compiler implicitly vectorizes
+the code to match the natural number of lanes on the target hardware.
+
+The same loop or the same function may be compiled with different
+vectorization factors resulting in different instances with a different
+number of lanes.
+
+In the SIMD case, we may end up with different instances of the same
+source loop using different vectorization factors resulting in a different
+number of lanes within the same function.  For example, when the following
+C function is compiled with `gcc -O2 -fopenmp` on IA, the &quot;for&quot; statement
+is transformed into both a 16-wide loop instance and a 1-wide loop
+instance:
+
+~~~
+void vec_add (char dst[], char src[], int len) {
+  #pragma omp simd
+  for (int i = 0; i &lt; len; ++i)
+    dst[i] += src[i];
+}
+~~~
+
+The vectorized loop instance packs 16 source elements into IA vector
+registers and processes all 16 source elements in one machine instruction.
+The code would load 16 adjacent source elements, each, add them, and store
+the resulting 16 source elements back.
+
+The trip count, which is the number of times the loop iterates during
+execution, is not known at compile-time.  Therefore the compiler also
+generates a 1-wide instance of the loop that processes one source element
+at a time.  Control flows from the vectorized loop instance to the scalar
+loop instance when the remaining trip count falls below a threshold
+determined by the compiler.
+
+When debugging the above kernel function or the above loop, the user would
+like to be able to inspect the variable i and the array elements dst[i]
+and src[i].  Since the code had been implicitly vectorized, multiple
+instances of the source code are executed in parallel.
+
+Debuggers may need to focus on a single lane at a time.  To map such
+vectorized machine code back to scalar source code, debug information
+must describe the location of a given variable with respect to a given
+lane.
+
+To describe this, we propose a new operator:
+    DW_OP_push_lane
+that allows the location of a variable to be described as function of the
+lane.
+
+The same scalar source code may be compiled using different vectorization
+factors resulting in a different number of lanes at different locations in
+the machine code.  Debuggers may need to show the number of lanes for the
+current machine code location and only allow the user to focus on a lane
+within those boundaries.
+
+To describe this, we propose a new subprogram attribute:
+    DW_AT_num_lanes
+that describes the number of lanes for implicitly vectorized code.
+
+Note that this only refers to implicitly vectorized code.  For explicitly
+vectorized code, the source variables are themselves vectors and location
+descriptions refer to the vector object.  Compilers may indicate this by
+describing the code region as num_lanes == 1.  They would not use
+DW_OP_push_lane in DWARF expressions.
+
+Note that for the example in Appendix D involving arrays split between
+memory and registers, I am using operators introduced in issue 211206.2.
+
+---
+
+Section 2.2, p.17.
+
+Add
+    DW_AT_num_lanes  |  Number of available lanes
+to table 2.2.
+
+
+Section 2.5.1.3, p.29.
+
+Add
+    16. DW_OP_push_lane
+        The DW_OP_push_lane operation pushes a lane index value of generic
+        type, which provides the context of the lane in which the
+        expression is being evaluated.  See section 3.3.5 on page 79.
+
+        <i>Producers that widen source code into vectorized machine code may
+        use this operation to describe the location of a source variable
+        as function of a single lane in the widened machine code.
+
+        Consumers will supply the lane argument to obtain the location of
+        the instance of that source variable that corresponds to the
+        provided lane argument.</i>
+
+to the end of the list on p.33.
+
+
+Section 3.3.5, p.79.
+
+Add
+    <i>SIMD instructions process multiple data elements in one instruction.
+    The number of data elements that is processed with one instruction is
+    typically referred to as SIMD width. Each individual data element is
+    typically referred to as SIMD lane.
+
+    When generating code for a SIMD architecture, compilers may need to
+    implicitly widen the source code to match the SIMD width of the
+    instruction set they are using.  Source variables are widened into a
+    vector of variables, with one instance per SIMD lane. </i>
+
+    A subroutine that is implicitly vectorized may have a DW_AT_num_lanes
+    attribute whose value is either a constant, a location expression, or
+    a location list describing the implicit vectorization factor and the
+    corresponding number of lanes in the generated code.
+
+    To refer to individual lanes in such vectorized code, for example to
+    describe the location of widened source variables, prodocers may use
+    the DW_OP_push_lane operation to have consumers supply the current
+    focus lane for which to evaluate the location expression.  The pushed
+    lane index must be an unsigned integer value between zero (inclusive)
+    and the value of this attribute (exclusive) at the current location.
+    See section 2.5.1.3 on page 29.
+
+    <i>If the source code had already been vectorized and is not further
+    widened by the compiler, the value should be one.  This also applies
+    to non-vectorized code, where the attribute is typically omitted.
+
+    This value does not only apply to vector instructions.  If a loop or
+    function has been widened, the entire loop or function body shall be
+    annotated with the vectorization factor.</i>
+
+Section 7.5.4, p.207.
+
+Add
+    DW_AT_num_lanes  |  TBD  | constant, exprloc, loclist
+to Table 7.5.
+
+Section 7.7, p.223.
+
+Add
+    DW_OP_push_lane  |  TBD  |  0  |
+to table 7.9.
+
+
+Section D.17 (new)
+
+Add
+    D.17 SIMD location descriptions
+
+    The following example uses a hypothetical machine with 64b scalar
+    registers r0, r1, ..., and 256b vector registers v0, v1, ... that
+    supports SIMD instructions with different SIMD widths.  Scalar
+    arguments are passed in scalar registers starting with r0 for the
+    first argument.
+
+    Consider the source code in figure D.73, which is implicitly widened
+    by a vectorization factor of 4 to match the 256b vector registers of
+    the target machine, resulting in the pseudo-code in figure D.74.
+
+    Figure D.73: C OpenMP source code
+    ~~~
+    void vec_add (int dst[], int src[], int len) {
+      #pragma omp simd
+      for (int i = 0; i &lt; len; ++i)
+          dst[i] += src[i];
+    }
+    ~~~
+
+    Figure D.74: Pseudo Assembly code
+    ~~~
+    .l0:
+    move.64b    r3, 0
+    .l1:
+    add.64b     r4, r3, 4
+    cmp.64b     r4, r2
+    jmp.ge      .l2
+    load.256b   v0, [r0+4*r3]
+    .l1.1
+    load.256b   v1, [r1+4*r3]
+    .l1.2
+    add.simd-4  v2, v0, v1
+    store.256b  [r0+4*r3], v2
+    .l1.3
+    mov.64b     r3, r4
+    jmp         .l1
+    .l2:
+    add.64b     r4, r3, 1
+    cmp.64b     r4, r2
+    jmp.ge      .l3
+    load.32b    r5, [r0+4*r3]
+    .l2.1
+    load.32b    r6, [r1+4*r3]
+    .l2.2
+    add.32b     r7, r5, r6
+    store.32b   [r0+4*r3], r7
+    .l2.3
+    mov.64b     r3, r4
+    jmp .l2
+    .l3:
+    return
+    .l4:
+    ~~~
+
+    The machine code contains two instances of the source loop: one
+    instance with SIMD width 4 at .l1, and one scalar instance at .l2 to
+    handle any remaining elements.
+
+    This function may be described in DWARF as shown in figure D.75.
+
+    Figure D.75: Possible DWARF description of the function in D.73
+                 compiled into pseudo machine code in D.74.
+    ~~~
+    DW_TAG_subprogram
+        DW_AT_name &quot;vec_add&quot;
+        DW_AT_num_lanes .loclist.0
+        ...
+        DW_TAG_variable
+            DW_AT_name &quot;i&quot;
+            DW_AT_type int
+            DW_AT_location .loclist.1
+            ...
+    .type.arr:
+    DW_TAG_array_type
+        DW_AT_type int
+        DW_TAG_subrange_type
+            DW_AT_lower_bound 0
+
+    .loclist.0:
+    range [.l1, .l2)
+        DW_OP_lit4
+        DW_OP_stack_value
+    end-of-list
+
+    .loclist.1:
+    range [.l0, .l1)
+        DW_OP_regx r3
+    range [.l1, .l2)
+        DW_OP_bregx r3, 0
+        DW_OP_push_lane
+        DW_OP_plus
+        DW_OP_stack_value
+    range [.l2, .l4)
+        DW_OP_regx r3
+    end-of-list
+    ~~~
+to the end of Appendix D on page 365.
+
+--
+2022-05-19: Revised.  Previous version: http://dwarfstd.dev/issues/211206.1-1.html 
+2023-02-01: Revised.  Previous version: http://dwarfstd.dev/issues/211206.1-2.html
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

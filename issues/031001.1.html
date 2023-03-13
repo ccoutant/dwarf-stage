@@ -1,0 +1,156 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>031001.1</td>
+      <td>Chris Quenelle</td>
+      <td>Index Info</td>
+      <td>Extension</td>
+      <td>Closed</td>
+      <td>Chris Quenelle</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Dwarf2 has the notion of &quot;index&quot; information stored in sections like
+&quot;.debug_pubnames&quot;, &quot;.debug_varnames&quot;, etc.  Some vendors have
+added additional similar sections.
+This information is used as an index into the full .debug_info
+data so that you don't have to read all the .debug_info section
+until you need some piece of it.
+
+If a vendor could extend or modify the kind of index information.
+without defining new ELF sections, that would be better.
+
+Has it been suggested to create a new section called something like:
+&quot;.debug_info_index&quot; which has the same format as &quot;.debug_info&quot;
+except it only includes the globally visible types/variables?
+(Along with DIE pointers into the .debug_info section, and/or pointers
+to the containing CU in the .debug_info section)
+It could bedefined loosely so vendors can put whatever kind of index
+information they want inside it.  Using the same (or similar)
+structure that's found in &quot;.debug_info&quot;.
+
+Basically the same info as what's in .debug_pubnames/.debug_varnames
+only in a more extensible format?
+
+-----------
+Jim Blandy &lt;jimb@redhat.com&gt;
+
+I kind of like this idea.
+
+Dwarf &gt;=2 dies are a pretty darn nice format.  You can invent new
+attributes and tags, and everything's optional, with pratically no
+space consequences.  I really began to appreciate ies when I was
+putting together the proposal for die-based macro information (which
+I've never gotten around to implementing...).
+
+It would make slurping up the indices a bit more compute-intensive,
+but GDB doesn't use them, so I have no sense for how much of an issue
+this is.
+
+------------
+Michael Eager
+
+My first impression is that while it would be more extensible (although
+without details it's difficult to say), it would require more processing.
+The .debug_pubnames and .debug_aranages are simple unstructured lists,
+which make them very easy to search.
+
+
+
+
+--------------
+
+Daniel Jacobowitz
+
+On the other hand, wouldn't this allow us to use .debug_str for the
+strings in .debug_pubnames - a potentially big space savings, esp. with
+a linker which merges constants?
+
+
+  Chris Quenelle
+  &gt; It would make slurping up the indices a bit more compute-intensive,
+  &gt; but GDB doesn't use them, so I have no sense for how much of an issue
+  &gt; this is.
+
+Very small, I think.  I've been meaning to implement this sort of thing
+in GDB, and .debug_info_index would be pretty much ideal.
+
+----------
+
+
+Closed due to lack of proposal.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

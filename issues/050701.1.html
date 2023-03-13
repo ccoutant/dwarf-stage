@@ -1,0 +1,325 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>050701.1</td>
+      <td>Ron Brender and Jim Blandy</td>
+      <td>Improve description of DW_OP_piece, with small extension</td>
+      <td>Improvement</td>
+      <td>Accepted</td>
+      <td>Ron Brender</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section: 2.4.1.6, 2.5
+Page: 21-25
+
+This proposal is the result of a joint effort between Jim Blandy
+and myself over the last week of June. Additional discussion may
+be found in the DWARF-WORKGROUP mail archive under the Subj: 060628.1
+
+
+brender@gemevn.zko.dec.com (Ron 603-884-2088) writes:
+&gt; One issue that remains unanswered is in
+&gt;
+&gt;     &quot;Keith.Walker@a 26-JAN-2001  DW_OP_piece and optimisations
+&gt;
+&gt; which comes down to how to describe an object one (or more) of whose
+&gt; pieces, but not all, is optimized away. I had no suggestion then and
+&gt; still offer none.
+&gt;
+&gt;
+&gt; PROPOSAL
+&gt; --------
+
+I like where all this is going.  Let me offer something which is a bit
+more formal (in the sense of &quot;related to form&quot;, not in the sense of
+&quot;stuffy&quot;), and which I think also addresses Keith Walker's concerns.
+
+Keep these two changes as they are:
+
+&gt;  1) In Section 2.4.1.6, remove bullet 1. Keep the plural section
+&gt;     title (&quot;Special Operations&quot;) even though there is now only one,
+&gt;     but change the introductory sentence to read
+&gt;
+&gt;       &quot;There is one special operation currently defined:&quot;
+&gt;
+&gt;
+&gt;  2) In Section 2.5.1, delete the (third) introductory sentence
+&gt;     that reads
+&gt;
+&gt;       &quot;Each register name operator must be used alone...&quot;
+
+And keep these --- but with some deletions, marked with &lt;omit&gt;...&lt;/omit&gt;:
+
+&gt;  3) Between Sections 2.5.1 and 2.5.2, insert a new section titled
+&gt;     &quot;Composition Operators&quot;. (Yes, plural--with or without
+&gt;     DW_OP_bit_piece.)
+&gt;
+&gt;  4) Begin this new section with
+&gt;
+&gt;       &quot;A composition operator describes the location of a piece
+&gt;       of a value which may be contained in part of a register or
+&gt;       stored in more than one location; it does not compute a
+&gt;       value nor store any result on the DWARF stack. &lt;omit&gt;There
+&gt;       may be one or more composition operators in a single
+&gt;       DWARF location expression. A series of such operators
+&gt;       describes the parts of a value in memory address order.
+&gt;
+&gt;       Each composition operator is immediately preceeded by
+&gt;       a register name operator or an addressing operation
+&gt;       which describes the location where part of the resultant
+&gt;       value is contained.&lt;/omit&gt;
+&gt;
+&gt;  5) Follow this with the text removed from 2.4.1.6 per 1) above.
+&gt;
+&gt;  6) If Issue 050518.1 is adopted, the DW_OP_bit_piece operator
+&gt;     can follow as bullet 2.
+
+Then:
+
+7) After &quot;Composition Operators&quot;, insert a second new section titled
+   &quot;Simple Location Expressions&quot;:
+
+        A &lt;definition&gt;simple location expression&lt;/definition&gt; describes
+        the location of one contiguous piece of a value.  A simple
+        location expression is either:
+
+        - a non-empty DWARF expression, whose value is the address of
+          a piece of an object in memory,
+
+        - a DWARF expression containing zero operations, which
+          represents a piece of an object that is present in the
+          source code but not in the object code (perhaps due to
+          optimization), or
+
+        - a register name operator, appearing alone as a single
+          opcode, without other DWARF expression operators,
+          representing a piece of the object located in the given
+          register.
+
+8) Replace the first paragraph of &quot;Location Expressions&quot; with the
+   following text:
+
+       A location expression is either:
+
+       - a simple location expression, representing an object which
+         exists in one piece at the given location, or
+
+       - two or more simple location expressions, each of which is
+         followed by one composition operator.  Each simple location
+         expression describes the location of one piece of the object;
+         each composition operator describes which part of the object
+         is located there.
+
+   (If issue 050518.1 is adopted, then that last sentence might need
+   to be loosened a little bit.)
+
+   I think this would address Keith Walker's concerns: we simply allow
+   the existing designation for an unavailable value --- an empty
+   expression --- to be part of a piece list, like anything else.
+
+9) Add an example to section 2.5.3:
+
+        DW_OP_reg0 DW_OP_piece 4 DW_OP_piece 4 DW_OP_fbreg -12 DW_OP_piece 4
+
+                A twelve-byte value whose first four bytes reside in
+                register zero, whose middle four bytes are unavailable
+                (perhaps due to optimization), and whose last four
+                bytes are in memory, twelve bytes before the frame
+                base.
+
+   This example shows an empty DWARF expression being used as a piece,
+   and also shows a piece that lives in memory, of which we have no
+   other examples.
+
+==================================
+
+Revised proposal:
+
+
+2.4.1.6	Special Operations
+
+There is one special operation currently defined: 
+
+    1.  DW_OP_nop 
+    The DW_OP_nop operation may be a place holder. It has no effect on
+    the location stack or any of its values. 
+
+...
+
+2.5.2	Composition Operators
+
+A composition operator describes the location of a piece of a
+value which may be contained in part of a register or stored in
+more than one location; it does not compute a value nor store any
+result on the DWARF stack. There may be one or more composition
+operators in a single DWARF location expression. A series of such
+operators described the parts of a value in memory address order.
+
+Each composition operator is immediately preceeded by a register
+name operator or an addressing operation which describes the
+location where part of the resultant value is contained.
+
+    1.	DW_OP_piece 
+    DW_OP_piece takes a single operand, which is an unsigned LEB128
+    number. The number describes the size in bytes of the piece of
+    the object referenced by the DWARF expression whose result is at
+    the top of the stack. If the piece is located in a register, but
+    does not occupy the entire register, the placement of the piece
+    within that register is defined by the ABI.
+
+    <i>
+    Many compilers store a single variable in sets of registers, or
+    store a variable partially in memory and partially in registers.
+    DW_OP_piece provides a way of describing how large a part of a
+    variable a particular DWARF expression refers to.
+    </i>
+
+    2.	DW_OP_bit_piece
+    DW_OP_bit_piece takes two operands. The first is an unsigned
+    LEB128 number that gives the size in bits of the piece. The
+    second is an unsigned LEB128 number that gives the offset in bits
+    from the location defined by the preceding DWARF location
+    expression.
+
+    Interpretation of the offset depends on the kind of location
+    expression. If the location is null, the offset doesnt matter and
+    the DW_OP_bit_piece operator describes a piece consisting of the
+    given number of bits whose values are undefined. If the location
+    is a register, the offset is from the least significant bit end
+    of the register. If the location is a memory address, the
+    DW_OP_bit_piece operator describes a sequence of bits relative to
+    the location whose address is on the top of the DWARF stack using
+    the bit numbering and direction conventions that are appropriate
+    to the current language on the target system.
+
+<i>
+DW_OP_bit_piece is used instead of DW_OP_piece when the piece to
+be assembled into a value or assigned to is not byte-sized or is
+not at the start of a register or addressable unit of memory.
+</i>
+
+2.5.3	Simple Location Expressions
+
+A simple location expression describes the location of one
+contiguous piece of a value. A simple location expression is
+either:
+
+    1.	A non-empty DWARF expression, whose value is the address
+    of the piece of the value in memory
+
+    2.	A DWARF expression containing no operations, which
+    represents a piece of an object that is present in the source
+    code but not in the object code (perhaps due to optimization), or
+
+    3.	A register name operator, appearing alone as a single
+    opcode, without other DWARF expression operators, representing a
+    piece of the object located in the given register.
+
+2.5.4	Location Expressions
+
+A location expression is either:
+
+    1.	A simple location expression, representing an object
+    which exists in one piece at the given location, or
+
+    2.	Two or more simple location expressions, each of which is
+    followed by one composition operator. Each simple location
+    expression describes the location of one piece of the object;
+    each composition operator describes which part of the object is
+    located there. Each simple location expression that is a DWARF
+    expression is evaluated independently of any others (as though on
+    its own separate stack).
+
+In the case of locations used for structure members, the
+computation implicitly pushes the base address of the immediately
+containing structure on the stack before evaluation of the
+addressing operation. 
+
+2.5.5	Example Location Expressions
+
+...
+
+DW_OP_reg0 DW_OP_piece 4 DW_OP_piece 4 DW_OP_fbreg -12 DW_OP_piece 4
+    A twelve byte value whose first four bytes reside in register
+    zero, whose middle four bytes are unavailable (perhaps due to
+    optimizaqtion), and whose last four bytes are in memory, 12 bytes
+    before the frame base.
+
+Accepted as revised.
+
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

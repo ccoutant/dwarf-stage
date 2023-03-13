@@ -1,0 +1,163 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>100423.1</td>
+      <td>David Anderson</td>
+      <td>Abstract root clarification</td>
+      <td>Editorial</td>
+      <td>Accepted</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 3.3.8.1, pg 59
+
+Background:
+A commercial compiler emits DWARF as in the following example
+which leaves a consumer unable to properly handle inlined
+functions.   Yet the compiler does not clearly violate
+anything in DWARF3 or DWARF4.   So it seems the standard
+needs clarification.
+
+Example:
+The compiler author provides no tie from
+the concrete inlined instance through the abstract root back
+to the class member!  See comments at the end of this note.
+
+The abstract root below is generated in the lexical context of
+the inlined subroutine, not in the class declaration.
+If the abstract root were in the class declaration
+there would be no ambiguity.
+
+The source  was coded in C++ .
+I am faking the mangled name here, the mangledRtX string
+is shorter and easier to read than the original mangled name!
+
+CU scope begins here
+...
+&lt;2&gt;&lt;77027&gt;      DW_TAG_class_type
+               DW_AT_name                  RtX
+               DW_AT_declaration           yes(1)
+...
+&lt;3&gt;&lt;77611&gt;      DW_TAG_subprogram // A public class member function.
+                  //  A Constructor in this case.
+               DW_AT_name                  RtX
+               DW_AT_MIPS_linkage_name          mangledRtX (a mangled name)
+               DW_AT_declaration           yes(1)
+               DW_AT_external              yes(1)
+               DW_AT_accessibility         DW_ACCESS_public
+...
+Global subprogram ZED definition begins here, CU scope.
+...
+lexical block begin
+...
+&lt;4&gt;&lt;887217&gt;     DW_TAG_inlined_subroutine // concrete inlined instance
+               DW_AT_abstract_origin       &lt;887268&gt;
+               DW_AT_low_pc                0x4061044
+               DW_AT_high_pc               0x4061084
+&lt;4&gt;&lt;887268&gt;     DW_TAG_subprogram   // Abstract root
+               DW_AT_name                  mangledRtX (The same
+                                      mangled name as above.
+                                      It is a mistake using a mangled
+                                      name here, it is a compiler bug.)
+               DW_AT_inline                DW_INL_declared_inlined
+...
+end subprogrogram ZED
+
+I don't find any clear language in DWARF3 or 4 which tells a compiler implementor 
+that it's necessary to either have the abstract root be in the class RtX or else
+provide a tie (like DW_AT_specification) to tie the abstract root to the declaration 
+of the class member at 77611.
+
+In the example above the compiler could have added a new attribute to  77611 such as
+   DW_AT_inline DW_INL_declared_inlined
+and referred to 77611 as the abstract root instead of constructing a duplicate.
+
+Proposed specification change based on public review draft of DWARF4:
+
+Add the following after the first paragraph of &quot;3.3.8.1 Abstract Instances&quot;.
+
+&quot;Each abstract instance root should either be part of a larger tree (thus 
+giving a context for the root) or should use DW_AT_specification to refer to the
+declaration in context. 
+<i>
+For example, in C++ the context might be a namespace declaration or a class declaration.
+</i>&quot;
+
+
+
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

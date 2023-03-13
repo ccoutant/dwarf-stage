@@ -1,0 +1,121 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>210305.1</td>
+      <td>Jakub Jelinek</td>
+      <td>Split DW_AT_language into DW_AT_language and DW_AT_language_version</td>
+      <td>Enhancement</td>
+      <td>Withdrawn</td>
+      <td>Jakub Jelinek</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 3.1.1, pg 61-63
+
+Some of the DW_LANG_* language codes currently include a language version, usually 
+in the form of 2 digit suffix for the standard year.  E.g.
+DW_LANG_C_plus_plus
+DW_LANG_C_plus_plus_03
+DW_LANG_C_plus_plus_11
+DW_LANG_C_plus_plus_14
+the problem with this way is that any time new language codes are assigned for new 
+language versions of the same language, all consumers need to be updated to handle 
+those new language codes.  Say if a consumer needs some special handling of C++11 
+or later, for DWARF5 it needs to look for DW_LANG_C_plus_plus_{11,14}, but in DWARF6 
+it would need to look for DW_LANG_C_plus_plus_{11,14,17,20} and maybe 23 too.
+
+As DWARF5 has DW_FORM_implicit_const, adding new constants to the TUs isn't that 
+expensive, so I'd like to propose that we adjust DW_LANG_* codes and add an 
+optional DW_AT_language_version attribute.  I think it would be best if the values 
+for DW_AT_language_version were YYYYMM decimal numbers when the particular standard 
+was finalized, so e.g. for C++ it would be 199711 for C++98, 201103 for C++11, 
+201402 for C++14, 201703 for C++17, 202002 for C++20, etc.  This would mean consumers
+then can check DW_AT_language value is DW_LANG_C_plus_plus and DW_AT_language_version
+value &gt;= 201103 etc. 
+
+In the DW_LANG_* table I'd suggest to add a column with implied default 
+DW_AT_language_version when that attribute is not explicitly specified.
+Now, the DW_LANG_* table contains either unversioned names for some languages, 
+those would be kept as is, or an unversioned (typically oldest) + some versioned 
+ones, here I'd suggest to keep but deprecate the versioned ones and for other languages
+there are only versioned ones, here I'd suggest to copy the oldest one to an unversioned
+name (alias) and deprecate the versioned ones.
+
+
+--
+2021-07-19:  Withdrawn.  See 210419.1.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

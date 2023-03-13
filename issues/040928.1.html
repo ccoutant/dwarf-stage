@@ -1,0 +1,170 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>040928.1</td>
+      <td>Don Darling</td>
+      <td>Add Address Size to Frame Info</td>
+      <td>Extension</td>
+      <td>Accepted</td>
+      <td>Jim Blandy</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Background 
+
+If one was to encounter a DW_OP_addr in the middle of a
+DW_CFA_expression, how is one supposed to determine the size of a target
+address, so they know how many bytes to read?  You could find the
+debug_info compile unit that references the same code as the FDE, but
+there are a lot of hoops to jump through to do this.  Also, some
+compiler vendors always generate .debug_frame sections, even if no other
+debugging information is generated.  Thus, they cannot rely on there
+being a .debug_info compile unit header to find the address size.
+
+The same is true for DW_CFA_set_loc.
+
+We have always encoded all target addresses as 4-byte values for all
+ISAs to avoid these issues, even if they are actually smaller.  I'm just
+curious about how a completely generic DWARF reader might handle this,
+without any knowledge of the target architecture.
+
+Jim Blandy wrote:
+|&gt; &gt;Does the .debug_frame section carry any indication of how large the
+|&gt; &gt;addresses it contains should be?  I'm talking about the
+|&gt; &gt;initial_location in the FDE, and the DW_CFA_set_loc operand.  One is
+|&gt; &gt;tempted to suggest using some compilation unit's address size, but
+|&gt; &gt;.debug_frame is supposed to be self-contained.
+..
+|&gt; &gt;It seems to me this is worth bumping the version number to fix.
+
+Ron (Brender?) writes (attribution not really clear):
+|&gt; But does one good fix deserve another -- or three?
+|&gt;
+|&gt; The .debug_line section has the same problem. Shall we bump its
+|&gt; version number (actually we already did) and add an address_size
+|&gt; byte there too?
+|&gt;
+|&gt; Worse yet are the .debug_loc and .debug_ranges sections -- these
+|&gt; have no header at all, hence no version number to bump, hence no
+|&gt; possibility to upwardly add an address_size header field at all!
+|&gt;
+|&gt; Sigh...
+
+Daniel Jacobowitz wrote, 25 Apr 2004
+|Is there any use in .debug_loc and .debug_ranges without first reading
+|the .debug_info section, which does contain the address size?  For
+|.debug_line there's a little more of an argument.
+
+PROPOSAL (revised 4/2/2007):
+
+This change requires changing the version number of .debug_frame.
+
+In the .debug_frame section, add address size and segment size fields
+to CIEs.  Specifically, in section 6.4.1, add, between 'augmentation'
+and 'code_alignment_factor' in the CIE text:
+
+    5.  address_size (ubyte)
+
+    The size of a target address in this CIE and any FDEs that use it, in
+    bytes.  If a Compilation Unit exists for this frame that Compilation
+    Unit address size must match the address size here.
+
+    6.  segment_size (ubyte)
+
+    The size of a segment selector in this CIE and any FDEs that use it,
+    in bytes.
+
+In the FDE description, add the following to the end of the
+description of 'initial location':
+
+    If the 'segment_size' field of this FDE's CIE is non-zero, the
+    initial location is preceded by a segment selector of the given
+    length.
+
+In section 6.4.2.1, &quot;Row Creation instructions&quot;, change the word
+'address' in the first sentence to 'target address', to make it
+clearer that the size of the field is controlled by the CIE's
+address_size field.  To the end of the paragraph, add the sentence:
+
+    If the 'segment_size' field of this FDE's CIE is non-zero, the
+    address operand is preceded by a segment selector of the given
+    length.
+
+------------------------------------------
+
+Proposal accepted 6/5/2007.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

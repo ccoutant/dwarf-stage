@@ -1,0 +1,397 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>160714.1</td>
+      <td>Ron Brender</td>
+      <td>Location List and Range List Sections Improvement/Enhancement</td>
+      <td>Improvement</td>
+      <td>Accepted</td>
+      <td>Ron Brender</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section Many, pg Many
+
+This a replacement for the proposal in Issue 150607.1. It is closely 
+related to and helps enable Proposal 160123.1 Revision 1.
+
+This proposal results from review of proposal 150607.1 at the June 
+2016 meeting and subsequent discussion with Cary Coutant. However, 
+while it grows out of the same original concerns, it takes a different 
+approach and extends the treatment of location and range list sections 
+in new ways as suggested at that meeting. As a result it is being 
+submitted as a new proposal. The original proposal 150607.1 is withdrawn.
+
+                           Note
+The companion Proposal 160123.1 Revision 1 refers to Revision 1 of Issue 
+150607.1. THIS is that revision, although it now has a new Issue number.
+Hopefully, this will not result in confusion.
+
+
+This proposal replaces the .debug_loc and .debug_ranges sections
+with new sections .debug_loclists and .debug_rnglists (and
+.debug_loclists.dwo and .debug_rnglists.dwo). These sections
+are designed to work with the new location list and range list
+entry formats defined in 160123.1 Revision 1.
+
+Proposal Sketch
+
+  1. Headers (of all four sections) consist of the
+     following fields
+     
+      a) unit_length (initial_length)
+      b) version (uhalf) = 5
+      c) address_size (ubyte)
+      d) segment_selector_size (ubyte)
+      
+     The above are the same as for .debug_loc/.debug_ranges in earlier
+     drafts for V5 (Note that .debug_loc/.debug_ranges did not have 
+     headers in V4.) This proposal adds:
+     
+      e) entry_offset_count (uword)
+         The number of offsets, one for each entry, that immediately
+         follow the header.
+
+  2. Immediately following the header are entry_offset_oount offsets.
+     Each offset is 4 bytes in size in the DWARF-32 format and 8 bytes 
+     in the DWARF-64 format. The contents contained in the location of 
+     the i-th offset is the offset from the base of the section (the
+     location of the first offset following the header) to the beginning 
+     of the i-th entry.
+     
+  3. Immediately following the entry offsets are the entries themselves.
+
+  4. Entries are referenced by their index using the (new) form 
+     DW_FORM_secx whose value is a ULEB unsigned integer. Given the
+     operand value i, the location of the entry within the corresponding 
+     section is determined as follows:
+      a) Let BASE be the location of the first offset following the
+         header. For a section in a split unit, this is the beginning
+         of the section plus the size of the header. For a section
+         in a non-split unit, this is the value given in the applicable
+         DW_AT_loclists_base or DW_AT_rnglists_base attribute.
+      b) Let SIZE be the size of an offset (4 in 32-bit and 8 in 64-bit
+         format). Note that these will (MUST) be the same in both the
+         referencing and referenced section.
+      c) Then the location of the i-th offset is given by BASE+i*SIZE.
+         The location of the i-th entry is given by BASE plus the contents 
+         at that location, that is BASE + [BASE+i*SIZE].
+
+     Note that the entry_offset_count is not needed to interpret
+     form DW_FORM_secx. But it does provide a way for dumpers to determine
+     the boundary between the offsets and entries.
+
+  5. Form DW_FORM_secx is defined as the only member of the new loclistx
+     and rnglistx classes (instead of DW_FORM_sec_offset). 
+  
+  6. Rename class rangelistptr to rnglistsptr. Note that the only form 
+     contained in class rnglistsptr remains DW_FORM_sec_offset.
+     
+     Similarly, rename class loclistptr to loclistsptr. The only form
+     contained in class loclistsptr remains DW_FORM_sec_offset.
+     
+  7. Rename DW_AT_ranges_base to DW_AT_rnglists_base for naming 
+     consistency. The class remains rnglistsptr. 
+     
+     Note: DW_AT_ranges_base was new in V5 so there is no need to 
+     preserve the code used for DW_AT_ranges_base to facilitate 
+     backwards compatibility.
+  
+  8. Add DW_AT_loclists_base which is analogous to DW_AT_rnglists_base
+     but for the .debug_loclists section. The value is of class 
+     loclistsptr.
+
+  9. Change the class of the operand of all attributes that allow 
+     loclistsptr except DW_AT_loclists_base to rnglistx.
+     
+  10. Change the class of the operand of all attributes that allow 
+     rnglistsptr except DW_AT_rnglists_base to rnglistx.
+
+These changes (together with Proposal 160123.1 Revision 1), let us:
+
+  A. Extend the size benefits of the new location list representation
+     in split units to non-split units as well.
+  B. Extend the size benefits of location lists to range lists (in both 
+     split and non-split contexts) in a manner consistent with location 
+     lists.
+  C. Solve certain late optimization problems (both compilation and link-
+     time) related to referencing location and range list entries in a 
+     simple consistent manner.
+  D. Get rid of the excessively complicated and contorted range 
+     representation scheme used in V4 and before.
+     
+
+     
+TEXTUAL CHANGES
+---------------
+Page numbers are from the May 20, 2016 draft.
+--------
+1. S7.28 &amp; S7.29, P235 &amp; P236 (parallel change in both):
+
+Add bullet and new following text:
+
+    5. offet_entry_count (uword)
+       A 4-byte count of the number of offsets and entries
+       that follow the header.
+
+    Immediately following the header is an array of offsets.
+    This array is followed by a series of [range|location] list
+    entries. 
+    
+    There is one offset for each entry. The contents
+    of the location for the i-th offset is the offset from the
+    beginning of the offset array to the location of the i-th 
+    list entry. 
+    
+In the following paragraph (L1067 in S7.28, L1092 in S7.29): replace
+&quot;This header&quot; with &quot;The array of offsets&quot;.
+
+Replace the last paragraph (L1072-1073 in 7.28, L1097-1098 in S7.29) 
+with
+
+    The [DW_AT_rnglists_base|DW_AT_loclists_base] attribute points
+    to the first offset following the header. The entries are referenced
+    by the index of the position of their corresponding offset in the
+    array of offsets, which indirectly specifies the offset to the
+    target entry.    
+--------
+2. S7.5.4, P209, L756: Insert immediately following the description of
+loclistsptr:
+
+      o loclistx
+
+        This is an index into the .debug_loclists
+        section. The unsigned ULEB operand identifies an offset location 
+        relative to the base of that section (the location of the first offset 
+        in the section, not the first byte of the section). The contents of 
+        that location is then added to the base to determine the location of 
+        the target list of entries.
+--------
+3. S7.5.4, P209, L768-770: Delete the sentence that reads &quot;If a 
+DW_AT_ranges_base ... DW_AT_ranges_base.&quot;.
+--------
+4.  S7.5.4, P210, L773: Insert imediately following the description of
+rnglistsptr:
+
+      o rnglistx
+
+        This is an index into the .debug_rnglists
+        section. The unsigned ULEB operand identifies an offset location 
+        relative to the base of that section (the location of the first offset 
+        in the section, not the first byte of the section). The contents of 
+        that location is then added to the base to determine the location of 
+        the target list of entries.
+
+--------
+5. In Table 7.5, P203-207:
+
+5a) Rename DW_AT_range_base to DW_AT_rnglists_base.
+
+5b) Replace all occurences of rangelistptr except for DW_AT_rnglists_base
+    (namely for DW_AT_start_scope and DW_AT_ranges) with class rnglistx.
+
+5c) Add (new) attribute DW_AT_loclists_base whose value is of class 
+    loclistsptr. 
+
+5d) Replace all occurences of loclistptr except for DW_AT_loclists_base
+    (namely for DW_AT_location, DW_AT_string_length, DW_AT_return_addr,
+    DW_AT_data_member_location, DW_AT_frame_base, DW_AT_segment, 
+    DW_AT_static_link, DW_AT_use_location, and DW_AT_vtable_elem_location)
+    with class loclistx.
+--------
+6. In Table 2.2, P19:
+6A) Insert new row:
+
+    DW_AT_loclists_base     | Base offset for location lists
+
+6B) Change DW_AT_ranges_base to DW_AT_rnglists_base.
+--------
+7. In Table 2.3, P21-22: Add the following two new classes (in alphabetical 
+order):
+   
+   loclistx     Specifies a location list indirectly by use of an index.
+   
+   rnglistx     Specifies a range list indirectly by use of an index.
+
+Also, rename rangelistptr to rnglistsptr.
+--------
+8. S3.1.1, P63, L168-172: Replace bullet 15 with the following:
+
+    15. A DW_AT_rnglists_base attribute, whose value is of class 
+        rnglistsptr. This attribute points to the base of the compilation 
+        unit&rsquo;s contribution to the .debug_rnglists section. References 
+        to range lists (using DW_FORM_secx) within the compilation 
+        unit are interpreted relative to this base.
+--------
+9. S3.1.1, P63, L172: Insert the following new bullet 16:
+
+    16. A DW_AT_loclists_base attribute, whose value is of class 
+        loclistsptr. This attribute points to the base of the compilation 
+        unit&rsquo;s contribution to the .debug_loclists section. References 
+        to location lists (using DW_FORM_secx) within the compilation 
+        unit are interpreted relative to this base.
+--------
+10. S3.1.2, P65,  L214: Delete bullet 8.
+
+Note that range lists can now be completedly contained in a split
+unit which, like location lists, may reference addresses via the
+DW_AT_addr_base attribute of the skeleton unit.
+--------
+11. S7.3.2.2, P184, L167-170: Delete--just like location lists, this
+is no longer a special case.
+--------
+12. SF, Table F.1, P387: 
+12A) For DW_AT_ranges: Remove check for skeleton units and add for spilt 
+    full unit.
+12B) For DW_AT_rnglists_base (was DW_AT_ranges_base): Remove check for
+    skeleton unit.
+--------
+13. SF.2.1, P391, L136: Delete
+--------
+14. Sf.2.1, P391, Figure F.4: Delete DW_AT_ranges and DW_AT_ranges_base.
+
+***********************************************************************
+*** 
+*** The above textual changes convey the heart of the proposal.
+*** The following are remaining editorial cleanups.
+***
+
+15. S1.4, P8, L237: Insert new bullet:
+
+      o Add new location list and range list representations that
+        save space and processing time by eliminating most related
+        object file relocations.
+--------
+16. S1.4, P9, L273: After DW_FORM_ref_sup insert &quot;DW_FORM_secx, &quot;.
+--------
+17. S2.6, P35, L503: Change &quot;loclistptr (which serves as an offset&quot; to 
+&quot;loclistx (which seres as an index&quot;.
+--------
+18. S3.1.2, P65, L219: Delete &quot;, DW_AT_range_base,&quot;.
+--------
+19. S3.1.3, P65, L241: Replace &quot;, DW_AT_addr_base and DW_AT_ranges_base&quot;
+    with &quot; and DW_AT_addr_base&quot;.
+--------
+20. S7.3.1, P182, L91-93: Delete discussion--no special case remains.
+--------
+21. S7.4, P193, L443: Replace &quot;.debug_loc and .debug_ranges&quot; with
+    &quot;.debug_loclists and .debug_rnglists&quot;.
+--------
+22. S7.3.1, P182, L102-104: Replace this bullet with:
+
+      o Entries in the .debug_addr and .debug_aranges sections may contain 
+        references to locations within the virtual address space of the 
+        program, and thus require relocation.
+       
+      o Entries in the .debug_loclists and .debug_rnglists sections may
+        contain references to locations within the virtual address space of the 
+        program depending on whether certain kinds of location or range
+        list entries are used, and thus require relocation.
+--------
+23. S7.3.2.1, P183, L136: Replace .debug_ranges with .debug_rnglists.
+--------
+24. S7.5.4, Table 7.5, P206: Add row immediately before DW_AT_lo_user:
+
+    DW_AT_rnglists_base&lt;ddag&gt;   | loclistsptr
+--------
+25. S7.5.4, Table 7.6, P213: 
+25A) In the row for DW_FORM_sec_offset, change loclistptr to loclistsptr 
+and rangelistptr to rnglistsptr.
+25B) Add new row at the end as in
+
+    DW_FORM_secx&lt;ddag&gt;   | loclistx, rnglistx
+--------
+26. S7.28, P233, L1092: Change .debug_ranges to .debug_rnglists.
+--------
+27. Appendix A: Change all occurences of DW_AT_ranges_base to 
+DW_AT_rnglists_base except for DW_TAG_skeleton_unit from which it is
+deleted.
+--------
+28. Appendix B: Rename...
+--------
+29: Appendix F: Rename...
+--------
+30. SF.1, P386, L95: Delete DW_AT_ranges_base.
+--------
+31. SF.1, P386, L111-113: Delete bullet 4.
+--------
+
+
+--
+
+08/02/2016 - Accepted (requires 160123.1).
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

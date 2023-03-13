@@ -1,0 +1,209 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>050808.1</td>
+      <td>John Bishop</td>
+      <td>Discontiguous scopes</td>
+      <td>Clarification</td>
+      <td>Accepted without change</td>
+      <td>Ron Brender</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section: 2.16.3, 4.1
+Page: 59
+
+This is a follow-up to issue 030626.1; Chris Quenelle [Chris.Quenelle@Sun.COM]
+was too busy to do a write-up, so I volunteered.  If I've understood things
+correctly, the initial issue was left unresolved and a subsidiary issue was 
+resolved.  Chris was going to design a system which tied the discontiguous
+scopes to source locations rather than to machine instructions, but he now
+believes that's too open a topic to bring up for V3.  I'm not addressing that
+issue, but am adressing the initial issue from the 030626.1.
+
+The issue is this: given a variable which has a &quot;live&quot; scope in a source block
+that has been itself chopped into a set of discontiguous (and possibly re-ordered
+set of instruction blocks), how do we represent the sub-blocks in which the variable
+is live, and where does that &quot;liveness&quot; start?  I'll note in passing that it might
+make semantic sense for the liveness to start and stop more than once, given the
+re-ordering.
+
+The current state is this text in 4.1, bullet 11:
+
+   If the containing scope is non-contiguous
+   (see Section 2.16.3), the value of this attribute is
+   the offset in bytes of the beginning of the scope
+   for the object from the beginning of the first range
+   list entry (that is not a base selection entry or an
+   end of list entry).
+
+   [editing note: I'd remove the parentheses around  &quot;(that...entry)&quot;;
+    I think they're unneeded.]
+
+This describes an object scope which begins somewhere after the
+start of the source code scope's ranges, but which is &quot;live&quot; from that 
+point to (implicitly) the end of the source code's ranges.  This means
+it is live even during intervening ranges from other bits of source,
+so it's not completely accurate.
+
+However, I believe that text will do for V3, so 030626.1 can stay resolved!
+
+Here is the proposal for V3+, based on the suggestions (e.g. from Jim 
+Blandy and David Anderson) in topic 030626.1:
+
+Add after the above quote (4.1, bullet 11)
+
+[added text]
+    If the scope of the object itself is discontiguous, the scope has
+    more than one start location, or DW_AT_start_scope for some reason
+    will not correctly represent the scope of the object, the object
+    entry may instead have a DW_AT_scope_ranges attribute.  The value of this
+    attribute is a rangelist of the ranges in which the object is in scope.
+[end added text]
+
+Given that this is a rangelist, we don't need to add text explaining
+what the offsets are from: that's already defined.
+
+Given that the object ranges are discontiguous, there's no need to
+call out any one of the &quot;starts&quot; as _the_ start, so the two attributes
+aren't going to co-occur and we can then make them alternates.
+
+Note that the use of DW_AT_scope_ranges is not restricted to the case
+that the enclosing code scope is discontiguous.
+
+Proposal (Ron Brender, 7/8/2007):
+
+1) In Section 2.17, page 32, insert the following just before the
+beginning of Section 2.17.1:
+
+     &quot;In addition, a non-contiguous range of addresses may also be
+     specified for the DW_AT_start_scope attribute as described in
+     Section 2.17.3.&quot;
+
+
+2) In Section 2.17.3, append to the first paragraph:
+
+     &quot;Similarly for a DW_AT_start_scope attribute.&quot;
+
+
+3) In Section 4.1, p61, replace the first paragraph of bullet 11, namely
+
+     &quot;11. If the scope of an object begins sometime after the low pc   	
+     value for the scope most closely enclosing the object, the
+     object entry may have a DW_AT_start_scope attribute. If the
+     containing scope is contiguous, the value of this attribute is
+     the offset in bytes of the beginning of the scope for the
+     object from the low pc value of the debugging information entry
+     that defines its scope. If the containing scope is
+     non-contiguous (see Section 2.17.3), the value of this
+     attribute is the offset in bytes of the beginning of the scope
+     for the object from the beginning of the first range list entry
+     that is not a base selection entry or an end of list entry.&quot;
+
+with the following:
+
+     &quot;11. If the scope of an object is smaller than (that is, a subset
+     of the addresses) for the scope most closely enclosing the object,
+     the object entry may have a DW_AT_start_scope attribute. There are
+     two cases:
+
+      1) If the scope of the object entry includes all of the containing
+         scope except for a contiguous sequence of bytes at the beginning
+         of that containing scope, then the scope of the object is
+         specified using a value of class constant. If the containing
+         scope is contiguous, the value of this attribute is the offset
+         in bytes of the beginning of the scope for the object from the
+         low pc value of the debugging information entry that defines
+         its scope. If the containing scope is non-contiguous (see
+         Section 2.17.3), the value of this attribute is the offset in
+         bytes of the beginning of the scope for the object from the
+         beginning of the first range list entry that is not a base
+         selection entry or an end of list entry.
+
+      2) Otherwise, the scope of the object is specified using a value
+         of class rangelistptr. This value indicates the beginning of
+         a range list (see Section 2.17.3).
+
+     <i>Due to optimization, the scope of an object may be non-
+     contiguous and require use of a range list even when the containing
+     scope is contiguous. Conversely, the scope of an object may not
+     require its own range list even when the containing scope is non-
+     contiguous.</i>&quot;
+
+
+
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

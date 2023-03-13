@@ -1,0 +1,611 @@
+<html><head>
+  
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>Dwarf Issues</title></head>
+<body>
+
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 810px; height: 26px;" border="0"
+ cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td>
+      <h1 style="text-align: center;">DWARF Version 3 Resolved Issues</h1>
+The following table lists issues about the DWARF standard
+which have been resolved.&nbsp; For details on an issue, follow the link 
+from the issue number.&nbsp; To submit an issue, please go to the 
+<a href="Comment.html">Public Comment</a> page.<br>
+<br>
+Follow this link for <a href="/issues.html">Open Issues</a>.
+<br>
+<br>
+<h3>Status descriptions:</h3>
+<ul>
+  <li>Accepted: &nbsp;The
+issue was evaluated and the proposal was accepted without change.</li>
+  <li>Accepted pending revision:
+&nbsp;The issue was evaluated and the proposal provisionally
+accepted, pending submission of revised wording.</li>
+  <li>Accepted with modifications:
+&nbsp;The issue was evaluated and the proposal was accepted with
+modifications or a substitute proposal was accepted. &nbsp;</li>
+  <li>Closed: &nbsp;The issue
+was closed without modification to the standard. &nbsp;&nbsp;</li>
+  <li>Duplicate: &nbsp;The
+issue is a duplicate of another issue.</li>
+  <li>Deferred: &nbsp;The
+issue will be reconsidered at a later time.</li>
+  <li>Rejected: &nbsp;The
+issue was evaluated but the proposal was not accepted.</li>
+</ul>
+Detailed description of the resolution of an issue are listed at the
+bottom of each resolved issue.
+<br>
+<br>
+      </td>
+    </tr>
+
+    <tr>
+      <td align="center">
+         <form method="get" action="ShowIssue.php" name="ShowIssue">
+	    Find issue by number:&nbsp; 
+	    <input size="10" name="issue" value="">&nbsp; 
+	    <input value="Go" type="submit"> 
+         </form>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+
+<table style="text-align: left; width: 800px; height: 82px;" border="1"
+ cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <th style="width: 75px;">Number<br></th>
+      <th style="width: 75px;">Submitter<br></th>
+      <th style="width: 75px;">Description<br></th>
+      <th style="width: 75px;">Type<br></th>
+      <th style="width: 75px;">Champion<br></th>
+      <th style="width: 75px;">Status<br></th>
+    </tr>
+    <tr>
+      <td><a href="issues/011219.1.html">011219.1</a></td>
+      <td>David Anderson</td>
+      <td>Clarification of DW_OP_le etc.</td>
+      <td>Clarification</td>
+      <td>James Cownie</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/011228.1.html">011228.1</a></td>
+      <td>David Anderson</td>
+      <td>UTF-8 Clarification</td>
+      <td>Clarification</td>
+      <td>Dave Anderson</td>
+      <td>Accepted with modifications</td>
+    </tr>
+    <tr>
+      <td><a href="issues/020101.1.html">020101.1</a></td>
+      <td>Ron Brender</td>
+      <td>DW_AT_allocated type</td>
+      <td>Editorial</td>
+      <td>Ron Brender</td>
+      <td>Accepted with modifications</td>
+    </tr>
+    <tr>
+      <td><a href="issues/020118.1.html">020118.1</a></td>
+      <td>Ron Brender</td>
+      <td>Opcode_base Value</td>
+      <td>Editorial</td>
+      <td>Ron Brender</td>
+      <td>Accepted with modifications</td>
+    </tr>
+    <tr>
+      <td><a href="issues/020201.1.html">020201.1</a></td>
+      <td>Keith Walker</td>
+      <td>DW_AT_segment</td>
+      <td>Clarification</td>
+      <td>Matthew Gretton-Dann</td>
+      <td>Accepted with modifications</td>
+    </tr>
+    <tr>
+      <td><a href="issues/020202.1.html">020202.1</a></td>
+      <td>Al Dunsmuir</td>
+      <td>DW_LNS_set_isa Incomplete</td>
+      <td>Clarification</td>
+      <td>Jeff Nelson</td>
+      <td>Accepted with modifications</td>
+    </tr>
+    <tr>
+      <td><a href="issues/020401.1.html">020401.1</a></td>
+      <td>Ron Brender</td>
+      <td>Cobol Data Types</td>
+      <td>Extension</td>
+      <td>Ron Brender</td>
+      <td>Accepted with modifications</td>
+    </tr>
+    <tr>
+      <td><a href="issues/020612.1.html">020612.1</a></td>
+      <td>Jim Blandy</td>
+      <td>Thread-local Storage</td>
+      <td>Extension</td>
+      <td>Jim Blandy</td>
+      <td>Accepted with modifications</td>
+    </tr>
+    <tr>
+      <td><a href="issues/020702.1.html">020702.1</a></td>
+      <td>James Cownie</td>
+      <td>FORM_data&lt;n&gt; signed or unsigned.</td>
+      <td>Clarification</td>
+      <td>James Cownie</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/020705.1.html">020705.1</a></td>
+      <td>Jim Blandy</td>
+      <td>Call Frame Instructions</td>
+      <td>Editorial</td>
+      <td>Jim Blandy</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/020712.1.html">020712.1</a></td>
+      <td>Todd Allen</td>
+      <td>New operator: DW_OP_call_frame_cfa</td>
+      <td>Extension</td>
+      <td>Todd Allen</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/020902.1.html">020902.1</a></td>
+      <td>David Anderson</td>
+      <td>Describing the Stack Pointer in the Call Frame Information</td>
+      <td>Extension</td>
+      <td>Matthew Gretton-Dann</td>
+      <td>Accepted with modifications</td>
+    </tr>
+    <tr>
+      <td><a href="issues/021016.1.html">021016.1</a></td>
+      <td>David Anderson</td>
+      <td>C++ namespaces example</td>
+      <td>Editorial</td>
+      <td>John DelSignore</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/021206.1.html">021206.1</a></td>
+      <td>David Anderson</td>
+      <td>CFI addressing unit size</td>
+      <td>Extension</td>
+      <td>Jim Blandy</td>
+      <td>Accepted with modifications</td>
+    </tr>
+    <tr>
+      <td><a href="issues/030318.1.html">030318.1</a></td>
+      <td>David Anderson</td>
+      <td>DW_AT_ranges and address size</td>
+      <td>Clarification</td>
+      <td>Dave Anderson</td>
+      <td>Accepted with modification</td>
+    </tr>
+    <tr>
+      <td><a href="issues/030603.1.html">030603.1</a></td>
+      <td>Keith Walker</td>
+      <td>Static data members</td>
+      <td>Clarification</td>
+      <td>Matthew Gretton-Dann</td>
+      <td>Accepted with modification</td>
+    </tr>
+    <tr>
+      <td><a href="issues/030626.1.html">030626.1</a></td>
+      <td>David Anderson</td>
+      <td>DW_AT_start_scope and discontiguous scopes</td>
+      <td>Clarification</td>
+      <td>None</td>
+      <td>Accepted with modifications</td>
+    </tr>
+    <tr>
+      <td><a href="issues/030716.1.html">030716.1</a></td>
+      <td>Brian Nettleton</td>
+      <td>Catch Block Entries</td>
+      <td>Editorial</td>
+      <td>Chris Quenelle</td>
+      <td>Accepted with modification</td>
+    </tr>
+    <tr>
+      <td><a href="issues/030812.1.html">030812.1</a></td>
+      <td>Unclear</td>
+      <td>Return Address Clarification</td>
+      <td>Editorial</td>
+      <td>Todd Allen</td>
+      <td>Accepted pending revision</td>
+    </tr>
+    <tr>
+      <td><a href="issues/030812.2.html">030812.2</a></td>
+      <td>David Anderson</td>
+      <td>CFA Calculation</td>
+      <td>Extension</td>
+      <td>Todd Allen</td>
+      <td>Accepted with modifications</td>
+    </tr>
+    <tr>
+      <td><a href="issues/030813.1.html">030813.1</a></td>
+      <td>Andrew Cagney</td>
+      <td>CIE initial state</td>
+      <td>Clarification</td>
+      <td>Todd Allen</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/030814.1.html">030814.1</a></td>
+      <td>Chris Quenelle</td>
+      <td>Separate compilation units</td>
+      <td>Clarification</td>
+      <td>None</td>
+      <td>Closed - no change</td>
+    </tr>
+    <tr>
+      <td><a href="issues/030815.1.html">030815.1</a></td>
+      <td>Daniel Jacobowitz</td>
+      <td>Describing Unsaved Stack Pointers</td>
+      <td>Extension</td>
+      <td>Jason Molenda</td>
+      <td>Duplicate of 030812.2</td>
+    </tr>
+    <tr>
+      <td><a href="issues/030915.1.html">030915.1</a></td>
+      <td>David Anderson</td>
+      <td>Line Number Small Omission</td>
+      <td>Editorial</td>
+      <td>Dave Anderson</td>
+      <td>Accepted with modifications</td>
+    </tr>
+    <tr>
+      <td><a href="issues/031001.1.html">031001.1</a></td>
+      <td>Chris Quenelle</td>
+      <td>Index Info</td>
+      <td>Extension</td>
+      <td>Chris Quenelle</td>
+      <td>Closed</td>
+    </tr>
+    <tr>
+      <td><a href="issues/031002.1.html">031002.1</a></td>
+      <td>Andrew Cagney</td>
+      <td>Where is OP_piece Value Stored?</td>
+      <td>Clarification</td>
+      <td>Jim Blandy</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/031002.2.html">031002.2</a></td>
+      <td>Michael Eager</td>
+      <td>Endianity Proposal</td>
+      <td>Extension</td>
+      <td>Michael Eager</td>
+      <td>Accepted with modifications</td>
+    </tr>
+    <tr>
+      <td><a href="issues/031203.1.html">031203.1</a></td>
+      <td>Jason Molenda</td>
+      <td>Objective C Language Codes</td>
+      <td>Extension</td>
+      <td>Jason Molenda</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/031203.2.html">031203.2</a></td>
+      <td>James Cownie</td>
+      <td>UPC Language Code</td>
+      <td>Extension</td>
+      <td>James Cownie</td>
+      <td>Closed - See 050224.1</td>
+    </tr>
+    <tr>
+      <td><a href="issues/040113.1.html">040113.1</a></td>
+      <td>Jason Molenda</td>
+      <td>Use HEX not DEC in tables</td>
+      <td>Editorial</td>
+      <td>Jim Blandy</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/040308.1.html">040308.1</a></td>
+      <td>Jason Molenda</td>
+      <td>Version Numbering</td>
+      <td>Clarification</td>
+      <td>Jason Molenda</td>
+      <td>Accepted with modifications</td>
+    </tr>
+    <tr>
+      <td><a href="issues/040405.1.html">040405.1</a></td>
+      <td>David Anderson</td>
+      <td>DW_AT_decl_file signedness</td>
+      <td>Editorial</td>
+      <td>Jason Molenda</td>
+      <td>Accepted as modified</td>
+    </tr>
+    <tr>
+      <td><a href="issues/040511.1.html">040511.1</a></td>
+      <td>David Anderson</td>
+      <td>Static Member Function</td>
+      <td>Clarification</td>
+      <td>Matthew Gretton-Dann</td>
+      <td>Accepted with modifications</td>
+    </tr>
+    <tr>
+      <td><a href="issues/040618.1.html">040618.1</a></td>
+      <td>James Cownie</td>
+      <td>Explicit Type for Enumerations</td>
+      <td>Extension</td>
+      <td>James Cownie</td>
+      <td>Accepted with modifications</td>
+    </tr>
+    <tr>
+      <td><a href="issues/040729.1.html">040729.1</a></td>
+      <td>David Anderson</td>
+      <td>Outermost Frame Identification</td>
+      <td>Extension</td>
+      <td>Todd Allen</td>
+      <td>Accepted revised proposal</td>
+    </tr>
+    <tr>
+      <td><a href="issues/040909.1.html">040909.1</a></td>
+      <td>Alasdair Grant</td>
+      <td>DW_AT_default_value</td>
+      <td>Extension</td>
+      <td>Matthew Gretton-Dann</td>
+      <td>Accepted with modification</td>
+    </tr>
+    <tr>
+      <td><a href="issues/041108.1.html">041108.1</a></td>
+      <td>David Anderson</td>
+      <td>Is Extra Padding Allowed</td>
+      <td>Clarification</td>
+      <td>Matthew Gretton-Dann</td>
+      <td>Closed with no change</td>
+    </tr>
+    <tr>
+      <td><a href="issues/050222.1.html">050222.1</a></td>
+      <td>Daniel Berlin</td>
+      <td>Location list entries should allow ending address to be same as starting address</td>
+      <td>Error</td>
+      <td>Daniel Berlin</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/050223.1.html">050223.1</a></td>
+      <td>Al Grant</td>
+      <td>mutable is not a C++ type qualifier</td>
+      <td>Error</td>
+      <td>Ben Elliston</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/050224.1.html">050224.1</a></td>
+      <td>James Cownie</td>
+      <td>UPC support</td>
+      <td>Enhancement</td>
+      <td>James Cownie</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/050317.1.html">050317.1</a></td>
+      <td>Ben Elliston</td>
+      <td>Extensions for decimal floating point</td>
+      <td>Enhancement</td>
+      <td>Ben Elliston</td>
+      <td>Accepted with modifications</td>
+    </tr>
+    <tr>
+      <td><a href="issues/050408.1.html">050408.1</a></td>
+      <td>John Demme</td>
+      <td>D Language Support</td>
+      <td>Extension</td>
+      <td>Michael Eager</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/050510.1.html">050510.1</a></td>
+      <td>Jeff Nelson</td>
+      <td>DW_AT_frame_base clarifications</td>
+      <td>Clarification</td>
+      <td>Jeff Nelson</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/050518.1.html">050518.1</a></td>
+      <td>John Bishop</td>
+      <td>DW_OP_bit_piece</td>
+      <td>Enhancement</td>
+      <td>John Bishop</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/050616.1.html">050616.1</a></td>
+      <td>Ron Brender</td>
+      <td>Null entries and null sibling references</td>
+      <td>Clarification</td>
+      <td>Ron Brender</td>
+      <td>Closed</td>
+    </tr>
+    <tr>
+      <td><a href="issues/050701.1.html">050701.1</a></td>
+      <td>Ron Brender and Jim Blandy</td>
+      <td>Improve description of DW_OP_piece, with small extension</td>
+      <td>Improvement</td>
+      <td>Ron Brender</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/050711.1.html">050711.1</a></td>
+      <td>Matthew Gretton-Dann</td>
+      <td>Specification of compiled units which are not 'named disk files'</td>
+      <td>Error</td>
+      <td>Matthew Gretton-Dann</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/050711.2.html">050711.2</a></td>
+      <td>Chris Quenelle</td>
+      <td>Add DW_AT_object_pointer for &quot;this&quot; parameters</td>
+      <td>Enhancement</td>
+      <td>Chris Quenelle</td>
+      <td>Accepted with modifications</td>
+    </tr>
+    <tr>
+      <td><a href="issues/050712.1.html">050712.1</a></td>
+      <td>Chris Quenelle</td>
+      <td>C++ explicit keyword</td>
+      <td>Enhancement</td>
+      <td>Chris Quenelle</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/050715.1.html">050715.1</a></td>
+      <td>Ron Brender</td>
+      <td>Slices of bit arrays</td>
+      <td>Enhancement</td>
+      <td>Ron Brender</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/050715.2.html">050715.2</a></td>
+      <td>Ron Brender</td>
+      <td>Bit strides and byte strides</td>
+      <td>Improvement</td>
+      <td>Ron Brender</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/050718.1.html">050718.1</a></td>
+      <td>Jim Cownie</td>
+      <td>FORTRAN extensions</td>
+      <td>Extension</td>
+      <td>Ron Brender</td>
+      <td>Accepted with modification</td>
+    </tr>
+    <tr>
+      <td><a href="issues/050720.1.html">050720.1</a></td>
+      <td>Chris Quenelle</td>
+      <td>DW_AT_mutable (replaces DW_TAG_mutable_type)</td>
+      <td>Enhancement</td>
+      <td>Chris Quenelle</td>
+      <td>Accpeted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/050720.2.html">050720.2</a></td>
+      <td>Chris Quenelle</td>
+      <td>DW_AT_object_pointer (v2)</td>
+      <td>Enhancement</td>
+      <td>Chris Quenelle</td>
+      <td>Closed - Duplicate</td>
+    </tr>
+    <tr>
+      <td><a href="issues/050726.1.html">050726.1</a></td>
+      <td>John Bishop</td>
+      <td>Meanings of &quot;basic_block&quot; and &quot;end_sequence&quot;</td>
+      <td>Improvement</td>
+      <td>John Bishop</td>
+      <td>Rejected with explaination</td>
+    </tr>
+    <tr>
+      <td><a href="issues/050731.1.html">050731.1</a></td>
+      <td>Todd Allen</td>
+      <td>Change D.2.2 Ada example to reference upper bound memory directly</td>
+      <td>Editorial</td>
+      <td>Todd Allen</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/050808.1.html">050808.1</a></td>
+      <td>John Bishop</td>
+      <td>Discontiguous scopes</td>
+      <td>Clarification</td>
+      <td>Ron Brender</td>
+      <td>Accepted without change</td>
+    </tr>
+    <tr>
+      <td><a href="issues/050808.2.html">050808.2</a></td>
+      <td>Wu Zhou</td>
+      <td>Add a new entry to identify the main function in a program</td>
+      <td>Enhancement</td>
+      <td></td>
+      <td>Closed</td>
+    </tr>
+
+  </tbody>
+</table>
+<br>
+
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+<br>
+</body></html>
+
+
+

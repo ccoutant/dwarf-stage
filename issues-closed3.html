@@ -1,0 +1,627 @@
+<html><head>
+  
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>Dwarf Issues</title></head>
+<body>
+
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 810px; height: 26px;" border="0"
+ cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td>
+      <h1 style="text-align: center;">DWARF Version 4 Resolved Issues</h1>
+The following table lists issues about the DWARF standard
+which have been resolved.&nbsp; For details on an issue, follow the link 
+from the issue number.&nbsp; To submit an issue, please go to the 
+<a href="Comment.html">Public Comment</a> page.<br>
+<br>
+Follow this link for <a href="/issues.html">Open Issues</a>.
+<br>
+<br>
+<h3>Status descriptions:</h3>
+<ul>
+  <li>Accepted: &nbsp;The
+issue was evaluated and the proposal was accepted without change.</li>
+  <li>Accepted pending revision:
+&nbsp;The issue was evaluated and the proposal provisionally
+accepted, pending submission of revised wording.</li>
+  <li>Accepted with modifications:
+&nbsp;The issue was evaluated and the proposal was accepted with
+modifications or a substitute proposal was accepted. &nbsp;</li>
+  <li>Closed: &nbsp;The issue
+was closed without modification to the standard. &nbsp;&nbsp;</li>
+  <li>Duplicate: &nbsp;The
+issue is a duplicate of another issue.</li>
+  <li>Deferred: &nbsp;The
+issue will be reconsidered at a later time.</li>
+  <li>Rejected: &nbsp;The
+issue was evaluated but the proposal was not accepted.</li>
+</ul>
+Detailed description of the resolution of an issue are listed at the
+bottom of each resolved issue.
+<br>
+<br>
+      </td>
+    </tr>
+
+    <tr>
+      <td align="center">
+         <form method="get" action="ShowIssue.php" name="ShowIssue">
+	    Find issue by number:&nbsp; 
+	    <input size="10" name="issue" value="">&nbsp; 
+	    <input value="Go" type="submit"> 
+         </form>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+
+<table style="text-align: left; width: 800px; height: 82px;" border="1"
+ cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <th style="width: 75px;">Number<br></th>
+      <th style="width: 75px;">Submitter<br></th>
+      <th style="width: 75px;">Description<br></th>
+      <th style="width: 75px;">Type<br></th>
+      <th style="width: 75px;">Champion<br></th>
+      <th style="width: 75px;">Status<br></th>
+    </tr>
+    <tr>
+      <td><a href="issues/040928.1.html">040928.1</a></td>
+      <td>Don Darling</td>
+      <td>Add Address Size to Frame Info</td>
+      <td>Extension</td>
+      <td>Jim Blandy</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/060615.1.html">060615.1</a></td>
+      <td>Stephane Chauveau</td>
+      <td>Address size clarification</td>
+      <td>Clarification</td>
+      <td></td>
+      <td>Closed</td>
+    </tr>
+    <tr>
+      <td><a href="issues/070426.1.html">070426.1</a></td>
+      <td>Cary Coutant</td>
+      <td>Constant expressions in location lists</td>
+      <td>Extension</td>
+      <td></td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/070426.2.html">070426.2</a></td>
+      <td>Cary Coutant</td>
+      <td>Support bundled instructions</td>
+      <td>Extension</td>
+      <td></td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/070512.1.html">070512.1</a></td>
+      <td>Dave Anderson</td>
+      <td>Clarify location expressions</td>
+      <td>Editorial</td>
+      <td>Dave Anderson</td>
+      <td>Accepted with modifications</td>
+    </tr>
+    <tr>
+      <td><a href="issues/070516.1.html">070516.1</a></td>
+      <td>Ron Brender</td>
+      <td>Section offset FORMs</td>
+      <td>Extension</td>
+      <td>Ron Brender</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/070519.1.html">070519.1</a></td>
+      <td>Michael Eager</td>
+      <td>Line table support for VLIW</td>
+      <td>Extension</td>
+      <td>Michael Eager</td>
+      <td>Rejected</td>
+    </tr>
+    <tr>
+      <td><a href="issues/070619.1.html">070619.1</a></td>
+      <td>Chris Quenelle/Michael Eager</td>
+      <td>Identify main function</td>
+      <td>Extension</td>
+      <td>Michael Eager</td>
+      <td>Accepted with modifications</td>
+    </tr>
+    <tr>
+      <td><a href="issues/070709.1.html">070709.1</a></td>
+      <td>Jim Blandy</td>
+      <td>Segment terminology cleanup</td>
+      <td>Editorial</td>
+      <td>Jim Blandy</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/070716.1.html">070716.1</a></td>
+      <td>Todd Allen</td>
+      <td>Encode High-PC as constant offset from Low-PC</td>
+      <td>Extension</td>
+      <td>Todd Allen</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/071227.1.html">071227.1</a></td>
+      <td>John Bishop</td>
+      <td>Calculate value in DWARF expression</td>
+      <td>Extension</td>
+      <td>Bishop/Blandy</td>
+      <td>Accepted with changes</td>
+    </tr>
+    <tr>
+      <td><a href="issues/080112.1.html">080112.1</a></td>
+      <td>Cary Coutant</td>
+      <td>FORM Reform Proposal 1: Reference Class Forms</td>
+      <td>Extension</td>
+      <td>Cary Coutant</td>
+      <td>Rejected</td>
+    </tr>
+    <tr>
+      <td><a href="issues/080112.2.html">080112.2</a></td>
+      <td>Cary Coutant</td>
+      <td>FORM Reform Proposal 2: Block Class Forms and Expressions</td>
+      <td>Extension</td>
+      <td>Cary Coutant</td>
+      <td>Accepted with changes</td>
+    </tr>
+    <tr>
+      <td><a href="issues/080112.3.html">080112.3</a></td>
+      <td>Cary Coutant</td>
+      <td>FORM Reform Proposal 3: Implicit Flag Form</td>
+      <td>Extension</td>
+      <td>Cary Coutant</td>
+      <td>Approved with changes</td>
+    </tr>
+    <tr>
+      <td><a href="issues/080128.1.html">080128.1</a></td>
+      <td>Cary Coutant</td>
+      <td>Clarify recommendations for filenames</td>
+      <td>Improvement</td>
+      <td>Cary Coutant</td>
+      <td>Accepted with modification</td>
+    </tr>
+    <tr>
+      <td><a href="issues/080205.1.html">080205.1</a></td>
+      <td>Julian Seward</td>
+      <td>Location List inconsistency?</td>
+      <td>Ambiguity</td>
+      <td></td>
+      <td>Closed -- explanation</td>
+    </tr>
+    <tr>
+      <td><a href="issues/080404.1.html">080404.1</a></td>
+      <td>Cary Coutant</td>
+      <td>Calculate value in DWARF expression</td>
+      <td>Extension</td>
+      <td>Coutant</td>
+      <td>Rejected</td>
+    </tr>
+    <tr>
+      <td><a href="issues/080422.1.html">080422.1</a></td>
+      <td>Joel Brobecker</td>
+      <td>default lower bound of DW_TAG_subrange_type for Ada</td>
+      <td>Extension</td>
+      <td></td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/080516.1.html">080516.1</a></td>
+      <td>Ron Brender</td>
+      <td>Default Array Lower Bounds</td>
+      <td>Extension</td>
+      <td>Ron Brender</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/080621.1.html">080621.1</a></td>
+      <td>David Anderson</td>
+      <td>Sharing Abbreviations</td>
+      <td>Clarification</td>
+      <td>Anderson</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/080622.1.html">080622.1</a></td>
+      <td>Ron Brender</td>
+      <td>Multiple entry stack values</td>
+      <td>Clarification</td>
+      <td>Brender</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/080930.1.html">080930.1</a></td>
+      <td>Cary Coutant</td>
+      <td>Using COMDAT Sections to Reduce the Size of DWARF Debug Information</td>
+      <td>Enhancement</td>
+      <td>Cary Coutant</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/081130.1.html">081130.1</a></td>
+      <td>Ron Brender</td>
+      <td>Packed unaligned bit fields</td>
+      <td>Enhancement</td>
+      <td>Ron Brender</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/081211.1.html">081211.1</a></td>
+      <td>Ron Brender</td>
+      <td>Allow DW_AT_bit_size like DW_AT_byte_size</td>
+      <td>Enhancement</td>
+      <td>Ron Brender</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/090106.1.html">090106.1</a></td>
+      <td>Kendrick Wong</td>
+      <td>Support C++0x r-value reference</td>
+      <td>Enhancement</td>
+      <td>Kendrick Wong</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/090107.1.html">090107.1</a></td>
+      <td>Kendrick Wong</td>
+      <td>Support C++0x generalized constant expression - user-defined literal</td>
+      <td>Enhancement</td>
+      <td>Kendrick Wong</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/090107.2.html">090107.2</a></td>
+      <td>Kendrick Wong</td>
+      <td>Support C++0x Variadic templates</td>
+      <td>Enhancement</td>
+      <td>Kendrick Wong</td>
+      <td>Rejected</td>
+    </tr>
+    <tr>
+      <td><a href="issues/090109.1.html">090109.1</a></td>
+      <td>Kendrick Wong</td>
+      <td>Support C++0x new string literals</td>
+      <td>Enhancement</td>
+      <td>Kendrick Wong</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/090112.1.html">090112.1</a></td>
+      <td>Kendrick Wong</td>
+      <td>Support C++0x template aliases</td>
+      <td>Enhancement</td>
+      <td>Kendrick Wong</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/090128.1.html">090128.1</a></td>
+      <td>Cary Coutant</td>
+      <td>Line Number Table to Support Profiling</td>
+      <td>Enhancement</td>
+      <td>Cary Coutant</td>
+      <td>Accepted with modifications</td>
+    </tr>
+    <tr>
+      <td><a href="issues/090303.1.html">090303.1</a></td>
+      <td>Kendrick Wong</td>
+      <td>Support C++0x strongly typed enumerations</td>
+      <td>Enhancement</td>
+      <td>Kendrick Wong</td>
+      <td>Accepted with modifications</td>
+    </tr>
+    <tr>
+      <td><a href="issues/090321.1.html">090321.1</a></td>
+      <td>Jan Kratochvil</td>
+      <td>DW_AT_declaration inheritance by DW_AT_specification</td>
+      <td>Ambiguity</td>
+      <td>John Bishop</td>
+      <td>Accepted with modifications</td>
+    </tr>
+    <tr>
+      <td><a href="issues/090402.1.html">090402.1</a></td>
+      <td>John DelSignore</td>
+      <td>DWARF support for overlays</td>
+      <td>Clarification</td>
+      <td>John DelSignore</td>
+      <td>Rejected</td>
+    </tr>
+    <tr>
+      <td><a href="issues/090402.2.html">090402.2</a></td>
+      <td>Paul Robinson</td>
+      <td>Clarify DW_TAG_condition_name</td>
+      <td>Editorial</td>
+      <td>Paul Robinson</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/090406.1.html">090406.1</a></td>
+      <td>Todd Allen</td>
+      <td>Template types</td>
+      <td>Clarification</td>
+      <td>Todd Allen</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/090503.1.html">090503.1</a></td>
+      <td>Ron Brender</td>
+      <td>DW_OP_linkage_name and DW_OP_linkage_name_ptr operations</td>
+      <td>Enhancement</td>
+      <td>Ron Brender</td>
+      <td>Rejected</td>
+    </tr>
+    <tr>
+      <td><a href="issues/090707.1.html">090707.1</a></td>
+      <td>Todd Allen</td>
+      <td>Template types appendix</td>
+      <td>Editorial</td>
+      <td>Todd Allen</td>
+      <td>Accepted with modifications</td>
+    </tr>
+    <tr>
+      <td><a href="issues/090715.1.html">090715.1</a></td>
+      <td>Ron Brender</td>
+      <td>Add a DW_AT_linkage_name attribute</td>
+      <td>Enhancement</td>
+      <td>Ron Brender</td>
+      <td>Accepted with modifications</td>
+    </tr>
+    <tr>
+      <td><a href="issues/090720.1.html">090720.1</a></td>
+      <td>Cary Coutant</td>
+      <td>Add DW_LANG_Python</td>
+      <td>Enhancement</td>
+      <td>Cary Coutant</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/100308.1.html">100308.1</a></td>
+      <td>David Gross</td>
+      <td>Typo, pg 37</td>
+      <td>Editorial</td>
+      <td>David Gross</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/100308.2.html">100308.2</a></td>
+      <td>David Gross</td>
+      <td>Typo, pg 48</td>
+      <td>Editorial</td>
+      <td>David Gross</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/100308.3.html">100308.3</a></td>
+      <td>David Gross</td>
+      <td>Typo, pg 110</td>
+      <td>Editorial</td>
+      <td>David Gross</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/100308.4.html">100308.4</a></td>
+      <td>David Gross</td>
+      <td>Typo, pg 188</td>
+      <td>Editorial</td>
+      <td>David Gross</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/100308.5.html">100308.5</a></td>
+      <td>David Gross</td>
+      <td>Typo, pg 236</td>
+      <td>Editorial</td>
+      <td>David Gross</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/100308.6.html">100308.6</a></td>
+      <td>David Gross</td>
+      <td>Typo, pg 151</td>
+      <td>Editorial</td>
+      <td>David Gross</td>
+      <td>Rejected</td>
+    </tr>
+    <tr>
+      <td><a href="issues/100308.7.html">100308.7</a></td>
+      <td>David Gross</td>
+      <td>Typo, pg 281</td>
+      <td>Editorial</td>
+      <td>David Gross</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/100308.8.html">100308.8</a></td>
+      <td>David Gross</td>
+      <td>Type signatures for function definitions</td>
+      <td>Clarification</td>
+      <td>David Gross</td>
+      <td>Accpeted with modifications</td>
+    </tr>
+    <tr>
+      <td><a href="issues/100316.1.html">100316.1</a></td>
+      <td>David Anderson</td>
+      <td>Errors in 6.4.2.2, 6.4.3.3</td>
+      <td>Editorial</td>
+      <td>David Anderson</td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/100416.1.html">100416.1</a></td>
+      <td>Jan Kratochvil</td>
+      <td>Static and Dynamic Values unclear reference+exprloc</td>
+      <td>Clarification</td>
+      <td></td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/100416.2.html">100416.2</a></td>
+      <td>Jakub Jelinek</td>
+      <td>DW_AT_lower_bound default for DW_LANG_Python</td>
+      <td>Ambiguity</td>
+      <td></td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/100419.1.html">100419.1</a></td>
+      <td>Jakub Jelinek</td>
+      <td>DW_ATE_UTF</td>
+      <td>Ambiguity</td>
+      <td></td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/100419.2.html">100419.2</a></td>
+      <td>Jakub Jelinek</td>
+      <td>Typo in Figure 76</td>
+      <td>Editorial</td>
+      <td></td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/100419.3.html">100419.3</a></td>
+      <td>Jakub Jelinek</td>
+      <td>Index doesn't reference DW_ATE_decimal_float on page 77</td>
+      <td>Editorial</td>
+      <td></td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/100419.4.html">100419.4</a></td>
+      <td>Jakub Jelinek</td>
+      <td>DW_AT_linkage_name for DW_TAG_member</td>
+      <td>Clarification</td>
+      <td></td>
+      <td>Answered</td>
+    </tr>
+    <tr>
+      <td><a href="issues/100421.1.html">100421.1</a></td>
+      <td>Jakub Jelinek</td>
+      <td>DW_AT_linkage_name for DW_TAG_common_block</td>
+      <td>Clarification</td>
+      <td></td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/100423.1.html">100423.1</a></td>
+      <td>David Anderson</td>
+      <td>Abstract root clarification</td>
+      <td>Editorial</td>
+      <td></td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/100427.1.html">100427.1</a></td>
+      <td>Roland McGrath</td>
+      <td>formatting error in 6.4.2.2 enumerated list, items 5/6</td>
+      <td>Editorial</td>
+      <td></td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/100427.2.html">100427.2</a></td>
+      <td>Roland McGrath</td>
+      <td>clarify CFA ops &quot;keep the old register/offset&quot; cases vs DWARF expression case</td>
+      <td>Clarification</td>
+      <td></td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/100517.1.html">100517.1</a></td>
+      <td>Jakub Jelinek</td>
+      <td>Implicit location descriptions not mentioned in DW_OP_bit_piece description</td>
+      <td>Clarification</td>
+      <td></td>
+      <td>Accepted</td>
+    </tr>
+    <tr>
+      <td><a href="issues/101203.1.html">101203.1</a></td>
+      <td>Kendrick Wong</td>
+      <td>Describing Fortran descriptors</td>
+      <td>Enhancement</td>
+      <td>Kendrick Wong</td>
+      <td>Withdrawn</td>
+    </tr>
+
+  </tbody>
+</table>
+<br>
+
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+<br>
+</body></html>
+
+
+

@@ -1,0 +1,179 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>050222.1</td>
+      <td>Daniel Berlin</td>
+      <td>Location list entries should allow ending address to be same as starting address</td>
+      <td>Error</td>
+      <td>Accepted</td>
+      <td>Daniel Berlin</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Re: Section 2.5.4, Page: 24
+
+As previously posted to the mailing list, i'm just submitting it as an &quot;official public comment&quot;
+
+The standard currently specifies that the end address of a location list
+entry *must* be greater than the beginning address (except for the
+location list terminator):
+
+&quot;2. An ending address, again relative to the applicable base address of
+the compilation unit referencing this location list. It marks the first
+address past the end of the address range over which the location is
+valid. The ending address must be greater than the beginning address.&quot;
+
+This causes significant problems for gcc 4.0 when trying to produce
+location lists (and i assume other producers have the same problem,
+whether they know it or not).
+
+The reason is that we (being gcc and others that genreate debug info in 
+the compiler, not the assembler or linker) can't know, at a minimum until 
+well after we've output the assembly code (at a minimum, we can't know 
+until the assembly file is assembled), whether the two labels we've put 
+in our IL, and that get output to the assembly,will actually have two 
+different addresses in memory.
+
+This is in part because the backend may decide, when expanding the
+instructions to assembly, not to actually output anything for a given
+instruction, at assembly output time.  So there is no way to know where
+to put the label such that it is at least 1 greater than begin label.
+
+There is also the case when the user uses inline assembly (in which case
+we just paste their inline assembly into the right place in the
+assembler file), and their inline assembly may or may not have actual
+instructions in it.
+
+So we can, and do, end up with the following assembly:
+
+LVL2 &lt;---- location list begin address label
+L3:  
+LVL3 &lt;--- location list end address label
+
+
+..
+LLST1:
+...
+        .long   .LVL2-.Ltext0   # Location list begin address (*.LLST1)
+        .long   .LVL3-.Ltext0   # Location list end address (*.LLST1)
+        .value  0x1     # Location expression size
+        .byte   0x51    # DW_OP_reg1
+...
+        .long   .LVL4-.Ltext0   # Location list begin address (*.LLST1)
+        .long   .LFE2-.Ltext0   # Location list end address (*.LLST1)
+        .value  0x1     # Location expression size
+        .byte   0x51    # DW_OP_reg1
+        .long   0x0     # Location list terminator begin (*.LLST1)
+        .long   0x0     # Location list terminator end (*.LLST1)
+
+
+Note that this location list entry becomes invalid when assembled,
+though we can't determine this at the time when we output it.
+
+Besides this, things can get worse if your assembler does any
+optimization and goes to update the debug info.  It now has to try to
+prove that the addresses are different in order to keep the entry there,
+otherwise it would have to presumptively delete it to keep the info
+valid and we lose possibly valuable information.
+Same with the linker.
+
+This all seems harsh, and for the convience of the consumer.
+The final consumer of this debug info could simply ignore location list
+entries that have the same begin and end address, without any trouble at
+all.
+
+Therefore, i'd like to propose that the standard explicitly allow the
+begin and end address to be the same for a location list entry, and in
+that case, the consumer should simply ignore it.
+
+This is not optimal from a space perspective, but this is a matter of
+something that is simply impossible for a producer to always get right.
+
+PROPOSAL:
+
+    <i>
+    A location list entry (but not a base address selection or end of
+    list entry) whose beginning and ending addresses are equal has no
+    effect because the size of the range covered by such an entry is
+    zero.
+    </i>
+
+Also, make a similar addition regarding a range list entry in Section
+2.16.3.
+
+
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

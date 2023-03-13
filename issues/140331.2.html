@@ -1,0 +1,133 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>140331.2</td>
+      <td>Mark Wielaard</td>
+      <td>Add file attributes to debug-line file table</td>
+      <td>Enhancement</td>
+      <td>Rejected</td>
+      <td>Dave Anderson</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 6.2.4, 6.2.5, pg 115
+
+Issue 130701.1 adds a fixed file_entry_format (ubyte) field that just allows one attribute 
+(group) to be defined. Which isn't vendor extensible. Instead of such a fixed file attribute 
+I propose to adopt the approach of the .debug_macro proposal 110722.1 to make the attributes 
+attached to a file entry producer described to allow extending the number of attributes in 
+later DWARF versions or as vendor extensions and give consumers a way to skip over
+any unknown attributes.
+
+Add the following to Section 6.2.4 &quot;The Line Number Program Header&quot; based on the text in 
+Issue 130701.1:
+
+file_attributes (ubyte)
+  - Possibly zero, number of attributes added to each file in the
+    file_names table.
+file_attribute_description (sequence of attribute descriptions)
+  - Entries in this description describe which attributes and in what
+    format those attributes are encoded for each file entry. It has
+    file_attributes entries. Each entry consists of:
+    - file_attribute (ubyte). One of DW_LNF_timestamp,
+      DW_LNF_length, DW_LNF_MD5, ...
+    - file_attribute_format. A uleb128 describing the number of
+      arguments for the format followed a single byte describing the
+      form of the argument. The allowed values are DW_FORM_data1,
+      DW_FORM_data2, DW_FORM_data4, DW_FORM_data8, DW_FORM_sdata, DW_FORM_udata,
+      DW_FORM_block, DW_FORM_block1, DW_FORM_block2, DW_FORM_block4, DW_FORM_flag,
+      DW_FORM_string, DW_FORM_strp and DW_FORM_sec_offset.
+
+file_names (sequence of file entries)
+  - Each entry consists of the following values:
+    - A null-terminated string containing the full or relative path name
+      of a source file.
+    - An unsigned LEB128 number representing the directory index of a
+      directory in the include_directories section.
+    - For each file_attribute_format described in the
+      file_attribute_description entries the value encoded in the format
+      given by file_attribute_format.
+
+For example DW_LNF_timestamp and DW_LNF_length would have as format 1
+DW_FORM_udata. DW_LNF_MD5 could by described by 2 DW_FORM_data8.
+
+The constants as defined and used in Issue 130701.1 can be reused in the above.
+
+--
+7/15/2014 -- Accepted
+8/19/2014 -- Reconsidered and rejecte.  Replaced with 140724.1.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

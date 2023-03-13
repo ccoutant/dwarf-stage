@@ -1,0 +1,213 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>180201.1</td>
+      <td>Scott Linder</td>
+      <td>DWARF and source text embedding</td>
+      <td>Enhancement</td>
+      <td>Accepted with modifications</td>
+      <td>Tony Tye</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 6.2, 7.27, pg 159, 237
+
+PROBLEM DESCRIPTION
+
+Programming models such as OpenCL can often have source generated at runtime, 
+which is compiled online, with its output not written to file. This raises an
+issue for the compiler: in the generated DWARF, what should it put as the
+file name of the compile unit and associated line table information?
+
+Common solutions to this problem include generating some temporary source
+file name and having a contract with the debugger to get the source somehow
+and write it out to that file. Since OpenCL and friends generally have quite
+small source files, it's quite reasonable to embed the entire source in the
+binary, then have the debugger look in a known section or address to extract
+the source. If there was a way to express this in DWARF, then runtime-
+generated source files could work without an additional contract between the
+compiler and debugger. This is particularly important when dealing with
+platforms where the filesystem is not writable, which is a common situation
+in mobile computing.
+
+The proposal allows the source text to be optional for each of the files of a
+compilation unit. This supports producers that may result in mixed properties
+for the files of a compilation unit. An example of this can happen for link time
+optimizations (LTO) that may result in code from other translation units being
+mixed into another compilation unit.
+
+The proposal embeds the source text directly in the line number program header.
+This ensures the source text is available even if the rest of the debug
+information is stripped which is a common practice.
+
+MOTIVATION
+
+It is common practice in applications that use OpenCL to construct the
+source text of the OpenCL program on the fly as part of the program
+execution at &ldquo;run time&rdquo;. For example, the application computes what kind of
+kernel is needed to solve the problem and conditionally pastes together that
+kernel&rsquo;s source text. An example is the OpenCL backend of the Gromacs
+(https://www.gromacs.org/) molecular modeling application.
+
+This source text is passed to an OpenCL runtime API such as clCompileProgram
+(https://www.khronos.org/registry/OpenCL/sdk/1.2/docs/man/xhtml/clCompileProgram.html).
+The act of compiling creates a code object that contains both the executable code
+and the DWARF debug information. This executable can then be linked, loaded and
+executed. This is typically all done without using a disk file system.
+
+Notice how clCompileProgram takes an optional set of &ldquo;header files&rdquo; specified
+by their names and contents. #include directives can be used to specify one of
+these &ldquo;header file names&rdquo;. The debugger would presumably want to present the
+source positions in terms of the &ldquo;header file names&rdquo; specified in the original
+compilation request, so the notion of the &ldquo;files&rdquo; having names still exists
+even when the contents of these &ldquo;source files&rdquo; do not exist on disk.
+
+The CUDA and HIP languages have similar run time compilation capabilities.
+
+The Clang compiler has the -gembed-source
+(https://clang.llvm.org/docs/ClangCommandLineReference.html#cmdoption-clang-gembed-source
+and https://llvm.org/docs/AMDGPUUsage.html#amdgpu-clang-debug-options-table)
+option which puts the contents of the &ldquo;file&rdquo; into the DWARF regardless of
+whether the source comes from a disk file or an in memory virtual &ldquo;file system&rdquo;.
+It uses the &ldquo;file name&rdquo; that was specified in the source input (for example the
+#include names) when generating DWARF even if it embeds the source text.
+
+HISTORY
+-------
+
+Issue 161018.1 was the initial proposal to support embedding source text into
+DWARF to support languages that support online compilation. It was based on the
+DWARF 4 standard which did not have a line table entry for the main file and so
+used a DW_AT_source attribute on the compilation unit. It also used a more
+complex method to support mixed file properties.
+
+The original proposal was revised by issue 180201.1. This was based on DWARF 5
+and so no longer needed the DW_AT_source compilation unit attribute. It did not
+completely address the mixed file properties as the MD5 property cannot be
+optional.
+
+This proposal is a revision of 180201.1 that simplifies supporting optional
+source text by defining the empty null terminated string as a sentinel value
+indicating the source text is not available.
+
+PROPOSED RESOLUTION
+
+This augments DWARF Version 5 section 6.2.4.1.
+
+6.  DW_LNCT_source
+
+     The component is a null-terminated UTF-8 source text string with
+     &quot;\n&quot; line endings. This content code is paired with the same forms as
+     DW_LNCT_path. It can be used for entries in the file_names field to
+     provide the source text contents of the file.
+
+     The value is an empty null-terminated string if no source is available. If
+     the source is available but is an empty file then the value is a
+     null-terminated single &quot;\n&quot;.
+
+     <i>When the source field is present, consumers can use the embedded source
+     instead of attempting to discover the source on disk using the file path
+     provided by the DW_LNCT_path field. When the source field is absent,
+     consumers can access the file to get the source text.</i>
+
+     <i>This is particularly useful for programming languages that support runtime
+     compilation and runtime generation of source text. In these cases, the
+     source text does not reside in any permanent file. For example, the OpenCL
+     language supports online compilation.</i>
+
+This augments DWARF Version 5 section 7.22 and Table 7.27.
+
+The following table gives the encoding of the additional line number header
+entry formats.
+
+   Table 7.27: Line number header entry format encodings
+   ====================================  =====
+   Line number header entry format name  Value
+   ====================================  =====
+   DW_LNCT_source                         0x6
+   ====================================  =====
+
+--
+2021-03-05: Revised.  Previous version: http://dwarfstd.dev/issues/180201.1-1.html
+2021-07-25: Revised non-normative text for DW_LNCT_is_MD5.
+2021-08-10: Added motivation section
+2022-03-05: Remove MD5 proposal.  See http://dwarfstd.dev/issues/220304.1.html
+2022-03-08: Add history, remove alternatives. 
+            Previous version: http://dwarfstd.dev/issues/180201.1-3.html
+2022-07-11: Accepted with modifications:  Remove &quot;with &quot;\n&quot; line endings&quot; in 
+            6. DW_LNCT_source; remove second paragraph under 6. DW_LNCT_source.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

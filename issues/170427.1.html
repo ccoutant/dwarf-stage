@@ -1,0 +1,205 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>170427.1</td>
+      <td>Alexandre Oliva</td>
+      <td>Location View Numbering</td>
+      <td>Enhancement</td>
+      <td>Open</td>
+      <td>Mark Wielaard</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 6.2, pg. 149-160.  
+
+This proposal introduces a new implicit column to the line number
+table, namely &quot;view numbers&quot;, so that multiple program states can be
+identified at the same program counter, and extends loclists with
+means to add view numbers to address ranges, enabling locations to
+start or end at specific views.
+
+This may improve debug information, enabling generators to indicate
+inlined entry points and preferred breakpoints for statements even if
+instructions associated with the corresponding source locations were
+not emitted at the given PC, and to emit variable locations that
+indicate the initial values of inlined arguments, and side effects of
+operations as they would be expected to take effect from the source
+code, even when multiple statements have their side effects all
+encoded at the same PC: with view numbers, debug information consumers
+may be able to logically advance the perceived program state, so as to
+reflect user-expected changes specified in the source code, even if
+the operations were reordered or optimized out in the executable code.
+
+
+View numbers
+------------
+
+In Section 6.2, page 149, line 4: change &quot;with one row&quot; to &quot;with at
+least one row&quot;.  Before line 11, add a bullet &quot;a view number,
+identifying a logical program state&quot;.
+
+In Section 6.2.2, page 150, add to Table 6.3, between 'address' and
+'op_index', a new register named &quot;view&quot;, defined as &quot;An unsigned
+integer that identifies each distinct entry associated with the same
+'address' in the line number matrix.&quot;
+
+In Section 6.2.2, page 152, add before line 1 the following sentence:
+&quot;The address and view registers, taken together, identify a logical
+state within the source program.&quot;
+
+In Section 6.3, page 153, add to Table 6.4 a line &quot;view | 0&quot; after
+address.
+
+In Section 6.2.5, page 160, add a Subsection &quot;6.2.5.0  View Numbers&quot;:
+
+  View numbers identify multiple logical states of the source program
+  that are all associated with the same address in the program.
+
+  View numbers are computed as a side effect of line number opcodes,
+  observing the following rules:
+
+  * opcodes that modify the address register (with the exception of
+    DW_LNS_fixed_advance_pc) simultaneously reset the view register to
+    zero
+
+  * opcodes that append a row to the matrix subsequently increment the
+    view register
+
+  Rationale: location lists can refer to address and view, not
+  op_index, so views are reset at address changes, not at op_index
+  changes.  Opcodes that advance op_index only will only reset the
+  view when they happen to advance the address, e.g. by exceeding
+  maximum_operations_per_instruction in op_index.
+
+  DW_LNS_fixed_advance_pc is the only opcode that may change the
+  address without resetting the view.  It is available for compilers
+  to use when an address change is uncertain, e.g., when advancing
+  past opcodes that may expand to an empty sequence,
+  e.g. possibly-empty alignment sequences, optional no-operation
+  opcodes or the like.
+
+In Section 6.2.5.1, page 160, insert before item 3: &quot;Reset the view
+register if the value of the address register changed in 2.&quot;, and
+after item 3: &quot;Increment the view register&quot;
+
+In Section 6.2.5.2, page 162, 1. DW_LNS_copy, line 10, add after
+&quot;Then it&quot;: &quot;increments the view register, &quot;.
+
+In Section 6.2.5.2, page 162, append to the description of
+2. DW_LNS_advance_pc: &quot;Then, if the value of the address register
+changed, it resets the view register to zero.&quot;
+
+In Section 6.2.5.2, page 163, append to the first paragraph of
+8. DW_LNS_const_add_pc: &quot;, and it resets the view register to zero if
+the value of the address register changed.&quot;
+
+In Section 6.2.5.2, page 163, add a third paragraph to
+9. DW_LNS_fixed_advance_pc: &quot;This is the only address-changing opcode
+that does NOT reset the view register.  It helps compilers that emit
+line number programs to determine view numbers even when advancing
+past opcodes that might expand to nothing.&quot;
+
+In Section 6.2.5.3, page 164, in 2. DW_LNE_set_address, change
+&quot;op_index register&quot; to &quot;view and op_index registers&quot;.
+
+Views in loclists
+-----------------
+
+In Section 2.6.2, page 43, add a bullet before &quot;Default location
+description&quot;:
+
+  * View description.  This kind of entry must precede a Bounded
+  location description, and it augments the starting and ending
+  address of the Bounded location description with [view numbers|link
+  to 6.2.5.0].  The addresses of a bounded location description that
+  is not preceded by a view description are argumented with view
+  number zero.
+
+In Section 2.6.2, page 45, add before 6++. DW_LLE_default_location:
+
+  6. DW_LLE_view_pair
+
+  This is the only form of view description, and it has two unsigned
+  LEB128 operands.  The first and second values specify respectively
+  the view numbers that augment the starting and ending addresses of
+  the bounded location description the view description precedes.
+
+In Section 7.7.3, add to Table 7.10 the following entry:
+
+  DW_LLE_view_pair | 0x09
+
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

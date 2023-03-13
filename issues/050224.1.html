@@ -1,0 +1,228 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>050224.1</td>
+      <td>James Cownie</td>
+      <td>UPC support</td>
+      <td>Enhancement</td>
+      <td>Accepted</td>
+      <td>James Cownie</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Revising a proposal from 2001 that we add all the items necessary for support of UPC.
+
+   At the time (2001), this was rejected on the grounds that
+   1) The standard was about to come out and it was much too late to add
+      things. 
+   2) There was no current practice to support it.
+
+   Since then the standard hasn't come out :-(, and we now have current
+   practice; these extensions (with an additional _UPC_ in tag names
+   since they're extensions) are used by Intrepid's GCC-UPC compiler.
+
+Here's the original message from 2001.
+
+&gt; Folks,
+&gt; 
+&gt; I know that it is now very late to be submitting new proposals for
+&gt; DWARF 2.1, and if the committee feels that I should therefore withdraw
+&gt; this proposal (in whole or in part), I will do so (and try to get it
+&gt; put up as &quot;suggested practice&quot; on the UPC site).
+&gt; 
+&gt; Rationale
+&gt; ---------
+&gt; 
+&gt; The UPC (Unified Parallel C) language ( http://hpc.gmu.edu/~upc ) is a
+                                      now http://hpc.gwu.edu/~upc
+&gt; parallel version of C, and therefore most of the constructs in UPC are
+&gt; already well covered by DWARF.
+&gt; 
+&gt; However UPC extends C in two areas for which there is no obvious
+&gt; expression within DWARF at present. These are
+&gt; 
+&gt; 1) The &quot;shared&quot; type qualifier.
+&gt;    This is syntactically a type-qualifier (similar to const, volatile
+&gt;    or restrict), it differs only in that it also carries a positive
+&gt;    integer value with it which defines the shared block size. This is
+&gt;    a compile time constant which describes the way in which the shared
+&gt;    object is to be distributed over the UPC threads in the executing program.
+&gt; 
+&gt; 2) The expansible array decalaration.
+&gt;    UPC allows one dimension of a shared array to be dimensioned with a
+&gt;    bound which is a multiple of the number of UPC threads instanced at
+&gt;    run time.
+&gt; 
+&gt; Neither of these concepts maps into any existing DWARF attributes or
+&gt; tags, yet both could easily be represented using one new tag and one
+&gt; new attribute. With these two additions UPC would (I believe) be fully
+&gt; covered by DWARF.
+&gt; 
+&gt; The reason for asking that these be included in the DWARF standard
+&gt; (rather than as vendor extensions) is that there are already three or
+&gt; four compiler groups working on UPC compilers. It is likely that more
+&gt; than one of them will want to use DWARF debug format.  If the concepts
+&gt; are _not_ standardised, then debuggers will have to handle different
+&gt; ways of expressing the same information in DWARF. This is unnecessary
+&gt; work !
+&gt; 
+&gt; Detailed proposals
+&gt; ------------------
+&gt; (Page numbers are against the Dwarf2p1-dearf6-010515-dif-base.pdf file
+&gt; from the normal place).
+&gt; 
+&gt; Component 1: Add a standard language tag for UPC
+&gt; ------------
+&gt; Add DW_LANG_Upc to the supported set of languages,
+&gt; 
+&gt; Page 42/43: Add DW_LANG_Upc     Unified Parallel C
+&gt; to the table of language names.
+&gt; 
+&gt; Page 145: Add DW_LANG_Upc   0x000f
+&gt; to the table of language encodings
+&gt; 
+&gt; Index-4:  Add DW_LANG_Upc to the index.
+&gt; 
+&gt; Component 2: Add DW_TAG_shared_type
+&gt; ------------
+&gt; Add a new tag (analogous to DW_TAG_const_type or DW_TAG_volatile_type)
+&gt; to allow the specification of a shared type.
+&gt; 
+&gt; Page 8: In the table, add DW_TAG_shared_type
+&gt; 
+&gt; Page 69: In the table add
+&gt; 
+&gt;        DW_TAG_shared_type     UPC shared qualified type
+&gt; 
+&gt; Page 84 (say ?) add a description of the shared_type
+&gt;        Shared type entries
+&gt; 
+&gt;        The UPC language extends ANSI C by adding the concept of shared
+&gt;        objects which are expressed by adding the &quot;shared [blocksize]&quot;
+&gt;        directive to a type. For instance
+&gt;           int shared [10] foo;
+&gt;        declares an integer which is shared with a blocksize of 10, or
+&gt;           int shared *p;
+&gt;        declares a local pointer to a shared integer with blocksize 1.
+&gt;        The DW_TAG_shared tag allows this concept to be expressed in
+&gt;        DWARF.
+&gt; 
+&gt;        The DW_TAG_shared_type expects as children the attributes
+&gt; 
+&gt;        1) DW_AT_count which gives the shared block size (if this is
+&gt;           absent, then &quot;infinite&quot; blocksize is used, as expressed in UPC
+&gt;           by &quot;shared []&quot;).
+&gt; 
+&gt;        2) DW_AT_type the type to which the shared property is being
+&gt;           applied.
+&gt; 
+&gt;        The type used in the first example above would then be expressed as
+&gt;        DW_TAG_shared
+&gt;           DW_AT_type    reference to &quot;int&quot;
+&gt;           DW_AT_count   10
+&gt; 
+&gt; Page 130: In the table add
+&gt;        DW_TAG_shared_type     0x3e
+&gt; 
+&gt; Page 159: In the table add
+&gt;        DW_TAG_shared_type     DW_AT_count
+&gt;                               DW_AT_type
+&gt; 
+&gt; Component 3: Support the &quot;THREADS scaled&quot; array declaration
+&gt; -----------
+&gt; Add a new attribute to allow the THREADS scaled array declaration to
+&gt; be expressed.
+&gt; 
+&gt; Page 16: In the table add
+&gt;        DW_AT_threads_scaled     Subrange type should be interpreted
+&gt;                                 scaled by THREADS
+&gt; 
+&gt; Page 85: In the description of the subrange type add.
+&gt;        If the subrange type has a DW_AT_threads_scaled attribute, then
+&gt;        it represents a UPC array bound which should be scaled by the
+&gt;        run time &quot;THREADS&quot; value (the number of UPC threads in this
+&gt;        execution of the program). This allows the expression of UPC
+&gt;        arrays declared like this example :-
+&gt; 
+&gt;        int shared foo[34*THREADS][10][20];
+&gt; 
+&gt; Page 133: In the table add
+&gt;      DW_AT_threads_scaled      0x60
+&gt; 
+&gt; Page 169: In the entry for DW_TAG_subrange_type
+&gt;      add DW_AT_threads_scaled
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

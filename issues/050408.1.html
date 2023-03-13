@@ -1,0 +1,118 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>050408.1</td>
+      <td>John Demme</td>
+      <td>D Language Support</td>
+      <td>Extension</td>
+      <td>Accepted</td>
+      <td>Michael Eager</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+There is an emerging language called D.  It is largely compatible with C, 
+thus it is already (sort of) capable of generating DWARF information.  
+According to http://www.tiobe.com/tpci.htm, as of writing, it's the 30th 
+most popular language.  This language is currently used on Linux, Windows, 
+and OS X.  There is a gcc-derived compiler in the works, and we expect it 
+will eventually become part of the gcc distribution.
+
+More information about D is available at http://www.digitalmars.com/d
+
+-Request
+Add a Language identifier for the D language.
+
+-Additions to DWARF3 Spec as of November 12, 2003:
+Add to Figure 8 [&quot;Language Names&quot;; 3.1.1, pp. 46-47]:
+
+   DW_LANG_D            D
+
+Add to Figure 27 [&quot;Language encodings&quot;; 7.12, p. 153]:
+
+   DW_LANG_ObjC            0x001d
+
+Doesn't really matter what the number is... Unfortunately 0x000d is taken  ;) 
+
+If possible, I would like similar additions made to the DWARF2 spec.
+
+I'm trying to put D support into GDB, so these additions would be invaluable 
+in getting D patches added to GDB's main tree.
+
+==================================================
+
+Accepted, correcting typo: DW_LANG_ObjC should be DW_LANG_D.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

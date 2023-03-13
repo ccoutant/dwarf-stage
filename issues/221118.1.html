@@ -1,0 +1,126 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>221118.1</td>
+      <td>David Anderson</td>
+      <td>Name Table 6.1.1.4.8</td>
+      <td>Editorial</td>
+      <td>Open</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 6.1.1.4.8, pg 147
+DWARF5 6.1.1.4.8 Entry Pool
+
+Editorial Change requested.
+
+BACKGROUND
+
+This requests a minor clarification of the wording.
+The data in an entry pool is
+    abbrev code
+
+    attribute values as defined by the abbreviations for that code
+    (the abbrevs are in the name table abbrev section of course).
+
+    0
+
+
+
+DWARF5 text page 147:
+
+Lines 8-11
+&quot;Each index entry in the series begins with an abbreviation
+code, and is followed by the attributes described by the
+abbreviation declaration for that code. The last index 
+entry in the series is followed by a terminating entry whose
+abbreviation code is 0.&quot;
+
+The 'attributes' themselves are not in the entry pool,
+they are in the abbrev section of the name table.
+
+So, for greater clarity of this paragraph:
+
+change
+&quot;is followed by the attributes described by the&quot;
+
+to
+&quot;is followed by the index attribute values described by the&quot;
+
+
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

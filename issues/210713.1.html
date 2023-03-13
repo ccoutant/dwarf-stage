@@ -1,0 +1,142 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>210713.1</td>
+      <td>Paul Robinson</td>
+      <td>Fix &quot;file 0&quot;</td>
+      <td>Improvement</td>
+      <td>Accepted</td>
+      <td>Paul Robinson</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 2.14, 6.2.2, 6.2.4, pg various
+BACKGROUND
+
+In DWARF v5, we changed the line-table header so that the directory and
+file tables started with index 0 (not 1) and specifically required that
+directory 0 match the CU's DW_AT_comp_dir, and file 0 describe the main
+source file, matching the CU's DW_AT_name.  Thus, file 0 necessarily 
+points to directory 0, and the combination matches DW_AT_comp_dir + 
+DW_AT_name.
+
+However, we missed making two related changes.  First, the initial state
+for the &quot;file&quot; register of the line-table state machine remained 1, even
+though it would make more sense for it to be 0; second, the description
+of DW_AT_decl_file said that 0 meant &quot;no source file.&quot;  (Note that prior
+DWARF versions didn't specify any particular file number for the main
+source file, and presumably we picked 1 because what else would you do.)
+
+While it is technically possible to conform to both the line table's
+requirement that file 0 mean the primary source file, and DW_AT_decl_file
+not using file 0 (by duplicating an entry for the primary source file),
+this is wasteful and inconsistent.
+
+Also, non-normative text introduced in DWARF v5 suggested that file 0
+had always meant the primary source file; that's actually not true.
+
+This proposal fixes all the above problems.
+
+SPECIFIC CHANGES
+
+Section 2.14 Declaration Coordinates
+
+- p.50 lines 20-21, delete the sentence starting &quot;The value 0...&quot;
+
+Section 6.2.2 State Machine Registers
+
+- p.151, in the description of the &quot;file&quot; register, add:
+
+    Files are numbered beginning at 0.
+
+Table 6.4 Line number program initial state
+
+- change the initial value for &quot;file&quot; from 1 to 0
+
+Section 6.2.4 The Line Number Program Header
+
+- p.158, lines 4-8, edit the non-normative paragraph starting &quot;Prior to
+  DWARF Version 5, ...&quot; so that it reads as follows.
+
+<i>
+Prior to DWARF Version 5, the current compilation file name did not have
+a specific entry in the file_names field.  Starting in DWARF Version 5,
+the current compilation file name has index 0.
+</i>
+--
+2022-07-25:  Accepted.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

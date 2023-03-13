@@ -1,0 +1,170 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>030812.1</td>
+      <td>Unclear</td>
+      <td>Return Address Clarification</td>
+      <td>Editorial</td>
+      <td>Accepted pending revision</td>
+      <td>Todd Allen</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+PROBLEM: Getting the call address context correct can be difficult.
+
+Andrew Cagney, Todd Allen, Chris Quenelle, Ron Brender
+all described manifestations of the following problem:
+
+ Functions (depending on hardware and software architectures)
+ generate a 'return address register value'
+ which is what dwarf can record in
+ the Call Frame Information.
+
+ If the function is known not to return the compiler may elid
+ cleanup instructions.  Consequently the 'return address'
+ may point to a context which is actually in a different
+ function or a different source line or a completely different function.
+
+Hardware architectures that have instructions of different lengths
+often have no way to turn the 'return address' into a reliable
+'calling address'.
+
+------- Andrew Cagney's initial example where 'return address'
+points to another function ----
+The problem I've encountered is that the RA provided by func's CFI could
+end up pointing at totally unrelated instruction  For instance the code:
+
+	bar()
+	{
+	  func () // no return
+	}
+
+	baz ()
+	{
+	  ...
+
+could become:
+
+	bar:
+		push arguments
+		call func
+	baz:
+		prologue of baz &lt;- RA
+
+leading to a bogus unwind (other more edgy cases occure when the call is
+at the end of a block - this one is easier to explain :-).
+-------------
+
+A typical workaround for the ia36 architecture is always to
+subtract 1 from the return address to get the right 'context'
+(even though the address involved may not be the beginning of the call
+instruction, it is 'inside' the call instruction, so in the right
+context).
+
+PROPOSAL:
+
+Add italics in the CFI information section.
+
+ 6.4.3  Call Frame Instruction usage
+
+
+At the end of this section, add
+
+&quot;Typically one of the registers restored by Call Frame Information
+is the Return Address register.   When a debugger unwinds call
+information it really normally wants the call-site address, but
+that is normally not recorded anywhere.
+
+&quot;In most cases the return address is the same context as the
+call, but that need not be the case, especially if the
+compiler knows (in some way) the call will never return.
+The context of the 'return address' might be off the end
+of the calling function entirely. As a result, a stack traceback
+may partially or completely fail.
+
+&quot;For example, the x86
+architecture has variable length instructions
+so there is no certain way to get back from the 'return address'
+to the 'call instruction'.
+A simple workaround adopted by debugger implementations is
+to subtract 1 from the 'return address'. While
+This does not get the caller address, it does get an address
+inside the calling instruction, so the right context is known
+and a traceback can function reasonably.&quot;
+
+
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

@@ -1,0 +1,313 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>160108.1</td>
+      <td>Ron Brender</td>
+      <td>Unify compilation unit and type unit headers</td>
+      <td>Improvement</td>
+      <td>Accepted with modifications</td>
+      <td>Ron Brender</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+ 
+Section Many, pg Many
+This is a proposal to unify compilation unit and type unit headers
+and then take advantage of the new potential created.
+
+This is an action item from the December 17, 2015 review meeting.
+It is also draws on ideas set forth in my email of June 24, 2015,
+&quot;Unit Types Spectrum of Proposals&quot; and July 1, 2015, &quot;Unit Types 
+Proposal&quot;.
+
+This proposal is a superset of Issue 150702.1 which need not be 
+considered if this one is accepted.
+
+The proposal has three parts:
+  1) Adopt the current type unit header layout as &quot;the&quot; header
+     layout for all compilation types. Unused space in some
+     unit types is defined as padding (and must be zeros).
+  2) Define additional unit type codes (DE_UT_*) so that the
+     nature or role of every kind of unit can be quickly and 
+     easily identified without having to look deeper into and
+     decode the following unit DIE.
+  3) Add a new dwo_id field in skeleton and split compilation 
+     unit headers that replaces (and eliminates the need for) 
+     the DW_AT_dwo_id attribute. Use the otherwise unused space 
+     that matches the type_signature field in current type units.
+
+
+Discussion
+
+Part 1
+------
+Currently we have two unit header layouts. Both have the
+following five fields:
+
+unit_length     4 or 12 bytes
+version         uhalf
+unit_type       ubyte
+address_size    ubyte
+debug_abbrev    4 or 8
+
+For DW_TAG_compile_unit and DW_TAG_partial_unit that is
+the complete header.
+
+* NOTE: The October 19, 2015 document shows the address_size
+* field following the debug_abbrev field. At the December 17
+* meeting we agreed to reverse this order. This proposal
+* assumes that change.
+
+For DW_TAG_type_unit, two additional fields are appended
+to the above:
+
+type_signature  8 bytes
+type_offset     4 or 8 bytes
+
+This proposal adds 12 or 16 bytes of padding to the first
+header layout to make it the same size as the type header.
+
+Part 2
+------
+Add new codes for skeleton unit, split compilation unit, 
+and split type unit. Proposed names are:
+-
+
+[ DW_UT_compile, DW_UT_partial &amp; DW_UT_type as now +]
+  DW_UT_skeleton
+  DW_UT_split_compile
+  DW_UT_split_type
+
+* Variation 2a: So far we have not specified partial units
+* as potential split units. I am inclined to keep it that
+* way. But if we did allow split partial units, it would 
+* be trivial to add one more code:
+*
+*     DW_UT_split_partial
+
+This expanded set of codes makes it possible to determine
+the nature of any unit without having to look into the
+following unit DIE, which means accessing the associated
+abbreviation table, followed by scanning/searching for the 
+attributes that distinguish unit kinds. This is so much 
+cleaner and simpler!
+
+Part 3
+------
+A skeleton unit header currently is followed by a skeleton 
+unit that includes a DW_AT_dwo_id field which is used to match
+the DW_AT_dwo_id attribute in the corresponding split full 
+compilation unit. This proposal eliminates the DW_AT_dwo_id
+attribute. Instead, add an 8-byte unit-id file in the headers
+for DW_UT_skeleton and DW_UT_split_compile. Allocate this
+field in the same place as the type_signature field in
+(both split and non-split) type unit headers. (There remains
+either 4 or 8 bytes of padding in these two headers.)
+     
+
+
+DETAILED TEXTUAL PROPOSAL
+-------------------------
+
+All citations (S=&gt;section, P=&gt;page, L=&gt;line, T=&gt;table, F=&gt;figure) 
+are to the October 19, 2015 draft.
+
+S2.2, T2.2, P17: Delete line for DW_AT_dwo_id
+
+S3.1.2, L180--181: Replace &quot;and DW_AT_dwo-id attributes&quot; with
+&quot;attribute&quot;.
+
+S3.1.2, L186: Revise to read
+
+    A skeleton compilation unit has a DW_AT_dwo_name attribute:
+    
+S3.1.2, L192-200: Delete and replace with this continuation of
+bullet 1:
+
+        The value in the dwo_id field of the unit header for 
+        this unit is the same as the value in the dwo_id field 
+        of the unit header of the corresponding full compilation 
+        unit (see Section 7.5.1 on page xxx).
+        
+        <i>The means of determining a compilation unit ID does 
+        not need to be similar or related to the means of 
+        determining a type unit signature. However, it should 
+        be suitable for detecting file version skew or other 
+        kinds of mismatched files and for looking up a full
+        split unit in a DWARF package file (see Section 7.3.5
+        on page xxx).</i>
+
+S3.1.2, L221-223: Delete &quot;, except for DW_AT_dwo_id...object file&quot;.
+        
+S3.1.3, L233-243: Replace with
+
+    A split full compilation unit may have the following 
+    attributes:
+
+S7.3.2.2, L161-163: Delete sub-bullet (&quot;The full compilation...&quot;)
+
+S7.3.5, P184, L229: Delete &quot;(DW_AT_dwo_id)&quot;.
+
+S7.5.1, T7.2: Add the following codes:
+
+          DW_UT_skeleton       | 0x04
+          DW_UT_split_compile  | 0x05
+          DW_UT_split_type     | 0x06
+
+s7.5.1, following T7.2: Insert
+
+    <i>All unit headers in a compilation have the same size.
+    Some header types include padding bytes to achieve this.</i>
+    
+S7.5.1.1, following L500: Insert
+
+    6.  <i>padding1</i> (8-byte unsigned integer)
+        Reserved to DWARF (must be zero).
+        
+    7.  <i>padding2</i> (section offset)
+        Reserved to DWARF (must be zero). In the 32-bit 
+        DWARF format, this is a 4-byte unsigned length; 
+        in the 64-bit DWARF format, this is an 8-byte 
+        unsigned length (see Section 7.4 on page 192).
+
+S7.5.1.2, L501: Renumber the existing 7.5.1.2 to 7.5.1.3 
+and insert this new Section 7.5.1.2:
+
+    7.5.1.2 Skeleton and Full Compilation Unit Header
+    
+    [[Replicate lines 475-500 describing unit_length, 
+    version, unit_type, address_size and debug_abbrev_offset. 
+    Then continue with:]]
+    
+    6.  dwo_id (8-byte unsigned integer)
+        An implementation-defined integer constant value, 
+        known as the compilation unit ID, that provides 
+        unique identification of a skeleton compilation 
+        unit and its associated split compilation unit in 
+        the object file named in the DW_AT_dwo_name attribute
+        of the skeleton compilation. 
+    
+    7.  <i>padding2</i> (section offset)
+        Reserved to DWARF (must be zero). In the 32-bit 
+        DWARF format, this is a 4-byte unsigned length; 
+        in the 64-bit DWARF format, this is an 8-byte 
+        unsigned length (see Section 7.4 on page 192).
+
+S7.5.4, T7.5, P202: Delete line for DW_AT_dwo_id.
+
+Appendix A, P243 (compilation unit): Delete line for 
+DW_AT_dwo_id.
+
+Appendix A, P243 (partial unit): Delete line for DW_AT_dwo_id.
+
+Appendix B, P265 (a), L100-101: Replace  &quot;DW_AT_dwo_id and
+DW_AT_dwo_name attributes&quot; with &quot;DW_AT_dwo_name attribute&quot;;
+replace &quot;connect&quot; with &quot;connects&quot;.
+
+Appendix B, P265 (did), L120-124: Replace with &quot;DW_AT_dwo_name 
+gives the file name which identifies the file with the .dwo 
+data.&quot;
+
+Appendix F.1, L95+: Delete DW_AT_dwo_id.
+
+Appendix F.1, P380, L102-103: Replace &quot;The DW_AT_dwo_id 
+attribute...a match&quot; with &quot;The dwo_id field is present
+in the header of the skeleton unit and the header of the 
+full compilation unit so that a consumer can verify a match&quot;.
+
+Appendix F.1, TF.1: Delete line for DW_AT_dwo_id
+
+Appendix F.2, TF.4: Delete line containing DW_AT_dwo_id.
+
+Appendix F.2, P385, L153-154: Replace 
+    &quot;The DW_AT_dwo_id attribute provides a hash of the debug 
+    information 154 contained in the split DWARF object file. 
+    This hash serves two purposes:&quot; 
+with 
+    &quot;The dwo_id file in the header of the skeleton unit provides 
+    an ID or key for the debug information contained in the 
+    DWARF object file. This ID serves two purposes:&quot;
+    
+Appendix F.2.2, P388, FF.5: Delete line containing DW_AT_dwo_id.
+
+Index: Verify DW_AT_dwo_id is no longer present...
+
+--
+
+5/17/2016 -- Accepted with following changes:  padding 1 &amp; 2 are zeros,
+not length.  No to variation 2a, split partial units.  Add user extension
+values, DW_UT_userlo, userhi.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

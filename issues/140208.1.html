@@ -1,0 +1,188 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>140208.1</td>
+      <td>Ron Brender</td>
+      <td>New classes for DW_AT_str_offsets_base, etc</td>
+      <td>Error</td>
+      <td>Accepted</td>
+      <td>Ron Brender</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 7.5.4, pg 159
+Discussion
+----------
+
+Cary's original size optimization proposals (130331.*) specified 
+the following classes of values for certain new attributes as:
+
+    DW_AT_str_offsets_base  string
+    DW_AT_addr_base         address
+    DW_AT_ranges_base       rangelistptr
+
+Your editor (masquerading as Ron) &quot;corrected&quot; these to all be class
+reference.
+
+When Cary saw this, he wrote:
+
+&gt; In Table 7.3, Attribute Encodings, on page 165, you've listed
+&gt; DW_AT_str_offsets_base, addr_base, and ranges_base as having
+&gt; &quot;reference&quot; class, while the proposals used &quot;string&quot;, &quot;address&quot;, and
+&gt; &quot;rangelistptr&quot;, respectively. Was that deliberate? (I can see it
+&gt; either way.)
+
+The editor replied:
+
+&gt;Yes, it was deliberate but I did linger over the issue for quite a bit. It
+&gt;is sort of an lvalue/rvalue kind of distinction. In these cases it feels
+&gt;like the attribute to acting like an lvalue so that the reference form
+&gt;is more appropriate.
+
+Separately, Keith Walker wrote:
+
+&gt;I think that DW_AT_str_offset_base, DW_AT_addr_base and DW_AT_ranges_base 
+&gt;having a &quot;reference&quot; class is definitely wrong as a reference is currently 
+&gt;defined to be references within a compilation_unit, .debug_info section 
+&gt;or to a type unit;   none of which hold for these attributes.
+&gt;
+&gt;DW_AT_ranges_base being a rangelistptr looks sensible to me.
+&gt;
+&gt;However I question whether DW_AT_str_offset_base having a &quot;string&quot; class 
+&gt;and DW_AT_ranges_base being an &quot;address&quot; class is correct .... neither of 
+&gt;theses attributes returns a &quot;string&quot; or &quot;address&quot; (although they may 
+&gt;indirectly be used in the evaluation of a &quot;string&quot; or &quot;address&quot; on another 
+&gt;attribute).   It currently isn't clear what Form(s) should be used for 
+&gt;these attributes.
+&gt;
+&gt;I would suggest that there be 2 new classes such as &quot;strlistptr&quot; and 
+&gt;&quot;addrlistptr&quot; (there may be better names for them) which have definitions 
+&gt;similar to the existing loclistptr/rangelistptr/etc classes but which are 
+&gt;offsets into the .debug__str_offsets and .debug_addr sections.    Then 
+&gt;DW_AT_str_offset_base would have a class of &quot;strlistptr&quot; and DW_AT_addr_base 
+&gt;would have a class of &quot;addrlistptr&quot;.    This would then mean these attributes 
+&gt;are then specified as using the form DW_FORM_sec_offset.
+
+Cary and I now support Keith's suggestion. Following is the formal proposal to
+incorporate it into the DWARF document.
+
+Proposal
+--------
+
+In Table 2.3, add:
+
+addrptr         Refers to a base location in the DWARF section that holds
+                a series of machine address values. Certain attributes refer
+                one of these addresses by indexing relative to this base
+                location.
+                
+stroffsetsptr   Refers to a base location in the DWARF section that holds
+                a series of offsets in the DWARF section that holds strings.
+                Certain attributes refer one of these offets by indexing 
+                relative to this base location. The resulting offset is the 
+                used to index into the DWARF string section.
+
+In Section 7.5.4, add:
+
+  . addrptr
+    This is an offset into the .debug_addr section (DW_FORM_sec_offset). It
+    consists of an offset from the beginning of the .debug_addr section to the
+    beginning of the list of machine addresses information for the
+    referencing entity. It is relocatable in a relocatable object file, and relocated
+    in an executable or shared object. In the 32-bit DWARF format, this offset is
+    a 4-byte unsigned value; in the 64-bit DWARF format, it is an 8-byte
+    unsigned value (see Section 7.4 on page 150).
+
+  . stroffsetsptr
+    This is an offset into the .debug_str_offsets section (DW_FORM_sec_offset). It
+    consists of an offset from the beginning of the .debug_str_offsets section to the
+    beginning of the string offsets information for the
+    referencing entity. It is relocatable in a relocatable object file, and relocated
+    in an executable or shared object. In the 32-bit DWARF format, this offset is
+    a 4-byte unsigned value; in the 64-bit DWARF format, it is an 8-byte
+    unsigned value (see Section 7.4 on page 150).
+    
+In Table 7.3, change the class (set of allowed representations) for these attributes:
+
+    DW_AT_str_offsets_base  stroffsetsptr
+    DW_AT_addr_base         addrptr
+    DW_AT_ranges_base       rangelistptr
+                
+
+--
+3/19/2014 -- Accepted.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

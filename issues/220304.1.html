@@ -1,0 +1,175 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>220304.1</td>
+      <td>Tony Tye</td>
+      <td>Allow MD5 hash to be optional in the line table</td>
+      <td>Enhancement</td>
+      <td>Rejected</td>
+      <td>Tony Tye</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 6.2.4.1, pg 159
+Allow MD5 hash to be optional in the line table
+===============================================
+
+PROBLEM DESCRIPTION
+-------------------
+
+The producer of different translation units may generate different properties
+for the files of a compilation unit in the line table. For example, the presence
+of the file size, time stamp, and MD5 hash in the file entries of the line table
+may be different in different translation units.
+
+Link time optimizations (LTO) can result in code from multiple translation units
+being mixed into a single compilation unit. This can result in different files
+in a single compilation unit line table having different file properties
+present.
+
+The file size and timestamp are defined to have a distinguished value to
+indicate they are not present. However, there is no value for the MD5 hash that
+can be used to indicate it is not present. This forces a producer to drop the
+MD5 hash of all files of a compilation unit if it is not available for all
+files. To avoid this it is proposed to add a way to indicate if the MD5 file
+property is present.
+
+PROPOSED RESOLUTION 1
+---------------------
+
+The first proposed solution defines a new file property to explicitly indicate
+that the DW_LNCT_MD5 file property should be ignored. This allows the
+DW_LNCT_MD5 file property to express the full range of hash values when present.
+
+This augments DWARF Version 5 section 6.2.4.1.
+
+1.  DW_LNCT_is_MD5
+
+    DW_LNCT_is_MD5 indicates if the DW_LNCT_MD5 content kind, if
+    present, is valid: when 0 it is not valid and when 1 it is valid. If
+    DW_LNCT_is_MD5 content kind is not present, and DW_LNCT_MD5
+    content kind is present, then the MD5 checksum is valid.
+
+    DW_LNCT_is_MD5 is always paired with the DW_FORM_udata form.
+
+    <i>This allows a compilation unit to have a mixture of files with and without
+    MD5 checksums. This can happen when link time optimization (LTO) generates code
+    for a translation unit that includes contributions from other translation units
+    that have different information about the source files.</i>
+
+This augments DWARF Version 5 section 7.22 and Table 7.27.
+
+The following table gives the encoding of the additional line number header
+entry formats.
+
+  Table 7.27: Line number header entry format encodings
+
+  ==================================== ====================
+  Line number header entry format name Value
+  ==================================== ====================
+  DW_LNCT_is_MD5                       0x7
+  ==================================== ====================
+
+PROPOSED RESOLUTION 2
+---------------------
+
+The second proposed solution defines a distinguished hash value to indicate the
+absence of the property. This is the same approach taken for the
+DW_LNCT_timestamp and DW_LNCT_size file properties. Using a hash of 0 bytes is
+the same approach taken by the Mercurial source control system (see
+https://www.mercurial-scm.org/wiki/Nodeid).
+
+This modifies DWARF Version 5 section 6.2.4.1.
+
+Change:
+
+5.  DW_LNCT_MD5
+
+    DW_LNCT_MD5 indicates that the value is a 16-byte MD5 digest of the file
+    contents. It is paired with form DW_FORM_data16.
+
+To:
+
+5.  DW_LNCT_MD5
+
+    DW_LNCT_MD5 indicates that the value is a 16-byte MD5 digest of the file
+    contents, or 16 bytes of 0 if not available. It is paired with form
+    DW_FORM_data16.
+
+--
+2022-11-14:  Rejected.  See issue 211108.2.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

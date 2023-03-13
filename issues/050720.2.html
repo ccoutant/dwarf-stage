@@ -1,0 +1,186 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>050720.2</td>
+      <td>Chris Quenelle</td>
+      <td>DW_AT_object_pointer (v2)</td>
+      <td>Enhancement</td>
+      <td>Closed - Duplicate</td>
+      <td>Chris Quenelle</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section: 5.6.7
+
+BACKGROUND:
+
+There is no explicit way to know if a C++ member function
+is declared static or const.  Both of these properties can
+be deduced in a straight forward way if the dwarf consumer
+can identify whether the function has a &quot;this&quot; pointer
+and if that pointer is a &quot;const&quot; pointer.  The same
+problem applies to other languages (Objective C/C++).
+
+Based on a recent addition, dwarf 3 requires that the
+&quot;this&quot; pointer (if preset) must be the first DW_TAG_formal_paremeter
+child of the DW_TAG_sunprogram die, and it must have the
+name &quot;this&quot; (or &quot;self&quot; if that's appropriate for the language).
+
+We should be more explicit about marking the &quot;this&quot; parameter.
+If the pointer is marked explicitly there would be no need
+for an artificial restriction on ordering or naming.
+
+For more background see issue : 040511.1  Static Member Function
+Also see the minutes for the con-call of June 28, 2005
+which were sent to the dwarf-workgroup alias.
+
+I didn't create an example for this, but I can do that
+if people think it's appropriate.
+
+PROPOSAL:
+
+Add an attribute DW_AT_object_pointer which is a reference
+to a die representing the object pointer for this function.
+
+In section 5.6.7:
+ append to the end of the section:
+
+  For member functions which are not static, the DW_AT_object_pointer
+  attribute is used on the DW_TAG_subprogram to specify the &quot;this&quot;
+  pointer (for C++) or the &quot;self&quot; pointer (in Objective C/C++).
+  Often, this attribute will point to a DW_TAG_formal_parameter
+  die, but it may also point to a variable die.
+
+  &lt;italics&gt;
+  In older implementations where DW_AT_object_pointer is not used,
+  one of the parameters should be named &quot;this&quot;, and should appear
+  first in the list of parameters.
+  &lt;/italics&gt;
+
+  The object pointer isn't explicitly declared in the source code,
+  so the die that represents the object pointer should be marked
+  with the DW_AT_artificial flag.
+
+  If the DW_AT_type for an object pointer points to a &quot;const&quot; qualified
+  type, then the member function was declared as &quot;const&quot; in the source code.
+
+  If the DW_AT_type for an object pointer points to a &quot;volatile&quot; qualified
+  type, then the member function was declared as &quot;volatile&quot; in the source code.
+
+(I'll leave the list of table updates to the editor.  It will
+be similar to the DW_AT_explicit proposal, for example.)
+
+-------------------------
+
+So that people can compare my proposal with what was
+previously suggested on the alias, I've copied some
+paragraphs from previous emails so you can compare.
+
+Ron previously suggested the following wording:
+
+    &quot;If the member function entry describes a non-static member
+    function then that entry owns at least one formal parameter
+    entry. The first such formal parameter entry
+    corresponds to the object for which the function is called.
+    The name attribute of that first formal parameter is defined by
+    the current language (for example &lt;code&gt;this&lt;/code&gt; for C++ or
+    &lt;code&gt;self&lt;/code&gt; for Objective-C++ and some other languages).
+    The parameter also has a DW_AT_artificial attribute whose value
+    is true. Conversely, if any of these properies does not apply
+    then the member function entry describes a static member function.
+
+    &quot;If the member function entry describes a &lt;code&gt;const&lt;/code&gt;
+    non-static member function, then the entry describes a non-static
+    member function whose first formal parameter entry has a type
+    that is const qualified.
+
+    <i>For simplicity, the type of the first formal parameter
+    of a non-static member function need not be checked by a
+    consumer to confirm that it is a pointer to the parent
+    class or a const qualified variant thereof.
+
+Matt previously suggested:
+
+    &quot;If the member function entry describes a non-static member function
+    that has a const-volatile qualification, then the entry describes a
+    non-static member function whose first formal parameter has a type
+    that has an equivalentl const-volatile qualification.&quot;
+
+=======================================
+
+Duplicate issue -- see 050711.2
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

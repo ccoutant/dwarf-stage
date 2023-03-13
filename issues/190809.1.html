@@ -1,0 +1,199 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>190809.1</td>
+      <td>Tom Tromey</td>
+      <td>Standardize DW_AT_GNU_bias</td>
+      <td>Enhancement</td>
+      <td>Accepted with modifications</td>
+      <td>Brock Wyma</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 5.13, pg 129
+
+In Ada, a scalar can be given a biased representation in some cases.
+For example, a scalar with a range of -7..-4 could be stored using 2 bits 
+with a bias of -7.
+
+GCC implements the DW_AT_GNU_bias extension to handle this case.
+See https://gcc.gnu.org/wiki/DW_AT_GNU_bias
+
+I think it would be good to standardize this.
+
+PROPOSED CHANGES
+----------------
+
+Section &quot;2.2 Attribute Types&quot; in table &quot;Table 2.2: Attribute names&quot;:
+Add the following row to the table:
+  --------------- -----------------------------------------------------------
+  Attribute       Identifies or Specifies
+  --------------- -----------------------------------------------------------
+  DW_AT_bias      Deviation from the base type encoding.
+
+Section &quot;5.1.1.1 Simple Encodings&quot;
+At the end of the section (following line 23), add:
+  For a data type with simple encodings, the type may have a DW_AT_bias attribute
+  whose value is an integer constant which is added to the encoded value to
+  determine the value of an object of the type in the source program.
+  If the DW_AT_bias is encoded using DW_FORM_data&lt;n&gt;, then the bias value
+  is treated as an unsigned integer.
+
+Section &quot;7.5.4 Attribute Encodings&quot; in table &quot;Table 7.5 Attribute Encodings&quot;:
+Add the following row to the table with the next available value:
+  --------------------- ------- ---------------------------------------------
+  Attribute name        Value   Classes
+  --------------------- ------- ---------------------------------------------
+  DW_AT_bias            0x??    constant
+
+Section &quot;7.32 Type Signature Computation&quot; in table &quot;Table 7.32 Attributes used
+in type signature computation&quot;:
+Add item:
+  DW_AT_bias
+
+Appendix A &quot;Attributes By Tag (Informative)&quot;, in table A.1 &quot;Attributes by tag value&quot;
+Add &quot;DW_AT_bias&quot; to the &quot;Applicable attributes&quot; column for DW_TAG_base_type:
+  --------------------- -----------------------------------------------------
+  TAG name              Applicable attributes
+  --------------------- -----------------------------------------------------
+  DW_TAG_base_type      ... existing attributes ...
+                        DW_AT_bias
+
+Appendix D &quot;Examples (Informative):
+Add this new section:
+  D.2.9 Ada Biased Bit-Field Example
+  The Ada source in Figure D.25 demonstrates how a member of a record which
+  normally occupies six bits can be biased to fit into three bits when the
+  range is known. The encoded values [ 0..7 ] correspond to the values
+  [ 50..57 ] used by the application.
+
+  The DWARF description is shown in Figure D.26.  The bias chosen, which in
+  this case corresponds to the lower bound, is specified in the base type at
+  1$.
+
+  +-------------------------------------------------------------------------+
+  | type SmallRangeType is range 50 .. 57;                                  |
+  | type RecordType is record                                               |
+  |    A : SmallRangeType;                                                  |
+  | end record;                                                             |
+  | for RecordType use record                                               |
+  |    A at 0 range 0 .. 2;                                                 |
+  | end record;                                                             |
+  | LocalRecord : RecordType;                                               |
+  +-------------------------------------------------------------------------+
+                  Figure D.25 Biased Bit-Field Ada Example
+
+  +-------------------------------------------------------------------------+
+  | 1$: DW_TAG_base_type                                                    |
+  |         DW_AT_byte_size(1)                                              |
+  |         DW_AT_encoding(7)                                               |
+  |         DW_AT_bias(50)                                                  |
+  |         DW_AT_artificial(1)                                             |
+  | 2$: DW_TAG_subrange_type                                                |
+  |         DW_AT_name(&quot;SmallRangeType&quot;)                                    |
+  |         DW_AT_lower_bound(50)                                           |
+  |         DW_AT_upper_bound(57)                                           |
+  |         DW_AT_type(reference to 1$)                                     |
+  | 3$: DW_TAG_structure_type                                               |
+  |         DW_AT_name(&quot;RecordType&quot;)                                        |
+  |         DW_AT_byte_size(1)                                              |
+  | 4$:     DW_TAG_member                                                   |
+  |             DW_AT_name(&quot;A&quot;)                                             |
+  |             DW_AT_type(reference to 2$)                                 |
+  |             DW_AT_bit_size(3)                                           |
+  |             DW_AT_data_bit_offset(0)                                    |
+  | 5$: DW_TAG_variable                                                     |
+  |             DW_AT_name(&quot;LocalRecord&quot;)                                   |
+  |             DW_AT_type(reference to 3$)                                 |
+  |             DW_AT_location ...                                          |
+  +-------------------------------------------------------------------------+
+               Figure D.26 Biased Bit-Field DWARF Description
+
+Note that other choices of encoding and bias lead to the same result. For
+example, the DW_ATE_signed encoding can be used in combination with a bias
+of 54.
+
+If the valid range of values is completely negative (for example, -57..-50) then
+only signed encoding is valid, and the bias will also need to be negative (-53).
+
+
+--
+2022-04-13:  Add propopsed changes.
+2022-06-27:  Accepted with modifications: integer types only, editorial changes TBD.
+2022-07-05:  Editorial changes: Move new text from 5.1.1 to 5.1.1.1, reword.  
+             Add text following Fig. D.26.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

@@ -1,0 +1,114 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>161118.1</td>
+      <td>Jason Merrill</td>
+      <td>DW_TAG for C++ static data members</td>
+      <td>Improvement</td>
+      <td>Accepted</td>
+      <td>Jason Merrill</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 4.1, pg 98
+DWARF 3 changed the TAG for in-class declarations of C++ static data members 
+to be DW_TAG_member; previously the TAG was unspecified.  I think this was a 
+mistake, since outside of C++ terminology they are better referred to as 
+member variables, and so DW_TAG_variable is more appropriate.  The 
+specification of DW_TAG_member is all about fields in a structure, and is 
+mostly inappropriate for variables.
+
+This has mostly been an odd wart on the standard when we could assume that
+there would be a separate DW_TAG_variable for the out-of-class definition
+of the static data member, but with C++17 inline variables there doesn't 
+need to be an out-of-class definition, so we can end up with a member 
+variable for which there is no DW_TAG_variable.
+
+Brock Wyma concurs, also pointing out that:
+   * Static member variables can have a DW_AT_const_value but that isn't 
+     even a valid attribute for DW_TAG_member according to Appendix A in our 
+     specification.
+   * Members typically have a data member location or data bit offset, but
+     static member variables do not.
+
+Before DWARF 3, GCC used DW_TAG_variable consistently for C++ static data
+members.  Can we switch to specifying that, or at least allow it?
+
+--
+12/06/2016 -- Accepted.  C++ static data represented by DW_TAG_variable.
+
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

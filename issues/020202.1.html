@@ -1,0 +1,141 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>020202.1</td>
+      <td>Al Dunsmuir</td>
+      <td>DW_LNS_set_isa Incomplete</td>
+      <td>Clarification</td>
+      <td>Accepted with modifications</td>
+      <td>Jeff Nelson</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+PROBLEM DESCRIPTION NEEDED
+
+Al Dunsmuir posted several questions and proposed changes
+on 2 Jan 2002 regarding the interpretation and use of the
+line number ISA state register and the DW_LNS_set_isa. After
+discussion and clarification, the resulting proposal boiled
+down to changing the default initial value of the ISA state
+register to 0 (from architecturally defined default) and
+adding some clarifying wording.
+
+
+PROPOSAL
+
+In Section 6.2.2, table of state registers, add the following
+to the description of the ISA register:
+
+    &quot;The value 0 indicates that the instruction set is not
+    significant or not yet set. On an architecture that
+    supports just one instruction set, it follows that that
+    instruction set is the one to assume.&quot;
+
+In the following list of initial states, change the description
+of isa to read:
+
+    isa     0
+
+and delete the following italic commentary.
+
+
+RECOMMENDATION
+
+Adopt the proposal.
+===============================================================
+5/17/2005  Accepted with modifications:
+Modify 6.2.2 to read:
+
+   isa     An unsigned integer whose value encodes the applicable instruction
+           set architecture for the current instruction.
+
+           <i>The encoding of instruction sets should be shared by all
+           users of a given architecture. It is recommended that this encoding
+           be defined by the ABI authoring committee for each architecture.
+</i>
+   At the beginning of each sequence within a line number program, the state of
+   the registers is:
+   . . .
+   isa     0
+
+   <i>The value 0 specifies that the instruction set is the architecturally
+   determined default instruction set.  This may be fixed by the ABI, or it may
+   be specified by other means, for example, the object file description.  
+</i>
+
+
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

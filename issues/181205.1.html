@@ -1,0 +1,129 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>181205.1</td>
+      <td>Greg Clayton</td>
+      <td>Clarify DW_OP_piece documentation for parts of values that are optimized out</td>
+      <td>Clarification</td>
+      <td>Accepted</td>
+      <td>Adrian Prantl</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 2.6.1.2, pg 42
+
+After someone posted a bug on bugzilla for LLDB regarding LLDB not showing 
+that parts of a value were optimized out (https://bugs.llvm.org/show_bug.cgi?id=39869), 
+I read the documentation on DW_OP_piece for clarification on what should be done 
+when part of a value is optimized out. As the comments in the bug show, there is a 
+mention in the DWARF specification in &quot;2.6.1.1.1 Empty Location Descriptions&quot; that 
+says something about an empty location means the value might be optimized out. 
+
+People reading the spec must currently read this and be able to infer that a 
+location like:
+DW_OP_piece: 6; ...
+Means that the value starts with 6 optimized out bytes. Also, these optimized out 
+bytes could be in the middle of a DWARF expression. It might be nice to clarify 
+usage of DW_OP_piece to specify that parts of the value are optimized out.
+
+I currently assume that if you run into a DW_OP_piece and the expression stack is 
+empty, then the bytes for the piece are optimized out. What would happen if there 
+was something on the stack and you needed to specify that 4 bytes of a value were 
+optimized out? 
+
+
+COMMENT
+
+The normative text currently is indeed missing an explanation for undefined 
+values, they are only mentioned in an example in Appendix D1.3.
+
+The last question is a misunderstanding: DW_OP_piece operates outside of the
+ DWARF stack. It is not possible to leave values on the DWARF stack beyond a
+ DW_OP_piece, because the DWARF stack does not exist outside of a (non-composite)
+ location description.
+
+PROPOSED CHANGE:
+
+Add the following normative text to 2.6.1.2:
+
+A composition operation that follows an empty location description indicates
+ that the piece is undefined, for example because it has been optimized away.
+
+--
+2021-10-04:  Updated.
+2021-11-01:  Accepted.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

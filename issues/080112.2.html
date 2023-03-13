@@ -1,0 +1,181 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>080112.2</td>
+      <td>Cary Coutant</td>
+      <td>FORM Reform Proposal 2: Block Class Forms and Expressions</td>
+      <td>Extension</td>
+      <td>Accepted with changes</td>
+      <td>Cary Coutant</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Background
+
+Since expressions can contain reference to DIEs, it's important for any 
+generic DWARF consumer to be able to identify and parse expressions without 
+a complete understanding of what attributes may have blocks that should be 
+treated as expressions. This proposal adds a new form, DW_FORM_expr, which 
+takes a ULEB128 length parameter, followed by &quot;length&quot; bytes interpreted as 
+an expression.
+
+I don't believe that fixed 1-, 2-, 4-, and 8-byte lengths are necessary 
+here -- any producer should be able to determine how long the expression 
+is before it needs to emit the length field.
+
+This proposal also deprecates DW_FORM_block1, block2, and block4 in favor 
+of DW_FORM_block. For blocks that aren't expressions (e.g., constant values 
+expressed as a block of bytes), the length of the block can just as easily 
+be expressed as a ULEB128. Any producer can reasonably be expected to know 
+how long the block is before it needs to emit the length.
+
+
+Proposal
+
+The proposed changes to the DWARF specification are detailed below, keyed 
+to the section numbering for the December 20, 2005, version of the DWARF-3 
+document.
+
+In Section 2.2, &quot;Attribute Types,&quot; add the following row to the table of 
+Figure 3:
+
+ expr     An arbitrary number of bytes of data, interpreted
+          as a DWARF expression (see Section 2.5).
+
+[Note: The terminology for DWARF expressions has been under discussion. 
+This proposal may need to be updated to be consistent with the final 
+terminology.]
+
+In Section 6.4.2.2, &quot;CFA Definition Instructions,&quot; Item 6, 
+&quot;DW_CFA_def_cfa_expression&quot;, change &quot;DW_FORM_block&quot; to &quot;DW_FORM_expr&quot;.
+
+In Section 7.5.4, &quot;Attribute Encodings,&quot; add the following paragraph to 
+the description of class block:
+
+ The use of forms DW_FORM_block1, DW_FORM_block2,
+ and DW_FORM_block4 is deprecated. Producers should
+ use DW_FORM_block instead.
+
+Add the following paragraphs immediately preceding the description for 
+class flag:
+
+ expr
+
+   Represented as an unsigned LEB128 length followed by the
+   number of bytes specified by the length (DW_FORM_expr).
+   The information bytes contain a DWARF expression (see
+   Section 2.5).
+
+In FIgure 20, &quot;Attribute encodings,&quot; change &quot;block&quot; to &quot;expr&quot; in the 
+&quot;Classes&quot; column for the following attributes:
+
+ DW_AT_location
+ DW_AT_byte_size
+ DW_AT_bit_offset
+ DW_AT_bit_size
+ DW_AT_string_length
+ DW_AT_lower_bound
+ DW_AT_return_addr
+ DW_AT_upper_bound
+ DW_AT_count
+ DW_AT_data_member_location
+ DW_AT_discr_list
+ DW_AT_frame_base
+ DW_AT_namelist_item
+ DW_AT_segment
+ DW_AT_static_link
+ DW_AT_use_location
+ DW_AT_vtable_elem_location
+ DW_AT_allocated
+ DW_AT_associated
+ DW_AT_data_location
+ DW_AT_byte_stride
+
+In Figure 21, add the following row:
+
+ Form name       Value    Class
+
+ DW_FORM_expr    0x18     expr
+
+--
+
+Accepted with changes:
+  1.  Remove DW_AT_namelist_item from list of changes
+  2.  Fix typo on pg. 136 -- DW_AT_namelist_item is reference, not block
+  3.  No deprecation of block1-4
+  4.  Clarify block form description (pg. 126) with reference to expr.  
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

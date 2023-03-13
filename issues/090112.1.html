@@ -1,0 +1,303 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>090112.1</td>
+      <td>Kendrick Wong</td>
+      <td>Support C++0x template aliases</td>
+      <td>Enhancement</td>
+      <td>Accepted</td>
+      <td>Kendrick Wong</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Background
+----------
+
+For detail description of the feature, please refer to:
+http://www.research.att.com/~bs/C++0xFAQ.html#template-alias
+http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2258.pdf 
+
+Overview
+--------
+
+The motivation behind this feature is to allow a shorthand notation 
+to create a template base on another template, and optionally have 
+zero or more template arguments specified. The keyword <i>using</i> is 
+introduced to allow this behavior.
+
+template&amp;lt;class T&amp;gt;
+using Vec = std::vector&amp;lt;T,My_alloc&amp;lt;T&amp;gt;&amp;gt;;    // alias declaration:
+                                           // standard vector using my allocator
+
+Vec&amp;lt;int&amp;gt; fib = { 1, 2, 3, 5, 8, 13 };      // allocates elements using My_alloc 
+vector&amp;lt;int,My_alloc&amp;lt;int&amp;gt;&amp;gt; verbose = fib;   // verbose and fib are of the same type
+
+In the above example, fib is a template alias of vector&amp;lt;int,My_alloc&amp;lt;int&amp;gt;&amp;gt;, 
+therefore both fib and verbose have identical types.
+
+The using keywords acts like similar to typedef, in that both keywords 
+introduces a typedef-name.
+
+Proposed change to DWARF
+========================
+
+New DWARF tag:
+DW_TAG_template_alias   0x42  template alias
+
+Allowable attributes: (modeled after DW_TAG_typedef)
+    * DECL
+    * DW_AT_abstract_origin
+    * DW_AT_accessibility
+    * DW_AT_allocated
+    * DW_AT_assocated
+    * DW_AT_data_location
+    * DW_AT_declaration
+    * DW_AT_description
+    * DW_AT_name
+    * DW_AT_sibling
+    * DW_AT_start_scope
+    * DW_AT_type
+    * DW_AT_visibility
+
+5.17: Template Alias Entries
+
+  Any arbitrary type named via template alias is represented by a 
+  debugging information entry with the tag DW_TAG_template_alias. 
+  The template alias entry has a DW_AT_name attribute whose value 
+  is a null-terminated string containing the name of the template 
+  alias as it appears in the source program. The template alias entry 
+  also contains a DW_AT_type attribute. The template alias entry will 
+  have the following child entries:
+
+   1. Each formal parameterized type declaration appearing in the 
+      template alias declaration is represented by a debugging 
+      information entry with the tag DW_TAG_template_type_parameter. 
+      Each such entry may have a DW_AT_name attribute, whose value is 
+      a null-terminated string containing the name of the formal 
+      type parameter as it appears in the source program. The template 
+      type parameter entry also has a DW_AT_type attribute describing 
+      the actual type by which the formal is replaced for this instantiation.
+
+   2. Each formal parameterized value declaration appearing in the 
+      template alias declaration is represented by a debugging information 
+      entry with the tag DW_TAG_template_value_parameter. Each such entry 
+      may have a DW_AT_name attribute, whose value is a null-terminated 
+      string containing the name of the formal value parameter as it appears 
+      in the source program. The template value parameter entry also has a 
+      DW_AT_type attribute describing the type of the parameterized value. 
+      Finally, the template value parameter entry has a DW_AT_const_value 
+      attribute, whose value is the actual constant value of the value 
+      parameter for this instantiation as represented on the target 
+      architecture.
+
+Appendix
+
+D.10.1 Template Aliases example
+
+First, no aliases at all. This is just plain old ordinary template instance DWARF:
+
+template&amp;lt;typename T, typename U&amp;gt;
+struct Alpha {
+   T tango;
+   U uniform;
+};
+
+There's no DWARF for just that. But now we have an instance like this:
+
+Alpha&amp;lt;int,short&amp;gt;  a;
+
+DWARF for variable 'a':
+
+10$:  DW_TAG_structure_type
+          DW_AT_name &quot;Alpha&quot;
+11$:      DW_TAG_template_type_parameter
+              DW_AT_name(&quot;T&quot;)
+              DW_AT_type(reference to type &quot;int&quot;)
+12$:      DW_TAG_template_type_parameter
+              DW_AT_name(&quot;U&quot;)
+              DW_AT_type(reference to type &quot;short&quot;)
+13$:      DW_TAG_member
+              DW_AT_name(&quot;tango&quot;)
+              DW_AT_type(reference to 11$)
+14$:      DW_TAG_member
+              DW_AT_name(&quot;uniform&quot;)
+              DW_AT_type(reference to 12$)
+15$:  DW_TAG_variable
+          DW_AT_name(&quot;a&quot;)
+          DW_AT_type(reference to $10)
+
+Now to introduce the first template alias:
+
+template&amp;lt;typename V&amp;gt; using Beta = Alpha&amp;lt;V,V&amp;gt;;
+
+Again, no DWARF for just that. But now there's an instance like this:
+
+Beta&amp;lt;long&amp;gt; b;
+
+DWARF for variable 'b':
+
+20$:  DW_TAG_structure_type
+          DW_AT_name &quot;Alpha&quot;
+21$:      DW_TAG_template_type_parameter
+              DW_AT_name(&quot;T&quot;)
+              DW_AT_type(reference to type &quot;long&quot;)
+22$:      DW_TAG_template_type_parameter
+              DW_AT_name(&quot;U&quot;)
+              DW_AT_type(reference to type &quot;long&quot;)
+23$:      DW_TAG_member
+              DW_AT_name(&quot;tango&quot;)
+              DW_AT_type(reference to 21$)
+24$:      DW_TAG_member
+              DW_AT_name(&quot;uniform&quot;)
+              DW_AT_type(reference to 22$)
+25$:  DW_TAG_template_alias
+          DW_AT_name(&quot;Beta&quot;)
+          DW_AT_type(reference to 20$)
+26$:      DW_TAG_template_type_parameter
+              DW_AT_name(&quot;V&quot;)
+              DW_AT_type(reference to &quot;long&quot;)
+27$:  DW_TAG_variable
+          DW_AT_name(&quot;b&quot;)
+          DW_AT_type(reference to 25$)
+
+D.10.2 Template Aliases example
+
+template&amp;lt;class TX&amp;gt; struct X { };
+template&amp;lt;class TY&amp;gt; struct Y { };
+template&amp;lt;class T&amp;gt; using Z = Y&amp;lt;T&amp;gt;;
+X&amp;lt;Y&amp;lt;int&amp;gt;&amp;gt; y;
+X&amp;lt;Z&amp;lt;int&amp;gt;&amp;gt; z;
+X&amp;lt;Y&amp;lt;int&amp;gt;&amp;gt; instantiates the following structures:
+
+30$:  DW_TAG_structure_type                         // struct Y&amp;lt;int&amp;gt;
+          DW_AT_name(&quot;Y&quot;)
+31$:      DW_TAG_template_type_parameter
+              DW_AT_name(&quot;TY&quot;)
+              DW_AT_type(reference to base type &quot;int&quot;)
+32$:  DW_TAG_structure_type                         // struct X&amp;lt;Y&amp;lt;int&amp;gt;&amp;gt;
+          DW_AT_name(&quot;X&quot;)
+33$:      DW_TAG_template_type_parameter
+              DW_AT_name(&quot;TX&quot;)
+              DW_AT_type(reference to 30$)
+
+X&amp;lt;Z&amp;lt;int&amp;gt;&amp;gt; instantiates the following structures:
+
+40$:  DW_TAG_template_alias                         // template&amp;lt;class T&amp;gt; using Z = Y&amp;lt;int&amp;gt;;
+          DW_AT_name(&quot;Z&quot;)
+          DW_AT_type(reference to 30$)
+41$:      DW_TAG_template_type_parameter
+              DW_AT_name(&quot;T&quot;)
+              DW_AT_type(reference to base type &quot;int&quot;)
+42$:  DW_TAG_structure_type                         // struct X&amp;lt;Z&amp;lt;int&amp;gt;&amp;gt;
+          DW_AT_name(&quot;X&quot;)
+43$:      DW_TAG_template_type_parameter
+              DW_AT_name(&quot;TX&quot;)
+              DW_AT_type(reference to 40$)
+
+Note that $32 and $42 are actually the same type:
+
+50$:  DW_TAG_variable             
+          DW_AT_name(&quot;y&quot;)
+          DW_AT_type(reference to $32)
+51$:  DW_TAG_variable             
+          DW_AT_name(&quot;z&quot;)
+          DW_AT_type(reference to $42)
+
+ 
+Change History
+
+April 20, 2009.
+
+    * Re-format DWARF description in Example section to match current documentation.
+
+May 5, 2009.
+
+    * Todd Allen suggests a simpler example to illustrate template alias.
+    * Todd Allen made a suggestion that the template type parameter within the 
+      structure/class can point directly to the template type parameter within 
+      the template alias declaration.
+    * Todd Allen suggests using a different TAG for describing template alias.
+
+June 2, 2009.
+
+    * Remove mentioning of template parameter pack
+    * Remove mentioning of C++0x within normative text
+
+--
+
+August 11, 2009 -- Accepted without changes.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

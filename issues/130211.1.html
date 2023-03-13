@@ -1,0 +1,119 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>130211.1</td>
+      <td>Kendrick Wong</td>
+      <td>Change default encoding of string literals to UTF8</td>
+      <td>Enhancement</td>
+      <td>Rejected</td>
+      <td>Kendrick Wong</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Affected sections in DWARF spec: all sections where 'names' are used.
+
+Overview:
+
+Prior to DWARF 5, the default encoding of all string literals within DWARF sections are ASCII 
+(ISO8859-1).  A compilation unit DIE may have an optional attribute, DW_AT_utf8, which indicates
+that the encoding of all string literals is UTF8.
+
+This proposal is to change the default encoding of all string literals to UTF8. (Thereby, deprecating 
+DW_AT_utf8 in DWARF 5)
+
+Proposal:
+
+In DWARF 5, the default encoding of all string literals within DWARF is UTF8.  This affects all string 
+literals within DWARF sections.  For example:
+ - string literals in .debug_info
+ - string literals in .debug_type
+ - file, directory names in .debug_line
+ - string literals in .debug_pubnames
+ - string literals in .debug_pubtypes
+ - string literals in .debug_str
+ - etc..
+
+While all the base ASCII characters share the same codepoints in UTF8, this is nevertheless an incompatible
+change.  This is because existing producer may encode string literals using multibyte encodings, and these
+literals will not be interpreted correctly under UTF8.
+
+Once the default encoding is changed, the attribute DW_AT_utf8 is no longer needed, and can be deprecated.
+
+---
+Rejected 3/19/2013 -- Committee decided to retain existing default encoding.  
+Producers are encouraged to use UTF-8 and to specify DW_AT_utf8 in the CU.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

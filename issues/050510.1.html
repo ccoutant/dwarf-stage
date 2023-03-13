@@ -1,0 +1,130 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>050510.1</td>
+      <td>Jeff Nelson</td>
+      <td>DW_AT_frame_base clarifications</td>
+      <td>Clarification</td>
+      <td>Accepted</td>
+      <td>Jeff Nelson</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Reference: DWARF V3, Draft 9 (November 12, 2003)
+
+Problem:
+
+Evaluation of the DW_OP_fbreg operator requires evaluation of the
+DW_AT_frame_base attribute. The description of the DW_OP_regN operator
+suggests that a DW_AT_frame_base containing a single DW_OP_regN could be
+interpreted as invalid. This is because--according to the DW_OP_regN
+definition--DW_OP_regN &quot;names&quot; the register, rather than provides the
+&quot;value&quot; of the register. The DW_OP_fbreg example in Section 2.5.3 would
+seem to support this conclusion.
+
+However, in a discussion on the DWARF mailing list in April 2005,
+several DWARF adopters reported that they have firmly established the
+convention of interpreting DW_AT_frame_base to be the register value
+when the attribute contains just DW_OP_regN. This practice needs to be
+codified.
+
+In addition, the description of DW_AT_frame_base in Section 3.3.5
+neglects to explain how the attribute should be interpreted if it is a
+location list. Note that location lists were clearly envisioned by the
+description of DW_OP_fbreg in Section 2.4.1.2.
+
+
+Proposal:
+
+Change the second paragraph of Section 3.3.5 from:
+
+    A subroutine or entry point entry may also have a DW_AT_frame_base
+    attribute, whose value is a location description that
+    computes the &ldquo;frame base&rdquo; for the subroutine or entry point.
+
+to the wording suggested by Jim Blandy and Ron Brender:
+
+    A subroutine or entry point may also have a DW_AT_frame_base
+    attribute, whose value is a location description that
+    computes the &quot;frame base&quot; for the subroutine or entry point.
+    If the location description is a register name, that register
+    contains the frame base address.  If the location description
+    is a DWARF expression, then the result of evaluating that
+    expression is the frame base address. Finally, for a
+    location list, this interpretation applies to each location
+    expression contained in the list of location list entries.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

@@ -1,0 +1,175 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>040909.1</td>
+      <td>Alasdair Grant</td>
+      <td>DW_AT_default_value</td>
+      <td>Extension</td>
+      <td>Accepted with modification</td>
+      <td>Matthew Gretton-Dann</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Sep 9, 2004 Alasdair Grant raised the issue:
+
+Is there a reason why DW_AT_default_value needs to be restricted
+to pointing to a debugging information entry for a variable or
+subroutine [4.1], and not, say, DW_TAG_constant or DW_TAG_enumerator?
+Even an inline constant would seem reasonable here.
+
+David Anderson replied:
+
+Al Grant asks:
+&gt;Is there a reason why DW_AT_default_value needs to be restricted
+&gt;to pointing to a debugging information entry for a variable or
+&gt;subroutine [4.1], and not, say, DW_TAG_constant or DW_TAG_enumerator?
+&gt;Even an inline constant would seem reasonable here.
+
+I don't recall why the wording is
+as specified, but note that the notion of 'variable' encompasses
+variables that are compiler generated (DW_AT_artificial)
+and have constant value.
+
+This attribute refers to 'something', so I don't see
+how DW_AT_default_value could 'be' a constant itself. ??
+
+
+A concrete inlined instance with a constant value is
+representable with bullet item 10 of 4.1, right?
+
+Alasdair Grant expanded:
+
+Yes, it wouldn't be much use for the purpose if it didn't!
+My concern is efficiency.
+
+&gt; This attribute refers to 'something', so I don't see how
+&gt; DW_AT_default_value could 'be' a constant itself. ??
+
+It could be a constant if it had form class 'constant' as an
+alternative to its form class 'reference'.  For something like
+the C++ function declaration
+
+  int f(int n = 0);
+
+it seems bizarre to have to invent an unnamed variable, or
+even an unnamed constant, simply to represent the value 0
+which could be encoded as e.g. DW_FORM_udata.
+
+&gt; A concrete inlined instance with a constant value is
+&gt; representable with bullet item 10 of 4.1, right?
+
+Not necessarily - item 10 covers items whose value is 'not
+represented by an object in the address space of the program'
+and 'does not have a location attribute', which makes it not
+generally applicable to formal parameters in, say, C++, which
+are addressible objects with locations, unless optimized away.
+
+&gt; Am I missing something here?
+
+As regards the representation of parameter defaults, I think
+you are missing efficiency considerations.  It is inefficient
+to have to encode a simple constant via a reference to an
+unnamed artificial constant-valued variable.  DWARF seems
+technically quite capable of encoding it as a constant.
+Other attributes, such as type properties (2.18) have form
+classes 'block, constant, reference'.  This would seem equally
+appropriate for DW_AT_default_value.
+
+
+
+PROPOSAL:
+
+4.1, paragraph numbered 9 on DW_AT_default value be
+altered to read:
+
+9. A formal parameter entry may have a DW_AT_default_value
+attribute. The value of this attribute  may be a reference to the
+debugging information entry for a variable or subroutine, or
+the value may be a constant value. If it is a reference, the
+default value of the parameter is the value of the variable
+(which may be constant) or the value returned by the
+subroutine. If the value of the DW_AT_default_value reference attribute
+is 0, it means that no default value has been specified.
+If the value is of form constant, the type of the constant
+must match the DW_AT_type of the formal-parameter-entry
+(unlike with a reference form, with a constant forme
+there is no means to indicate 'no default value').
+
+
+Accepted, with change to read &quot;a value of the same type 
+as the formal parameter&quot;. 
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

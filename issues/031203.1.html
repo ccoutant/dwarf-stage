@@ -1,0 +1,124 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>031203.1</td>
+      <td>Jason Molenda</td>
+      <td>Objective C Language Codes</td>
+      <td>Extension</td>
+      <td>Accepted</td>
+      <td>Jason Molenda</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+At Apple we have a variant of C, Objective-C, which has been in use for
+a decade or so.  We also have a beastie called Objective-C++ which is
+Objective-C and C++ all in one glorious package.  Our debugger, gdb,
+needs to know when it is dealing with an Objective-C or Objective-C++
+function.  Objective-C is included in the standard GCC distribution;
+Objective-C++ is currently only in our version of GCC.
+
+Based on Draft 8 of the DWARF3 standard (2001-11-19), here's my
+proposed addition.
+
+
+=== SUMMARY
+
+Add language identifier to support the Objective-C and Objective-C++
+languages, used primarily, but not exclusively, on the MacOS X
+operating system.
+
+=== PROPOSED ADDITIONS
+
+Add to Figure 8 [&quot;Language Names&quot;; 3.1.1, pp. 36-67]:
+
+   DW_LANG_ObjC            Objective-C
+   DW_LANG_ObjC_plus_plus  Objective-C++
+
+Add to Figure 27 [&quot;Language encodings&quot;; 7.12, p. 143]:
+
+   DW_LANG_ObjC            0x0010
+   DW_LANG_ObjC_plus_plus  0x0011
+
+
+
+
+There is quite a substantial amount of code written in Objective-C and
+Objective-C++, so getting the language codes defined from the beginning
+would be very helpful. :-)
+
+
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

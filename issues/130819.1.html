@@ -1,0 +1,159 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>130819.1</td>
+      <td>Keith Walker</td>
+      <td>Language-dependent default array ordering not specified</td>
+      <td>Clarification</td>
+      <td>Withdrawn</td>
+      <td>Keith Walker</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+Section 5.4, pg 83
+
+In section 5.4 &quot;Array Type Entries&quot; is the statement:
+
+  &quot;If no ordering attribute is present, the default ordering for the source language
+   (which is indicated by the DW_AT_language attribute of the enclosing compilation
+   unit entry) is assumed.&quot;
+
+However the default ordering is then not defined anywhere in the Standard.
+
+Where a similar language-dependent default is used (Section 5.11 &quot;Subrange Type Entries&quot;)
+the language specific defaults are specified, as well as in the Language encodings table
+in Section 7.12 &quot;Source Languages&quot;.
+
+DWARF Changes:
+
+Add to section 5.13 &quot;Subrange Type Entries&quot; after the sentence &quot;If no ordering 
+attribute is present, the default ordering for the source language (which is 
+indicated by the DW_AT_language attribute of the enclosing compilation unit 
+entry) is assumed.&quot;:
+
+The default array ordering is DW_ORD_row_major for Ada, C, C++, Cobol, D, Go, 
+Haskell, Java, Modula-2, Modula-3, Objective C, Objective C++, OpenCL, Pascal, 
+PL/1, Python, UPC.  The default array ordering is DW_ORD_col_major for Fortran.
+
+
+Change the sentence in Section 7.12 from:
+
+&quot;Table 7.14 also shows the default lower bound, if any, assumed for an 
+omitted DW_AT_lower_bound attribute in the context of a DW_TAG_subrange_type 
+debugging information entry for each defined language&quot;
+
+To:
+
+&quot;Table 7.14 also shows the default lower bound, if any, assumed for an 
+omitted DW_AT_lower_bound attribute in the context of a DW_TAG_subrange_type 
+debugging information entry and the default array ordering for an omitted 
+DW_AT_ordering in the context of a DW_TAG_array_type for each defined language&quot;
+
+Add an additional column called &quot;Default Array Ordering&quot; to Table 7.14: 
+&quot;Language encodings&quot; which contains the following values:
+
+DW_LANG_C89               DW_ORD_row_major
+DW_LANG_C                 DW_ORD_row_major
+DW_LANG_Ada83             DW_ORD_row_major
+DW_LANG_C_plus_plus       DW_ORD_row_major
+DW_LANG_Cobol74           DW_ORD_row_major
+DW_LANG_Cobol85           DW_ORD_row_major
+DW_LANG_Fortran77         DW_ORD_col_major
+DW_LANG_Fortran90         DW_ORD_col_major
+DW_LANG_Pascal83          DW_ORD_row_major
+DW_LANG_Modula2           DW_ORD_row_major
+DW_LANG_Java              DW_ORD_row_major
+DW_LANG_C99               DW_ORD_row_major
+DW_LANG_Ada95             DW_ORD_row_major
+DW_LANG_Fortran95         DW_ORD_col_major
+DW_LANG_PL1               DW_ORD_row_major
+DW_LANG_ObjC              DW_ORD_row_major
+DW_LANG_ObjC_plus_plus     DW_ORD_row_major
+DW_LANG_UPC               DW_ORD_row_major
+DW_LANG_D                  DW_ORD_row_major
+DW_LANG_Python            DW_ORD_row_major
+DW_LANG_OpenCL            DW_ORD_row_major
+DW_LANG_Go                 DW_ORD_row_major
+DW_LANG_Modula3           DW_ORD_row_major
+DW_LANG_Haskell           DW_ORD_row_major
+
+---
+
+Revised 11/19/2013.
+Withdrawn 11/20/2013: Defer to language definition.
+ 
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

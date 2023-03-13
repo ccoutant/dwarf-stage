@@ -1,0 +1,149 @@
+<html><head>
+  
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF 5 Standard</title></head>
+<body>
+
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>DWARF 5 Standard</title>
+</head>
+<body>
+<table style="width: 800px; text-align: left;" border="0"
+ cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="text-align: center;">
+      <h1><font class="title">DWARF 5 Standard</font></h1>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: left;">
+      <p align="justify"><font class="content">The <strong>DWARF Version 5 Debugging 
+Format Standard</strong>
+is based on the <strong>DWARF Version 4 Standard</strong>. It is an upward compatible 
+extension to the previous version of the standard.<br>
+      <br>
+The major enhancements in DWARF Version 5 are
+      </font></p>
+      <font class="content"> 
+      <ul>
+<li>Description of the objectives and rationale for the design and evolution of the DWARF Standard.<li>
+<li>Merge .debug_types into .debug_info section.</li>
+<li>Support collecting common debug information into a single supplementary object file.</li>
+<li>Replace the line number program header allowing better data compression and source validation.</li>
+<li>Support split object file and package representations to allow DWARF info to be kept separate from executable files.</li>
+<li>Replace .debug_macinfo with .debug_macro representation allowing much more compact representation of C/C++ macros.</li>
+<li>Replace .debug_pubnames and .debug_pubtypes with much more functional .debug_names section.</li>
+<li>Replace location list (.debug_loc) and range list (.debug_ranges) sections with new sections (.debug_loclists and
+.debug_rnglists) allowing more compact representation and eliminating relocations.</li>
+<li>Add new TAG to describe call site information, including tail call and tail recursion.</li>
+<li>Improve support for FORTRAN assumend rank arrays, dynamic rank arrays, and co-arrays.</li>
+<li>Add new operators which support a DWARF expression stack containing typed values.</li>
+<li>Add support for C++ auto return type, deleted member functions, and defaulted constructors and destructors. </li>
+<li>Add new attribute to identify a subprogram which does not return to its caller.</li>
+<li>Add language codes for C 2011, C++ 2003, C++ 2011, C++ 2014, Dylan,
+Fortran 2003, Fortran 2008, Go, Haskell, Julia, Modula 3, Ocaml, OpenCL,
+Rust, Swift, and BLISS.</li>
+<li>Numerous minor additions to improve functionality and performance. </li>
+      </ul>
+The DWARF Version 5 Standard is compatible with DWARF Version 4 except as follows:
+  <ul>
+<li>The compilation unit header (in the .debug_info section) has a new unit_type field.</li>
+<li>New operand forms for attribute values are defined (DW_FORM_addrx*, 
+DW_FORM_data16, DW_FORM_implicit_const, DW_FORM_line_strp,
+DW_FORM_loclistx, DW_FORM_rnglistx, DW_FORM_ref_sup*,
+DW_FORM_strp_sup and DW_FORM_strx*).</li>
+<li>The line number table header is substantially revised.</li>
+<li>A location list entry with the address range (0, maximum-address) is defined
+as the new default location list entry.</li>
+<li>In a string type, the DW_AT_byte_size attribute is re-defined to always
+describe the size of the string type. (Previously it described the size of the
+optional string length data field if the DW_AT_string_length attribute was
+also present.)</li>
+<li>New representations for macro definitions, symbol lookup, location lists and range lists.</li>
+  </ul>
+      </font>
+  </td>
+</tr>
+<tr>
+  <td>
+    <a href="/doc/DWARF5.pdf">
+      <button type="button" class="btn btn-primary">Download DWARF Version 5 Standard</button>
+    </a>
+  </td>
+</tr>
+  </tbody>
+</table>
+<br>
+</body>
+</html>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+<br>
+</body></html>

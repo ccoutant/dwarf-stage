@@ -1,0 +1,147 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>090402.2</td>
+      <td>Paul Robinson</td>
+      <td>Clarify DW_TAG_condition_name</td>
+      <td>Editorial</td>
+      <td>Accepted</td>
+      <td>Paul Robinson</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+In section 5.7 Condition Entries, the normative text currently reads:
+
+    The DW_TAG_condition debugging information entry describes a COBOL
+    level-88 condition.  If a name has been given to the condition, the
+    condition entry has a DW_AT_name attribute whose value is a null-
+    terminated string giving the condition name as it appears in the
+    source program.
+
+    The condition entry's parent entry describes the conditional
+    variable; normally this will be a DW_TAG_variable or DW_TAG_member
+    entry.  The type of the condition entry is derived from the
+    DW_AT_type attribute of the parent entry.
+
+    The condition entry owns DW_TAG_constant and/or DW_TAG_subrange_type
+    entries that describe the constant values associated with the
+    condition.  If any child entry has a DW_AT_type attribute, that
+    attribute should describe a type compatible with the type derived
+    from the condition entry's parent.
+
+There are a few problems with this description.
+
+1. The type &quot;derived from&quot; the parent is not well defined. In particular
+   what happens when the parent has an array type is not specified, and
+   it needs to be because it's not obvious.
+
+2. The &quot;type of the condition entry&quot; is actually best described as
+   boolean, and is not interesting (so don't bother describing it at
+   all).  What matters is the relationship between the type of the
+   conditional variable and the type(s) of the constant(s).
+
+3. Normative text explicitly mentions COBOL.
+
+I propose to replace the normative text with the following.
+
+    The DW_TAG_condition debugging information entry describes a logical
+    condition that tests whether a given data item's value matches one
+    of a set of constant values.  If a name has been given to the
+    condition, the condition entry has a DW_AT_name attribute whose
+    value is a null-terminated string giving the condition name as it
+    appears in the source program.
+
+    The condition entry's parent entry describes the conditional
+    variable; normally this will be a DW_TAG_variable, DW_TAG_member or
+    DW_TAG_formal_parameter entry.  If the parent entry has an array
+    type, the condition can test any invididual element, but not the
+    array as a whole.  The condition entry implicitly specifies a
+    &quot;comparison type&quot; that is the type of an array element if the parent
+    has an array type, otherwise it is the type of the parent entry.
+
+    The condition entry owns DW_TAG_constant and/or DW_TAG_subrange_type
+    entries that describe the constant values associated with the
+    condition.  If any child entry has a DW_AT_type attribute, that 
+    attribute should describe a type compatible with the comparison type;
+    otherwise the child's type is the same as the comparison type.
+
+The non-normative text would remain as is.
+
+--
+
+Accepted July 7, 2009.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>

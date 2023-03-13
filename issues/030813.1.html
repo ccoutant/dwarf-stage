@@ -1,0 +1,216 @@
+<html><head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>DWARF Issue</title>
+</head><body>
+<body>
+<table style="text-align: left; width: 800px; height: 136px;" border="0">
+  <tbody>
+    <tr>
+      <td
+ style="vertical-align: middle; text-align: center; width: 153px;"><img
+ src="dwarf.png" border="0"> </td>
+      <td style="width: 372px;">
+      <div style="text-align: center;"> </div>
+      <h1 style="text-align: center;">DWARF Standard</h1>
+      <div style="text-align: center;"> </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<table style="text-align: left; width: 800px; height: 26px;" border="0"
+ cellpadding="0" cellspacing="0">
+  <tbody>
+    <tr>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/">HOME</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/Download.html">SPECIFICATIONS</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="http://wiki.dwarfstd.dev/index.php?title=DWARF_FAQ">FAQ</a><br>
+      </td>
+      <td
+ style="text-align: center; background-color: rgb(51, 51, 255);"><a
+ style="color: rgb(255, 255, 255);"
+ href="/issues.html">ISSUES</a><br>
+      </td>
+      <td style="width: 168px; background-color: rgb(51, 51, 255);"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+
+<table style="text-align: left; width: 794px; height: 25px;" border="1" cellpadding="2" cellspacing="2">
+  <tbody>
+
+    <tr>
+      <td>030813.1</td>
+      <td>Andrew Cagney</td>
+      <td>CIE initial state</td>
+      <td>Clarification</td>
+      <td>Accepted</td>
+      <td>Todd Allen</td>
+    </tr>
+  </tbody>
+</table>
+<pre><big>
+
+The CFI is broken down into two parts - a CIE and an FDE.  The CIE, 
+which is shared by multiple FDEs provides the initial settings for all 
+the registers (in INITIAL_INSTRUCTIONS).
+
+What happens if a compiler fails to provide that information, or if that 
+information is [very] incomplete?  What is the initial state of any 
+undefined registers?  Undefined, ABI committee defined, compiler 
+dependant, ...
+
+The example in D.5:
+[ example omitted here to save space.]
+
+strongly suggests that the intent was for the compiler to provide a 
+completly populated initial table row, however I'm struggling to find 
+any definitive language in the spec proper supporting this.
+
+------
+David Anderson
+The DWARF2/3 spec says the state is unspecified. That is, the
+spec does not answer your question. As far as I've been able to tell.
+
+I found this unappealing (to say the least) and for SGI/MIPS
+the default setting is 'same value', a setting that makes
+sense for the MIPS instruction set.  So initial-instructions
+need only have the registers that one expects have changed
+when we get to the initial instruction.
+(Rather than repeating 'same-value' for the rest of the registers.)
+
+
+Todd Allen
+
+Our tools have been assuming that, for a register with no explicit initial
+state in the CIE, its value must be &quot;undefined&quot;.  (If it's undefined, it must
+be &quot;undefined&quot;.  :) )  Although I've seen lots of code that has no need to
+distinguish between &quot;undefined&quot; and &quot;same value&quot;.
+
+Andrew Cagney
+
+BTW, GCC assumes same-value.  To cut past an e-mail I'm just sending to GDB:
+
+RTH wrote:
+&gt; Moreover, the algorithm I suggested that you use -- assume saved --
+&gt; is also completely independant of the ABI, so its' not like GDB 
+&gt; needs to hard code ABI specific information either.
+
+It doesn't work in general.
+On a register window machine, it could use a fairly complex starting 
+state vis:
+	globals: same
+	locals: where saved on stack
+	input: undefined
+	output: in input
+(register windows give me a headache so don't assume this one is correct :-)
+
+It is open to per compiler interpretation.
+Unless clearly defined by the spec, GCC's interpretation is strictly 
+that - GCCs interpretation.  An alternative toolchain is equally at 
+liberty to start with the assumption that registers are undefined.
+
+A complete CIE can make for more compact CFI
+If the initial state is preserve-&gt;same and scratch-&gt;undefined, the CFI 
+need only describe the preserved registers that get moved.
+
+My current best guess is that this is should be defined by either dwarf2 
+or the relevant ABI committee.
+
+
+
+Andrew Cagney
+
+Yes.  From the debugger and users point of view, I think &quot;undefined&quot; is 
+safer.
+
+Marking it as undefined is less likely to lead to a situtation where the 
+debugger displays incorrect values (at the price of occasionally 
+displaying ``value undefined'' when it really is).  On the other hand, 
+assuming ``same value'' can easily lead to the debugger displaying 
+values that are wrong.  From the users view point, wrong values are far 
+worse than no values.
+
+
+==========================
+PROPOSAL (not Andrew Cagney's words, David Anderson's words.
+	Andrew may wish to change this to one of his suggestions
+        above)
+
+Add the following sentence to 6.4.1, CIE, 
+    8) initial instructions (array of ubyte)
+after the existing sentence.
+In italics.
+
+&quot;Default values for the columns before applying the
+initial instructions are not provided.  The ABI authoring
+body or a compilation system authoring body should
+specify a default value.  In DWARF2 the default
+value was not mentioned.&quot;
+
+==========================
+ALTERNATIVE PROPOSAL (not proposed, but is one alternative) 
+    Add, before 8) initial instructions (array of ubyte) in 6.4.1:
+
+8) default state (uleb128 value)
+   A  single value, which is the 'default state' of
+   all registers before 'initial instructions' are applied.
+   Normaly would be the value of either DW_CFA_undefined or
+   DW_CFA_same_value.   
+
+In italics then add
+The ABI authoring body or a compilation system authoring body
+may specify a default value that applies after the
+default state (for example, saying that different
+classes of registers have different defaults).  
+In DWARF2 the default value was not mentioned.
+
+==========================
+
+2ND ALTERNATIVE PROPOSAL:
+
+   6.4.1, CIE, 8) initial instructions (array of ubyte)
+
+   The default rule for all columns before interpretation of the initial
+   instructions is the undefined rule.  However, an ABI authoring body or a
+   compilation system authoring body may specify an alternate default value
+   for any or all columns.  <i>In DWARF2, the default value was not
+   mentioned.</i>
+
+--------------------------
+
+Accepted 2nd Alternative.
+</big></pre>
+<br><br>
+
+<table style="text-align: left; width: 800px;" border="0" cellpadding="0" cellspacing="0">
+  <small>
+  </small><tbody><small>
+    </small><tr><small>
+      </small><td style="width: 800px; text-align: center;"><small>
+      <font class="footmsg">
+All logos and trademarks in this site are property of their respective
+owner. <br>
+The comments are property of their posters, all the rest &copy; 2007-2022
+by DWARF Standards Committee.</font></small></td><small>
+    </small></tr><small>
+  </small></tbody><small>
+  </small>
+</table>
+
+</body></html>
