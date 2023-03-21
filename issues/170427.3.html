@@ -68,7 +68,7 @@
 
 Section 2.6.2 Location Lists and Section 2.17.3 Non-Contiguous Address Ranges
 
-This proposal introduces an mechanism for loclists and rnglists to
+This proposal introduces a mechanism for loclists and rnglists to
 share location list or range list fragments among multiple location or
 range lists.
 
@@ -104,7 +104,7 @@ In Section 2.6.2, page 45, add after 8. DW_LLE_start_length:
   first entry of a loclist whose entries are to be regarded as part of
   the current loclist, up to the DW_LLE_end_of_list_entry.
 
-In Section 2.7.13, page 53, add following 1. DW_RLE_end_of_list:
+In Section 2.17.3, page 53, add following 1. DW_RLE_end_of_list:
 
   2. DW_RLE_include_rnglistx
 
@@ -114,7 +114,7 @@ In Section 2.7.13, page 53, add following 1. DW_RLE_end_of_list:
   a target list of entries, which will be regarded as part of the
   current rnglist, up to the DW_RLE_end_of_list entry.
 
-In Section 2.7.13, page 54, add after 8. DW_RLE_start_length:
+In Section 2.17.3, page 54, add after 8. DW_RLE_start_length:
 
   10. DW_RLE_include_rnglist
 
@@ -132,8 +132,8 @@ In Section 7.7.3, add to Table 7.10:
 
 In Section 7.25, add to Table 7.30:
 
-  DW_LRE_include_rnglist  | 0x??
-  DW_LRE_include_rnglistx | 0x??
+  DW_RLE_include_rnglist  | 0x??
+  DW_RLE_include_rnglistx | 0x??
 
 --
 2021-04-15:  Revised from 170427.2.
