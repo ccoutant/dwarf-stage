@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Fast Name Lookup</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 140817.1: Fast Name Lookup</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Michael Eager</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Michael Eager</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2014-08-17</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Withdrawn</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>5</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section 6.1.1, pg 126
+BACKGROUND
+----------
+
+The pubnames and pubtypes data described in Section 6.1 are
+much larger than needed, since they contain redundant information,
+and the are missing other information, such as local symbol names.
+This proposal is to replace the current .debug_pubnames and 
+.debug_pubtypes sections with a new section named .debug_names.
+
+This proposal is an alternate to 130410.1 and has adopted a 
+number of the features of that proposal. 
+
+The following issues with the existing sections will be addressed:
+
+  1. A consumer cannot identify what a specific symbol from these sections is
+     (type, function, etc) without reading from the .debug_info section.
+
+  2. A consumer has to check multiple sections if they don&#x27;t know what type
+     the symbol is beforehand.
+
+  3. These sections are defined to only contain &quot;global&quot; objects, functions,
+     and types, but consumers often wish to access non-global symbols as well.
+
+  4. The existing standard does not specify exactly which symbols should be
+     emitted.  For instance, are names of enumerators included?
+
+  5. Global symbols which are &quot;localized&quot; into non-global symbols are excluded
+     from these sections.  If a routine is inlined but has no out-of-line
+     instance then there would be no entry emitted for the routine.
+
+  6. Many of the strings emitted into the pubnames section are used in other
+     sections, and space can be saved by emitting string table references
+     instead.
+
+Additionally, we also include the following design goals:
+
+  1. We want to keep look-ups fast and optimize for the not-found case.  If
+     a symbol exists in a single compilation unit out of four-hundred, we want
+     to quickly eliminate the three-hundred ninety-nine which do not contain
+     the requested symbol.
+
+  2. The on-disk representation should be as small as possible.  Additionally,
+     because consumers use this information in different ways, it should be
+     possible to omit the unused portions to reduce file size.
+
+The new .debug_names section will contain all symbols, both local and
+public, which are present in the compilation unit.  Minimally, the section
+will contain only global symbol and type names, but additional optional 
+accelerator data may be included to improve search performance.
+
+PROPOSAL
+--------
+
+Replace Section 6.1.1 with the following:
+6.1.1 Lookup by Name
+
+For lookup by name, one or more Name Lookup Tables are maintained in a separate 
+object file section named .debug_names.  The Name Lookup Table consists of 
+a Name Subtable and an optional Lookup Table.  The Name Subtable contains 
+the names of objects, functions, or types whose definitions are represented by
+debugging information entries within by a single compilation unit.  The optional
+Lookup Table is used to accelerate searching the Name Subtable.
+
+6.1.1.1  Name Subtable
+
+The Name Subtable immediately follows the Name Lookup Table header.  It
+consists of the a series of entries for names defined in the compilation
+unit, each followed by optional additional information.
+
+If DW_NAME_TABLE_USES_DEBUG_STR in the header is set, then each entry is a 
+ULEB128 offset into the .debug_str section for the name, otherwise each enry
+is a zero-terminated UTF-8 string.  
+
+If DW_NAME_TABLE_HAS_TAG in the header is set, each name is followed by the
+a ULEB128 value of the TAG of the DIE which defines the name.
+
+If DW_NAME_TABLE_HAS_DIE in the header is set, this is followed by a ULEB128
+value with the offset of into the .debug_info section of the DIE which defines
+the name.
+
+If DW_NAME_TABLE_HAS_PARENT_DIE in the header is set, this is followed by a
+ULEB128 value with the offset of into the .debug_info section of the parent of
+the DIE which defines the name.  *If the parent DIE field is present, the
+name should be the unqualified symbol name.  If the parent DIE field is absent,
+the name be the fully qualified (scoped) symbol name using delimiters appropriate
+for the source language of the compilation unit.*
+
+If DW_NAME_TABLE_PUBNAMES in the header is set, the table contains only the
+names of global objects, functions, and types.  Otherwise, the Name Subtable
+contains all names defined by debugging information entries in the compilation
+unit.  *If this option is set, the names are essentially identical to those
+in .pubnames and .pubtypes in previous versions of DWARF.*
+
+*C++ member functions with a definition in the class declaration are
+definitions in every compilation unit containing the class declaration,
+but if there is no concrete out-of-line instance there is no need to 
+have a entry for the member function.*
+
+6.1.1.2 Lookup Table
+
+The Lookup Table provides information to quickly determine whether a 
+particular name is present in the compilation unit.  The Lookup Table 
+is optional.  It consists of two parts, the Map followed by the Index List.
+
+The Map consists of a sequence of fixed sized (4 byte) entries.  It is 
+indexed by the digest of the name (see below) modulo the size of the Map.
+Each entry in the Map is an offset from the start of the Index List.  
+
+The Index List consistes of one or more sequences of individual entries.  
+Each sequence is referenced by only one Map entry.  The entries start 
+with a ULEB128 value with the offset into the Name Subtable.  If DW_LOOKUP_HAS_DIGEST 
+is set in the header, this is followed by a four byte value containing 
+digest of the name.  If DW_LOOKUP_HAS_DIGEST is set in the header, the
+Index List entries are in ascending order of the digest value, otherwise
+they are unordered.  Each sequence is terminated by a zero.  
+
+An entry of 0xffffffff in a Map entry indicates that no Index List entry
+exists.
+
+[ Alternate design choice;  
+  The Index list could have fixed size entries and a count field,
+  which would allow the list to be search using a binary search
+  rather than sequentially.  ]
+
+
+6.1.1.3  Mapping Function
+
+The mapping function is applied to the name to generate a four byte 
+digest of the name.  A list of the standard mapping functions and their
+detailed descriptions is found in Appendix X.
+
+6.1.2  Physical representation
+
+The .debug_names object file section contains a Name Lookup Table for each
+Compilation Unit.  The Name Lookup Table begins with a header containing 
+the following values:
+
+1. unit_length (initial length)
+   The total length of the all of the entries for the Name Lookup Table, not
+   including the length field itself (see Section 7.2.2 on page 152).
+
+2. version (uhalf)
+   A version number (see Section 7.19 on page 185). This number is specific to
+   the name lookup table and is independent of the DWARF version number.
+
+3. debug_info_offset (section offset)
+   The offset from the beginning of the .debug_info section of the compilation
+   unit header referenced by the set.  The value is encoded as a ULEB128.
+
+4. Name Subtable size (uword)
+   The size in bytes of the Name Subtable.
+
+5. Map Table size (uword)
+   The size in bytes of the Map Table.
+
+6. Index List size (uword)
+   The size in bytes of the Index List.
+
+7. Name Lookup options (uhalf)
+   A binary value containing the following flag bits:
+
+   DW_NAME_TABLE_PUBNAMES             (0x0001) -- Pubname/pubtypes only
+   DW_NAME_TABLE_USES_DEBUG_STR       (0x0002) -- Entries to .debug_str
+   DW_NAME_TABLE_HAS_TAG              (0x0004) -- Each entry has TAG
+   DW_NAME_TABLE_HAS_DIE              (0x0008) -- Each entry has DIE offset
+   DW_NAME_TABLE_HAS_PARENT_DIE       (0x0010) -- Each entry has parent offset
+   DW_NAME_LOOKUP_HAS_DIGEST          (0x0020) -- Each entry has digest value
+   RESERVED                           (0x00c0) -- Reserved must be zero
+   DW_NAME_USER                       (0xff00) -- User extensions
+
+
+The header is followed by the Name Subtable, and, if Map Table size and 
+Index List size are non-zero, those tables.  If the Map Table is present,
+the Name Subtable is padded so that the Map Table is starts on a four-byte
+boundry.
+
+Appendix X.  Daniel J. Bernstein hash algorithm
+
+Originally published in comp.lang.c, this algorithm has been empirically 
+shown to be efficient and effective.
+
+#include &lt;stdint.h&gt;
+uint32_t djb_hash (const char *s)
+{
+        uint32_t h = 5381;
+    unsigned char c;
+
+        for (c = *s; c != &#x27;\0&#x27;; c = *++s)
+                h = h * 33 + c;
+
+        return h;
+}
+
+
+Appendix X.  Examples searching for names
+
+Search for name, returning vector of dies which define that name.
+
+dies[] = lookup_name (&quot;name&quot;, NULL)
+
+lookup_name (name, parent_dies) {
+  digest = mapping_algorithm(name)
+  map_index = digest % map_table_size
+  name_list_index = map[map_index]
+  if (name_list_index == 0xffffffff) then FAIL
+  dies = []
+  while (1) {
+    name_index = readuleb128 (name_list_index)
+    if (name_index == 0) break
+    if (DW_NAME_TABLE_HAS_TAG) 
+      list_digest = read_tag (name_list_index)
+    if (DW_NAME_TABLE_HAS_DIGEST) 
+      list_digest = read_digest (name_list_index)
+    if (DW_NAME_TABLE_HAS_DIE) 
+      list_die = read_die (name_list_index)
+    if (DW_NAME_TABLE_HAS_PARENT) 
+      list_parent = read_parent (name_list_index)
+    if (DW_NAME_TABLE_HAS_DIE &amp;&amp; (list_digest != digest))
+      continue
+    if (DW_NAME_TABLE_USES_DEBUG_STR) {
+      name_index = read_debug_str (name_index)
+    }
+    if (stringcmp (name, name_index) == 0)
+      if (parent_dies == NULL) || 
+        (list_parent in parent_dies))
+      dies[] += list_die
+  }
+  return dies
+}
+
+
+Searching for a member in a structure.
+
+dies[] = lookup_member (&quot;foo&quot;, &quot;bar&quot;)
+
+lookup_member (struct_name, member_name) {
+  struct_dies = lookup_name (struct_name)
+  dies = []
+  for_each die in struct_dies {
+    dies += lookup_name (member_name, struct_dies)
+  } 
+  return dies
+}
+
+
+--
+11/19/2014 -- withdrawn.  
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

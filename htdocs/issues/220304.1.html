@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Allow MD5 hash to be optional in the line table</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 220304.1: Allow MD5 hash to be optional in the line table</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Tony Tye</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Tony Tye</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2022-03-04</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Rejected</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>6</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section 6.2.4.1, pg 159
+Allow MD5 hash to be optional in the line table
+===============================================
+
+PROBLEM DESCRIPTION
+-------------------
+
+The producer of different translation units may generate different properties
+for the files of a compilation unit in the line table. For example, the presence
+of the file size, time stamp, and MD5 hash in the file entries of the line table
+may be different in different translation units.
+
+Link time optimizations (LTO) can result in code from multiple translation units
+being mixed into a single compilation unit. This can result in different files
+in a single compilation unit line table having different file properties
+present.
+
+The file size and timestamp are defined to have a distinguished value to
+indicate they are not present. However, there is no value for the MD5 hash that
+can be used to indicate it is not present. This forces a producer to drop the
+MD5 hash of all files of a compilation unit if it is not available for all
+files. To avoid this it is proposed to add a way to indicate if the MD5 file
+property is present.
+
+PROPOSED RESOLUTION 1
+---------------------
+
+The first proposed solution defines a new file property to explicitly indicate
+that the DW_LNCT_MD5 file property should be ignored. This allows the
+DW_LNCT_MD5 file property to express the full range of hash values when present.
+
+This augments DWARF Version 5 section 6.2.4.1.
+
+1.  DW_LNCT_is_MD5
+
+    DW_LNCT_is_MD5 indicates if the DW_LNCT_MD5 content kind, if
+    present, is valid: when 0 it is not valid and when 1 it is valid. If
+    DW_LNCT_is_MD5 content kind is not present, and DW_LNCT_MD5
+    content kind is present, then the MD5 checksum is valid.
+
+    DW_LNCT_is_MD5 is always paired with the DW_FORM_udata form.
+
+    *This allows a compilation unit to have a mixture of files with and without
+    MD5 checksums. This can happen when link time optimization (LTO) generates code
+    for a translation unit that includes contributions from other translation units
+    that have different information about the source files.*
+
+This augments DWARF Version 5 section 7.22 and Table 7.27.
+
+The following table gives the encoding of the additional line number header
+entry formats.
+
+  Table 7.27: Line number header entry format encodings
+
+  ==================================== ====================
+  Line number header entry format name Value
+  ==================================== ====================
+  DW_LNCT_is_MD5                       0x7
+  ==================================== ====================
+
+PROPOSED RESOLUTION 2
+---------------------
+
+The second proposed solution defines a distinguished hash value to indicate the
+absence of the property. This is the same approach taken for the
+DW_LNCT_timestamp and DW_LNCT_size file properties. Using a hash of 0 bytes is
+the same approach taken by the Mercurial source control system (see
+https://www.mercurial-scm.org/wiki/Nodeid).
+
+This modifies DWARF Version 5 section 6.2.4.1.
+
+Change:
+
+5.  DW_LNCT_MD5
+
+    DW_LNCT_MD5 indicates that the value is a 16-byte MD5 digest of the file
+    contents. It is paired with form DW_FORM_data16.
+
+To:
+
+5.  DW_LNCT_MD5
+
+    DW_LNCT_MD5 indicates that the value is a 16-byte MD5 digest of the file
+    contents, or 16 bytes of 0 if not available. It is paired with form
+    DW_FORM_data16.
+
+--
+2022-11-14:  Rejected.  See issue 211108.2.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

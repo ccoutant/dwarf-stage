@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Standardize DW_AT_GNU_bias</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 190809.1: Standardize DW_AT_GNU_bias</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Tom Tromey</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Brock Wyma</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2019-08-09</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted with modifications</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>6</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section 5.13, pg 129
+
+In Ada, a scalar can be given a biased representation in some cases.
+For example, a scalar with a range of -7..-4 could be stored using 2 bits 
+with a bias of -7.
+
+GCC implements the DW_AT_GNU_bias extension to handle this case.
+See https://gcc.gnu.org/wiki/DW_AT_GNU_bias
+
+I think it would be good to standardize this.
+
+PROPOSED CHANGES
+----------------
+
+Section &quot;2.2 Attribute Types&quot; in table &quot;Table 2.2: Attribute names&quot;:
+Add the following row to the table:
+  --------------- -----------------------------------------------------------
+  Attribute       Identifies or Specifies
+  --------------- -----------------------------------------------------------
+  DW_AT_bias      Deviation from the base type encoding.
+
+Section &quot;5.1.1.1 Simple Encodings&quot;
+At the end of the section (following line 23), add:
+  For a data type with simple encodings, the type may have a DW_AT_bias attribute
+  whose value is an integer constant which is added to the encoded value to
+  determine the value of an object of the type in the source program.
+  If the DW_AT_bias is encoded using DW_FORM_data&lt;n&gt;, then the bias value
+  is treated as an unsigned integer.
+
+Section &quot;7.5.4 Attribute Encodings&quot; in table &quot;Table 7.5 Attribute Encodings&quot;:
+Add the following row to the table with the next available value:
+  --------------------- ------- ---------------------------------------------
+  Attribute name        Value   Classes
+  --------------------- ------- ---------------------------------------------
+  DW_AT_bias            0x??    constant
+
+Section &quot;7.32 Type Signature Computation&quot; in table &quot;Table 7.32 Attributes used
+in type signature computation&quot;:
+Add item:
+  DW_AT_bias
+
+Appendix A &quot;Attributes By Tag (Informative)&quot;, in table A.1 &quot;Attributes by tag value&quot;
+Add &quot;DW_AT_bias&quot; to the &quot;Applicable attributes&quot; column for DW_TAG_base_type:
+  --------------------- -----------------------------------------------------
+  TAG name              Applicable attributes
+  --------------------- -----------------------------------------------------
+  DW_TAG_base_type      ... existing attributes ...
+                        DW_AT_bias
+
+Appendix D &quot;Examples (Informative):
+Add this new section:
+  D.2.9 Ada Biased Bit-Field Example
+  The Ada source in Figure D.25 demonstrates how a member of a record which
+  normally occupies six bits can be biased to fit into three bits when the
+  range is known. The encoded values [ 0..7 ] correspond to the values
+  [ 50..57 ] used by the application.
+
+  The DWARF description is shown in Figure D.26.  The bias chosen, which in
+  this case corresponds to the lower bound, is specified in the base type at
+  1$.
+
+  +-------------------------------------------------------------------------+
+  | type SmallRangeType is range 50 .. 57;                                  |
+  | type RecordType is record                                               |
+  |    A : SmallRangeType;                                                  |
+  | end record;                                                             |
+  | for RecordType use record                                               |
+  |    A at 0 range 0 .. 2;                                                 |
+  | end record;                                                             |
+  | LocalRecord : RecordType;                                               |
+  +-------------------------------------------------------------------------+
+                  Figure D.25 Biased Bit-Field Ada Example
+
+  +-------------------------------------------------------------------------+
+  | 1$: DW_TAG_base_type                                                    |
+  |         DW_AT_byte_size(1)                                              |
+  |         DW_AT_encoding(7)                                               |
+  |         DW_AT_bias(50)                                                  |
+  |         DW_AT_artificial(1)                                             |
+  | 2$: DW_TAG_subrange_type                                                |
+  |         DW_AT_name(&quot;SmallRangeType&quot;)                                    |
+  |         DW_AT_lower_bound(50)                                           |
+  |         DW_AT_upper_bound(57)                                           |
+  |         DW_AT_type(reference to 1$)                                     |
+  | 3$: DW_TAG_structure_type                                               |
+  |         DW_AT_name(&quot;RecordType&quot;)                                        |
+  |         DW_AT_byte_size(1)                                              |
+  | 4$:     DW_TAG_member                                                   |
+  |             DW_AT_name(&quot;A&quot;)                                             |
+  |             DW_AT_type(reference to 2$)                                 |
+  |             DW_AT_bit_size(3)                                           |
+  |             DW_AT_data_bit_offset(0)                                    |
+  | 5$: DW_TAG_variable                                                     |
+  |             DW_AT_name(&quot;LocalRecord&quot;)                                   |
+  |             DW_AT_type(reference to 3$)                                 |
+  |             DW_AT_location ...                                          |
+  +-------------------------------------------------------------------------+
+               Figure D.26 Biased Bit-Field DWARF Description
+
+Note that other choices of encoding and bias lead to the same result. For
+example, the DW_ATE_signed encoding can be used in combination with a bias
+of 54.
+
+If the valid range of values is completely negative (for example, -57..-50) then
+only signed encoding is valid, and the bias will also need to be negative (-53).
+
+
+--
+2022-04-13:  Add propopsed changes.
+2022-06-27:  Accepted with modifications: integer types only, editorial changes TBD.
+2022-07-05:  Editorial changes: Move new text from 5.1.1 to 5.1.1.1, reword.  
+             Add text following Fig. D.26.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

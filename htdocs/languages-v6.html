@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Version 6 Language and Version Codes</title>
+  <link rel="stylesheet" href="../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+<h1>DWARF Version 6 Language and Version Codes</h1>
+<p><a href="issues/210419.1.html">Issue 210419.1</a>
+introduced a way to separately specify languages and versions which is
+expected to be adopted for DWARF Version 6.
+As described in the proposal, each supported language has a specified
+value for <code>DW_AT_language_name</code> and each version of that language has a
+unique <code>DW_AT_language_version</code>.</p>
+<p>New language codes and version codes may be requested by submitting a
+request on the <a href="comment.html">Public Comment</a> page.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Language</th>
+<th style="text-align: left;">Language Code (<code>DW_AT_language_name</code>)</th>
+<th style="text-align: center;">Value</th>
+<th style="text-align: center;">Default Lower Bound</th>
+<th style="text-align: left;">Version Codes (<code>DW_AT_language_version</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">ISO Ada †</td>
+<td style="text-align: left;"><code>DW_LNAME_Ada</code></td>
+<td style="text-align: center;">0x0001</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">BLISS</td>
+<td style="text-align: left;"><code>DW_LNAME_BLISS</code></td>
+<td style="text-align: center;">0x0002</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">C (K&amp;R and ISO)</td>
+<td style="text-align: left;"><code>DW_LNAME_C</code></td>
+<td style="text-align: center;">0x0003</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: left;">K&amp;R 000000</td>
+</tr>
+<tr>
+<td style="text-align: left;">ISO C++</td>
+<td style="text-align: left;"><code>DW_LNAME_C_plus_plus</code></td>
+<td style="text-align: center;">0x0004</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: left;">C++98 199711<br>C++11 201103<br>C++14 201402<br>C++17 201703<br>C++20 202002</td>
+</tr>
+<tr>
+<td style="text-align: left;">ISO Cobol †</td>
+<td style="text-align: left;"><code>DW_LNAME_Cobol</code></td>
+<td style="text-align: center;">0x0005</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Crystal</td>
+<td style="text-align: left;"><code>DW_LNAME_Crystal</code></td>
+<td style="text-align: center;">0x0006</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">D</td>
+<td style="text-align: left;"><code>DW_LNAME_D</code></td>
+<td style="text-align: center;">0x0007</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Dylan</td>
+<td style="text-align: left;"><code>DW_LNAME_Dylan</code></td>
+<td style="text-align: center;">0x0008</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">ISO Fortran</td>
+<td style="text-align: left;"><code>DW_LNAME_Fortran</code></td>
+<td style="text-align: center;">0x0009</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Go †</td>
+<td style="text-align: left;"><code>DW_LNAME_Go</code></td>
+<td style="text-align: center;">0x000a</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Haskell †</td>
+<td style="text-align: left;"><code>DW_LNAME_Haskell</code></td>
+<td style="text-align: center;">0x000b</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">HIP</td>
+<td style="text-align: left;"><code>DW_LNAME_HIP</code></td>
+<td style="text-align: center;">0x001d</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Java</td>
+<td style="text-align: left;"><code>DW_LNAME_Java</code></td>
+<td style="text-align: center;">0x000c</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Julia</td>
+<td style="text-align: left;"><code>DW_LNAME_Julia</code></td>
+<td style="text-align: center;">0x000d</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Kotlin</td>
+<td style="text-align: left;"><code>DW_LNAME_Kotlin</code></td>
+<td style="text-align: center;">0x000e</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Modula 2</td>
+<td style="text-align: left;"><code>DW_LNAME_Modula2</code></td>
+<td style="text-align: center;">0x000f</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Modula 3 †</td>
+<td style="text-align: left;"><code>DW_LNAME_Modula3</code></td>
+<td style="text-align: center;">0x0010</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Objective C</td>
+<td style="text-align: left;"><code>DW_LNAME_ObjC</code></td>
+<td style="text-align: center;">0x0011</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Objective C++</td>
+<td style="text-align: left;"><code>DW_LNAME_ObjC_plus_plus</code></td>
+<td style="text-align: center;">0x0012</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">OCaml</td>
+<td style="text-align: left;"><code>DW_LNAME_OCaml</code></td>
+<td style="text-align: center;">0x0013</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">OpenCL †</td>
+<td style="text-align: left;"><code>DW_LNAME_OpenCL</code></td>
+<td style="text-align: center;">0x0014</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">ISO Pascal</td>
+<td style="text-align: left;"><code>DW_LNAME_Pascal</code></td>
+<td style="text-align: center;">0x0015</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">ANSI PL/I †</td>
+<td style="text-align: left;"><code>DW_LNAME_PLI</code></td>
+<td style="text-align: center;">0x0016</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Python †</td>
+<td style="text-align: left;"><code>DW_LNAME_Python</code></td>
+<td style="text-align: center;">0x0017</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">RenderScript</td>
+<td style="text-align: left;"><code>DW_LNAME_RenderScript</code></td>
+<td style="text-align: center;">0x0018</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Rust</td>
+<td style="text-align: left;"><code>DW_LNAME_Rust</code></td>
+<td style="text-align: center;">0x0019</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Swift</td>
+<td style="text-align: left;"><code>DW_LNAME_Swift</code></td>
+<td style="text-align: center;">0x001a</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Unified Parallel C (UPC)</td>
+<td style="text-align: left;"><code>DW_LNAME_UPC</code></td>
+<td style="text-align: center;">0x001b</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Zig</td>
+<td style="text-align: left;"><code>DW_LNAME_Zig</code></td>
+<td style="text-align: center;">0x001c</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: left;"></td>
+</tr>
+</tbody>
+</table>
+<p>† These names and their associated values are reserved, but
+the languages they represent are not well supported.</p>
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../htdocs/download.html">Download</a></li>
+		<li><a href="../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../htdocs/members.html">Members</a></li>
+		<li><a href="../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

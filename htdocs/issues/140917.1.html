@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: procedure/subroutine/subprogram terminology</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 140917.1: procedure/subroutine/subprogram terminology</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Paul Robinson</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Paul Robinson</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2014-09-17</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Editorial</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>5</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section many, pg many
+The net result of this proposal is that (a) &quot;procedure&quot; always means &quot;DWARF procedure&quot;
+(except when it&#x27;s a PASCAL keyword in an example); (b) &quot;subroutine&quot; always means a
+piece of the compiled program being debugged.
+
+The DW_AT_default_value attribute is described as possibly being a 
+reference to a &quot;subroutine&quot; and it computes &quot;the value returned by the 
+referenced subroutine.&quot;  This language implies a call to a part of the
+compiled program, but recent discussion within the committee suggests
+that the intent was to call a DWARF procedure.  This proposal changes
+the language describing DW_AT_default_value to make that completely
+clear.
+
+Related terminology issue #1: The description of DW_OP_call* also uses
+the word &quot;subroutine&quot; to describe the called thingy; it&#x27;s the only place
+obviously referring to a DWARF procedure that doesn&#x27;t use the term
+&quot;DWARF procedure.&quot;  For consistency, it should.
+
+Related terminology issue #2: There are 4 places that use the word
+&quot;procedure&quot; to refer to a part of the compiled program, rather than
+a DWARF procedure.  I think it would be prudent to change all these
+to &quot;subroutine&quot; or &quot;subprogram&quot; (editor&#x27;s choice).
+
+(The terms &quot;subroutine&quot; and &quot;subprogram&quot; are used widely throughout
+the document to refer to a part of the compiled program.  It doesn&#x27;t
+seem worth the trouble to make them all use the same word.)
+
+PROPOSED EDITS
+==============
+(Section/page references per dwarf5.20140618.pdf.)
+
+Fixing DW_AT_default_value
+--------------------------
+Section 4.1 item 9, p.83.
+This one is basically a complete replacement because of how intertwined
+all the cases are.
+
+Current text:
+
+9. A DW_AT_default_value attribute for a formal parameter entry. The
+   value of this attribute is a reference to the debugging information
+   entry for a variable or subroutine, or the value may be a constant.
+   If the attribute form is of class reference, the default value of the
+   parameter is the value of the referenced variable (which may be
+   constant) or the value returned by the referenced subroutine; a
+   reference value of 0 means that no default value has been specified.
+   If the value is of class constant, that constant is interpreted as a
+   default value of the type of the formal parameter.
+   *For a constant form there is no way to express the absence of a default
+   value.*
+
+Replacement text:
+9. A DW_AT_default_value attribute for a formal parameter entry. The
+   value of this attribute may be a constant, or a reference to the
+   debugging information entry for a variable, or a reference to a
+   debugging information entry containing a DWARF procedure.  If the
+   attribute form is of class constant, that constant is interpreted as
+   a default value of the type of the formal parameter. If the attribute
+   form is of class reference, and the referenced entry is for a
+   variable, the default value of the parameter is the value of the
+   referenced variable.  If the reference value is 0, no default value
+   has been specified.  Otherwise, the attribute represents an implicit
+   DW_OP_call_ref to the referenced debugging information entry, and
+   the default value of the parameter is the value returned by that
+   DWARF procedure, interpreted as a value of the type of the formal
+   parameter.
+   *For a constant form there is no way to express the absence of a default
+   value.*
+
+
+Fixing &quot;subroutine&quot; -&gt; &quot;DWARF procedure&quot;
+----------------------------------------
+section 2.5.1.5 p.24 item 4
+
+First sentence currently reads:
+
+   DW_OP_call2, DW_OP_call4, and DW_OP_call_ref perform subroutine calls
+   during evaluation of a DWARF expression or location description.
+
+Replace &quot;subroutine&quot; with &quot;DWARF procedure&quot;
+
+
+Fixing &quot;procedure&quot; -&gt; &quot;subprogram&quot;/&quot;subroutine&quot;
+-----------------------------------------------
+I propose to leave it to the editor&#x27;s discretion whether to use
+&quot;subprogram&quot; or &quot;subroutine&quot; in any given place.
+
+section 3.3.5 
+p.66 non-normative text (middle of the page, 3 occurrences)
+p.67 item 1 (note: item 2 uses &quot;subroutine&quot; to mean the same thing!)
+
+section 6.2.1
+p.123 definition of &quot;basic block&quot;
+
+section 6.4.1
+p.144 1st paragraph
+
+section E.1.2.1
+p.312 2nd paragraph (but is that correct FORTRAN terminology?)
+
+--
+10/21/2014 -- Accepted.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

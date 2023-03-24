@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Add a DW_AT_linkage_name attribute</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 090715.1: Add a DW_AT_linkage_name attribute</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Ron Brender</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Ron Brender</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2009-07-15</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted with modifications</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>4</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Background
+----------
+
+A vendor defined attribute DW_AT_MIPS_linkage_name has been in use
+for many years by various implementations. This proposal seeks to 
+standardize this industry practice within DWARF.
+
+Proposal
+--------
+
+1) In Table 1, add an entry for
+
+    DW_AT_linkage_name          Object language name for an entity
+
+2) Add a new Section as follows:
+
+    2.22 Linkage Names
+
+    *Some language implementations, notably for C++ and similar
+    languages, make use of implemntation defined object file
+    names that are different from the names of entities as they
+    appear in the source. Such names, sometimes known as mangled names, 
+    are used in various ways, including: to encode additional information 
+    about an entity, to distinguish multiple entities that have the same 
+    name, and so on. When an entity has an associated distinct linkage name
+    it may sometimes be useful for a producer to include this name
+    in the DWARF description of the program to facilitate consumer
+    access to and use of object file information about an entity
+    and/or information that is encoded in the linkage name itself.*
+
+    Entities that may reference or be referenced across compilation
+    unit boundaries may have a DW_AT_linkage_name attribute whose
+    value is a null-terminated string describing the implementation
+    defined linkage name associated with the entity.
+
+    If the object file name for an entity is the same as the name in
+    the source program, then a linkage name attribute is omitted.
+
+    *Debugging information entries to which DW_AT_linkage_name may
+    apply include: DW_TAG_constant, DW_TAG_entry_point,
+    DW_TAG_subprogram and DW_TAG_variable.*
+
+3)  In Section 3.3.1. General Subroutine and Entry Point Information,
+    insert after the second paragraph:
+
+    If the name of a subprogram or entry point described by an entry
+    with the tag DW_TAG_subprogram or DW_TAG_entry_point is visible
+    outside of its containing compilation unit, it may have a
+    DW_AT_linkage_name attribute as described in Section 2.22.
+
+4)  In Section 4.1, Data Object Entries, add a new list item at the
+    end:
+
+    14. If the name of a varable or constant is visible outside
+        of its enclosing compilation unit, the entity may have a
+        DW_AT_linkage_name attribute as described in Section 2.22.
+
+5)  In Figure 20. Attribute Encodings, add
+
+    DW_AT_linkage_name          0x6d            string
+
+6)  In Appendix A, Figure 42, add DW_AT_linkage_name as an applicable
+    attribute for
+
+        DW_TAG_constant
+        DW_TAG_entry_point
+        DW_TAG_subprogram
+        DW_TAG_variable
+
+Discussion
+----------
+
+An earlier proposal [090503.1] adding linkage name DWARF operators for 
+use in location expressions. There was some support for this in
+addition to a linkage name attribute, but little support for such
+operators alone. Further, operators were generally perceived to be
+potentially useful but currently a solution looking for a problem.
+
+This proposal deliberately says nothing about how linkage names are
+formed and/or used. That is left for implementations to determine.
+
+Note that linkage name attributes are never required by DWARF, even
+in implementations that use mangled names.
+
+-- 
+
+August 11, 2009 -- Accepted with following replacement non-normative
+text: &quot;Entities may have a DW_AT__linkage_name whose attribute is a 
+null terminated string which describes the implementation defined 
+name associated with the entity.&quot;
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

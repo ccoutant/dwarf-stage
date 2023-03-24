@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Index Info</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 031001.1: Index Info</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Chris Quenelle</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Chris Quenelle</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2003-10-01</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Extension</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Closed</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>3</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Dwarf2 has the notion of &quot;index&quot; information stored in sections like
+&quot;.debug_pubnames&quot;, &quot;.debug_varnames&quot;, etc.  Some vendors have
+added additional similar sections.
+This information is used as an index into the full .debug_info
+data so that you don&#x27;t have to read all the .debug_info section
+until you need some piece of it.
+
+If a vendor could extend or modify the kind of index information.
+without defining new ELF sections, that would be better.
+
+Has it been suggested to create a new section called something like:
+&quot;.debug_info_index&quot; which has the same format as &quot;.debug_info&quot;
+except it only includes the globally visible types/variables?
+(Along with DIE pointers into the .debug_info section, and/or pointers
+to the containing CU in the .debug_info section)
+It could bedefined loosely so vendors can put whatever kind of index
+information they want inside it.  Using the same (or similar)
+structure that&#x27;s found in &quot;.debug_info&quot;.
+
+Basically the same info as what&#x27;s in .debug_pubnames/.debug_varnames
+only in a more extensible format?
+
+-----------
+Jim Blandy &lt;jimb@redhat.com&gt;
+
+I kind of like this idea.
+
+Dwarf &gt;=2 dies are a pretty darn nice format.  You can invent new
+attributes and tags, and everything&#x27;s optional, with pratically no
+space consequences.  I really began to appreciate ies when I was
+putting together the proposal for die-based macro information (which
+I&#x27;ve never gotten around to implementing...).
+
+It would make slurping up the indices a bit more compute-intensive,
+but GDB doesn&#x27;t use them, so I have no sense for how much of an issue
+this is.
+
+------------
+Michael Eager
+
+My first impression is that while it would be more extensible (although
+without details it&#x27;s difficult to say), it would require more processing.
+The .debug_pubnames and .debug_aranages are simple unstructured lists,
+which make them very easy to search.
+
+
+
+
+--------------
+
+Daniel Jacobowitz
+
+On the other hand, wouldn&#x27;t this allow us to use .debug_str for the
+strings in .debug_pubnames - a potentially big space savings, esp. with
+a linker which merges constants?
+
+
+  Chris Quenelle
+  &gt; It would make slurping up the indices a bit more compute-intensive,
+  &gt; but GDB doesn&#x27;t use them, so I have no sense for how much of an issue
+  &gt; this is.
+
+Very small, I think.  I&#x27;ve been meaning to implement this sort of thing
+in GDB, and .debug_info_index would be pretty much ideal.
+
+----------
+
+
+Closed due to lack of proposal.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

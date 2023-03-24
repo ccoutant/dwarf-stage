@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: DW_OP_implicit_pointer</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 100831.1: DW_OP_implicit_pointer</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Roland McGrath</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Jakub Jelinek</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2010-08-31</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>5</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section 2.6.1.1.3, pg 27
+Implicit pointer values in debug information
+============================================
+
+Overview
+--------
+
+Optimized compilation can eliminate a pointer that exists in the
+semantics of the source program (including C++ &quot;references&quot; and other
+source language constructs with pointer-like semantics).  These may be
+pointer-typed variables, or portions of aggregate data structures that
+are ordinarily represented as address values.  While no actual address
+will ever exist for these semantic pointers at runtime, often what they
+&quot;point to&quot; has a known location in registers or discontiguous pieces, or
+can be rematerialized from other information at runtime.
+
+For example, consider the C function:
+
+    static void add_point (struct point *a, const struct point *b)
+    {
+      a-&gt;x += b-&gt;x;
+      a-&gt;y += b-&gt;y;
+    }
+
+This may be inlined away in compilation such that all the members of the
+two structures exist only in registers.  A debugger cannot show the user
+an address value for &quot;a&quot; or &quot;b&quot;, but it can show a struct value for &quot;*a&quot;
+or &quot;*b&quot;, and it can evaluate &quot;a-&gt;x&quot; or &quot;b-&gt;y&quot;.  Another common example
+is the &quot;this&quot; pointers and reference-typed arguments in C++ methods
+handling class types with small amounts of data so they are inlined away
+into using just registers.  More complex examples can include pointers
+into the middle of an array or other aggregate type, optimized-away
+aggregates containing pointer-typed members, pointers to constants
+optimized away, multiple levels of pointer indirection optimized away,
+and combinations of all these.
+
+
+Proposed changes to DWARF
+-------------------------
+
+2.6.1.1.3 Implicit Location Descriptions
+
+An implicit location description represents a piece or all of an
+object which has no actual location but whose contents are
+nonetheless either known or known to be undefined.
+
+The following DWARF operations may be used to specify a value
+that has no location in the program but is a known constant or is
+computed from other locations and values in the program.
+
+1. DW_OP_implicit_value
+
+   The DW_OP_implicit_value operation specifies an immediate
+   value using two operands: an unsigned LEB128 length, followed
+   by a block representing the value in the memory representation
+   of the target machine. The length operand gives the length in
+   bytes of the block.
+
+2. DW_OP_stack_value
+
+   The DW_OP_stack_value operation specifies that the object does
+   not exist in memory but its value is nonetheless known and is
+   at the top of the DWARF expression stack. In this form of
+   location description, the DWARF expression represents the
+   actual value of the object, rather than its location. The
+   DW_OP_stack_value operation terminates the expression.
+
+3. DW_OP_implicit_pointer
+
+   The DW_OP_implicit_pointer operation specifies that the object
+   is a pointer that cannot be represented as a real pointer,
+   even though the value it would point to can be described. In
+   this form of location description, the DWARF expression refers
+   to a debugging information entry that represents the actual
+   value of the object to which the pointer would point. Thus, a
+   consumer of the debug information would be able to show the
+   value of the dereferenced pointer, even when it cannot show
+   the value of the pointer itself.
+
+   This operation has two operands: a reference to a debugging
+   information entry that describes the dereferenced object&#x27;s
+   value, and a signed number that is treated as a byte offset
+   from the start of that value. The first operand is a 4-byte
+   unsigned value in the 32-bit DWARF format, or an 8-byte
+   unsigned value in the 64-bit DWARF format (see Section 7.4).
+   The second operand is a signed LEB128 number.
+
+   The first operand is used as the offset of a debugging
+   information entry in a .debug_info section, which may be
+   contained in a shared object or executable other than that
+   containing the operator. For references from one shared object
+   or executable to another, the relocation must be performed by
+   the consumer.
+
+   The referenced debugging information entry is typically a
+   DW_TAG_variable or DW_TAG_formal_parameter entry whose
+   DW_AT_location attribute gives a second DWARF expression or a
+   location list that describes the value of the object, but it
+   may be any entry that contains a DW_AT_location or
+   DW_AT_const_value attribute (e.g., DW_TAG_dwarf_procedure).
+   Using the second DWARF expression, the consumer can
+   reconstruct the value of the object when asked to dereference
+   the pointer described by the original DWARF expression
+   containing the DW_OP_implicit_pointer operation.
+
+DWARF location expressions are intended to yield the *location*
+of a value rather than the value itself. An optimizing compiler
+may perform a number of code transformations where it becomes
+impossible to give a location for a value, but remains possible
+to describe the value itself. Section 2.6.1.1.2 (&quot;Register
+Location Descriptions&quot;) describes operators that can be used to
+describe the location of a value when that value exists in a
+register but not in memory. The operations in this section are
+used to describe values that exist neither in memory nor in a
+single register.
+
+If the compiler determines that the value of an object is
+constant (either throughout the program, or within a specific
+range), it may choose to materialize that constant only when
+used, rather than store it in memory or in a register. The
+DW_OP_implicit_value operation can be used to describe such a
+value. Sometimes, the value may not be constant, but still can be
+easily rematerialized when needed. A DWARF expression terminating
+in DW_OP_stack_value can be used for this case. The compiler may
+also eliminate a pointer value where the target of the pointer
+resides in memory, and the DW_OP_stack_value operator may be used
+to rematerialize that pointer value. In other cases, the compiler
+will eliminate a pointer to an object that itself needs to be
+materialized. Since the location of such an object cannot be
+represented as a memory address, a DWARF expression cannot give
+either the location or the actual value of a pointer variable
+that would refer to that object. The DW_OP_implicit_pointer
+operation can be used to describe the pointer, and the debugging
+information entry to which its first operand refers describes the
+value of the dereferenced object. A DWARF consumer will not be
+able to show the location or the value of the pointer variable,
+but it will be able to show the value of the dereferenced
+pointer.
+
+
+D.13 Implicit Pointer Examples
+
+The C source shown in figure D.36 can be described in DWARF as
+illustrated in Figure D.37, assuming the foo function is not inlined,
+assuming that the argument x is passed in register 5 and that the
+foo function is optimized by the compiler into just increment of
+a volatile variable v.
+
+--------------------------------------------------------
+struct S { short a; char b, c; };
+volatile int v;
+void foo (int x)
+{
+  struct S s = { x, x + 2, x + 3 };
+  char *p = &amp;s.b;
+  s.a++;
+  v++;
+}
+int main ()
+{
+  foo (v+1);
+  return 0;
+}
+
+Figure D.36: Implicit pointer example #1: source
+--------------------------------------------------------
+
+
+--------------------------------------------------------
+1$: DW_TAG_structure_type
+        DW_AT_name(&quot;S&quot;)
+        DW_AT_byte_size(4)
+10$:    DW_TAG_member
+        DW_AT_name(&quot;a&quot;)
+        DW_AT_type(reference to &quot;short int&quot;)
+        DW_AT_data_member_location(constant 0)
+11$:    DW_TAG_member
+        DW_AT_name(&quot;b&quot;)
+        DW_AT_type(reference to &quot;char&quot;)
+        DW_AT_data_member_location(constant 2)
+12$:    DW_TAG_member
+        DW_AT_name(&quot;c&quot;)
+        DW_AT_type(reference to &quot;char&quot;)
+        DW_AT_data_member_location(constant 3)
+2$: DW_TAG_subprogram
+        DW_AT_name(&quot;foo&quot;)
+20$:    DW_TAG_formal_parameter
+        DW_AT_name(&quot;x&quot;)
+        DW_AT_type(reference to &quot;int&quot;)
+        DW_AT_location(DW_OP_reg5)
+21$:    DW_TAG_variable
+        DW_AT_name(&quot;s&quot;)
+        DW_AT_location(expression=
+        DW_OP_breg5(1) DW_OP_stack_value DW_OP_piece(2)
+        DW_OP_breg5(2) DW_OP_stack_value DW_OP_piece(1)
+        DW_OP_breg5(3) DW_OP_stack_value DW_OP_piece(1))
+22$:    DW_TAG_variable
+        DW_AT_name(&quot;p&quot;)
+        DW_AT_type(reference to &quot;char *&quot;)
+        DW_AT_location(expression=
+        DW_OP_implicit_pointer(reference to 21$, 2))
+
+Figure D.37: Implicit pointer example #1: DWARF description
+--------------------------------------------------------
+
+
+When both the s and p variables are optimized away completely,
+this DWARF description still allows to print the value of the
+s variable - { 2, 3, 4 } - and, as the s variable doesn&#x27;t live in
+memory, there is nothing to print for value of p, but the debugger
+should still be able to show that p[0] is 3, p[1] is 4, p[-1] is
+on little endian 0 and p[-2] is 2.
+
+The C source shown in figure D.38 can be described in DWARF as
+illustrated in Figure D.39, assuming the foo function is inlined
+into main and the body of the main function is optimized to just
+3 blocks of instructions where each one increments the volatile
+variable v, and finally block of instructions to return 0 from
+the function.  Assume that label0 is at the start of the main
+function, label1 after the first v++ block, label2 after the
+second v++ block and label3 at the end of the main function.
+The b variable is optimized away completely, as it isn&#x27;t used,
+and the &quot;opq&quot; string literal is optimized away as well.
+
+
+--------------------------------------------------------
+static const char *b = &quot;opq&quot;;
+volatile int v;
+static inline void foo (int *p)
+{
+  (*p)++;
+  v++;
+  p++;
+  (*p)++;
+  v++;
+}
+int main ()
+{
+  int a[2] = { 1, 2 };
+  v++;
+  foo (a);
+  return a[0] + a[1] - 5;
+}
+
+Figure D.38: Implicit pointer example #2: source
+--------------------------------------------------------
+
+
+--------------------------------------------------------
+1$: DW_TAG_variable
+        DW_AT_name(&quot;b&quot;)
+        DW_AT_type(reference to &quot;const char *&quot;)
+        DW_AT_location(expression=
+        DW_OP_implicit_pointer(reference to 2$, 0))
+2$: DW_TAG_dwarf_procedure
+        DW_AT_location(expression=
+        DW_OP_implicit_value(4, {&#x27;o&#x27;, &#x27;p&#x27;, &#x27;q&#x27;, &#x27;\0&#x27;}))
+3$: DW_TAG_subprogram
+        DW_AT_name(&quot;foo&quot;)
+        DW_AT_inline(DW_INL_declared_inlined)
+30$:    DW_TAG_formal_parameter
+        DW_AT_name(&quot;p&quot;)
+        DW_AT_type(reference to &quot;int *&quot;)
+4$: DW_TAG_subprogram
+        DW_AT_name(&quot;main&quot;)
+40$:    DW_TAG_variable
+        DW_AT_name(&quot;a&quot;)
+        DW_AT_type(reference to &quot;int[2]&quot;)
+        DW_AT_location(location list 98$)
+41$:    DW_TAG_inlined_subroutine
+        DW_AT_abstract_origin(reference to 3$)
+42$:    DW_TAG_formal_parameter
+        DW_AT_abstract_origin(reference to 30$)
+        DW_AT_location(location list 99$)
+
+! .debug_loc section
+98$:    &lt;label0 in main&gt; .. &lt;label1 in main&gt;
+    DW_OP_lit1 DW_OP_stack_value DW_OP_piece(4)
+    DW_OP_lit2 DW_OP_stack_value DW_OP_piece(4)
+    &lt;label1 in main&gt; .. &lt;label2 in main&gt;
+    DW_OP_lit2 DW_OP_stack_value DW_OP_piece(4)
+    DW_OP_lit2 DW_OP_stack_value DW_OP_piece(4)
+    &lt;label2 in main&gt; .. &lt;label3 in main&gt;
+    DW_OP_lit2 DW_OP_stack_value DW_OP_piece(4)
+    DW_OP_lit3 DW_OP_stack_value DW_OP_piece(4)
+    0 .. 0
+99$:    &lt;label1 in main&gt; .. &lt;label2 in main&gt;
+    DW_OP_implicit_pointer(reference to 40$, 0)
+    &lt;label2 in main&gt; .. &lt;label3 in main&gt;
+    DW_OP_implicit_pointer(reference to 40$, 4)
+    0 .. 0
+
+Figure D.39: Implicit pointer example #2: DWARF description
+--------------------------------------------------------
+
+
+With the DWARF description in Figure D.39, at the beginning of
+each of the 3 increments of volatile variable v the current
+value of the variable a in main can be viewed (it will be
+{ 1, 2 }, { 2, 2 } resp. { 2, 3 } at those locations).  The
+parameter p value can&#x27;t be printed, it points somewhere into
+the a variable which doesn&#x27;t live in memory, but at the beginning
+of the second v increment p[0] can be shown to be 2 and p[1] also 2,
+and at the beginning of the third v increment p[0] will be 3 and
+p[-1] 2.  The value of b also can&#x27;t be printed, the string literal
+&quot;opq&quot; doesn&#x27;t live in memory, but the debugger should be able to
+print what b points to (&quot;opq&quot;) and that b[0] is &#x27;o&#x27;, b[3] is &#x27;\0&#x27;
+etc.
+
+-- 
+
+Revised 2/12/2013.  Previous version: 
+http://dwarfstd.org/issues/100831.1-1.html
+Revised 5/26/2013:  Added Appendix D examples.
+Accepted 5/28/2013.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

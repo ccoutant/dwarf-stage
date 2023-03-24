@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Replace DW_MACRO_define/undef_sup with sized versions</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 211004.1: Replace DW_MACRO_define/undef_sup with sized versions</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Paul Robinson</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Jeremy Morse</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2021-10-04</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted with modifications</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>6</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section various, pg various
+Background:
+
+As for DW_FORM_ref_sup[4,8], and issue 181026.2 which proposes a similar
+pair of forms to replace DW_FORM_strp_sup, the macro definition opcodes
+should allow distinguishing between 4-byte and 8-byte offsets within a
+supplementary object file, and not assume the supplementary file and all
+referencing files use the same 32/64 format.
+
+Proposed changes to the specification:
+
+Section 6.3.1 Macro Information Header
+
+On p.166, lines 11-13, in the description of the `offset_size_flag 
+add a sentence saying:
+  This flag does not apply to the opcodes DW_MACRO_define_sup4,
+  DW_MACRO_define_sup8, DW_MACRO_undef_sup4, and DW_MACRO_define_sup8.
+
+
+Section 6.3.2.1 Define and Undefine Entries
+
+On p.168, lines 17-23, replace item 4 (DW_MACRO_define_sup`, DW_MACRO_undef_sup)
+with the following (making the offset size dependent on the opcode
+rather than the `offset_size_flag field):
+
+4. DW_MACRO_define_sup4, DW_MACRO_define_sup8, DW_MACRO_undef_sup4,
+   DW_MACRO_undef_sup8
+    A DW_MACRO_define_sup4, DW_MACRO_define_sup8, DW_MACRO_undef_sup4,
+    or DW_MACRO_undef_sup8 entry has two operands.  The first operand
+    encodes the line number of the #define` or `#undef macro directive.
+    The second operand identifies a string; it is represented as an 
+    4-byte (DW_MACRO_define_sup4, DW_MACRO_undef_sup4) or 8-byte
+    (DW_MACRO_define_sup8, DW_MACRO_undef_sup8) offset into the 
+    .debug_str` section of the supplementary object file.
+
+
+Section 6.3.2.2 Macro Define String
+
+On p.168 line 28, replace &quot;DW_MACRO_define_sup&quot; with &quot;DW_MACRO_define_sup4
+or DW_MACRO_define_sup8&quot;.
+
+
+Section 6.3.2.3 Macro Undefine String
+
+On p.168 line 8, replace &quot;DW_MACRO_undef_sup&quot; with &quot;DW_MACRO_undef_sup4
+or DW_MACRO_undef_sup8&quot;.
+
+
+Section 6.3.3.2 Importation of Macro Units
+
+On p.170, lines 24-29, replace the title and first paragraph of item 2
+(DW_MACRO_import_sup) with the following:
+
+2. DW_MACRO_import_sup4, DW_MACRO_import_sup8
+    A DW_MACRO_import_sup4 or DW_MACRO_import_sup8 entry has one operand,
+    a 4-byte (DW_MACRO_import_sup4) or 8-byte (DW_MACRO_import_sup8) offset
+    from the start of the `.debug_macro` section in the supplementary object
+    file.  Apart from the different location in which to find the macro 
+    unit, these entry types are equivalent to DW_MACRO_import.
+
+
+Section 7.3.6 DWARF Supplementary Object Files
+
+On p.195, lines 28, replace &quot;DW_MACRO_define_sup or DW_MACRO_undef_sup&quot;
+with &quot;DW_MACRO_define_sup4, DW_MACRO_define_sup8, DW_MACRO_undef_sup4
+or DW_MACRO_undef_sup8&quot;.
+
+On p.195, line 30, replace &quot;DW_MACRO_import_sup&quot; with &quot;DW_MACRO_import_sup4
+or DW_MACRO_import_sup8&quot;.
+
+Issue 181026.2 adds a non-normative paragraph to this section; probably it
+should go at the end of the entire section, as it applies to both the forms
+and macro directives.
+
+--
+2022-10-31:  Accepted with modifications:
+   Add DW_MACRO_import_sup{4,8} in 6.3.1.
+   Change the second mention of DW_MACRO_define_sup8 to DW_MACRO_undef_sup8.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

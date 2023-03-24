@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Line Number Small Omission</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 030915.1: Line Number Small Omission</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>David Anderson</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Dave Anderson</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2003-09-15</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Editorial</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted with modifications</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>3</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+In draft8 sec 6.2.4, the unit_length field is missing the
+description of 0xffffffff as the code for &#x27;64 bit length follows&#x27;.
+
+The words used in 7.19  or 7.20 for unit_length are what I mean.
+
+Actually might be better to move some/all of the header
+description to chapter 7 (as well as fix unit_length)?
+
+
+
+PROPOSAL:
+
+In section 6.2.4, the initial length description, add
+a new sentence to 
+
+1. unit_length (initial length)
+
+&quot;The initial length field is implemented as either 32 or
+64 bits as described in section 7.4.&quot;
+
+=======================================================
+
+Revised proposal:
+
+Add &quot;(see Section 7.2.2)&quot; at the end of the sentence that describes 
+the initial length fields in each of Sections 6.1.1, 6.1.2, 6.2.4, 
+and 6.4.1.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

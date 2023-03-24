@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: DW_FORM_ref_sup unspecified size</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 161114.1: DW_FORM_ref_sup unspecified size</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Paul Robinson</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Paul Robinson</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2016-11-14</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Error</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted with modification</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>5</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section 7.5.5, pg 216
+In section 7.5.5, p.216 (public review draft), class &#x27;reference&#x27;,
+fourth type is DW_FORM_ref_sup which is an offset into the supplementary file&#x27;s
+.debug_info section.  The description fails to specify the size of this reference.
+
+Naively it would be 4 or 8 bytes depending on whether the containing .debug_info
+section format is DWARF32 or DWARF64, like other &#x27;reference&#x27; classes.  However,
+the reference might be in a DWARF32 section while the supplementary file might
+be DWARF64, which leaves part of the supplementary file inaccessible.
+
+It seems like there are three difference ways to address this.
+(a) Make DW_FORM_ref_sup 8-bytes, so it can always work regardless of format.
+(b) Replace DW_FORM_ref_sup with two size-specific forms, something like
+    DW_FORM_ref_sup4 and DW_FORM_ref_sup8.  This works because the supplementary
+    file already exists and the producer knows what format it uses.  In fact the
+    producer could use sup4 to save space even if the supplementary file is in
+    DWARF64 format, if the reference value is small enough.
+(c) Require that if the supplementary file is DWARF64, all referencing units must
+    also be DWARF64, and then DW_FORM_ref_sup is 4 or 8 bytes depending on the
+    referencing unit&#x27;s format just like all other &#x27;reference&#x27; forms.
+
+
+--
+12/06/2016 -- Accepted option (b): Replace DW_FORM_ref_sup with DW_FORM_ref_sup4 
+and DW_FORM_ref_sup8. 
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

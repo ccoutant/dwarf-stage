@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Need to mark ctors and dtors with =default</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 141003.1: Need to mark ctors and dtors with =default</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Cary Coutant</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Cary Coutant</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2014-10-03</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Withdrawn</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>5</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section 5.7.7, pg 110
+
+Compare these two ways of declaring a destructor:
+
+struct S {
+   ~S() {}
+};
+
+struct T {
+   ~T() = default;
+};
+
+DWARF currently provides no way to distinguish these, but in the
+Itanium C++ ABI, there is a difference, and the debugger needs to
+know. In the first case, with a user-defined destructor, S is not
+a trivial class, and the calling convention for a function that
+returns S requires the caller to pass the address of a buffer for
+the return value as an implicit first parameter. In the second
+case, with a default destructor, T is trivial, and the calling
+convention allows it to return the value on the stack.
+
+Similarly, it may be necessary for a consumer to know if a
+special member function has been explicitly deleted.
+
+In order to represent deleted and default special member
+functions, we should add a DW_AT_provided attribute with the
+following values:
+
+    DW_PROV_declared
+    DW_PROV_implicit_default
+    DW_PROV_explicit_default
+    DW_PROV_explicit_delete
+
+The rules in the C++ standard for determining whether a class is
+trivial can depend on more details of the class than a consumer
+can gather from the DWARF information, and may vary from one
+version of the standard to the next. In order to give the
+consumer an explicit indication of whether a class is trivial, we
+should add a DW_AT_layout attribute with one of the following
+values:
+
+    DW_LAYOUT_unspecified
+    DW_LAYOUT_non_trivial
+    DW_LAYOUT_trivial
+    DW_LAYOUT_pod
+
+If the layout is unspecified, the consumer may attempt to
+deduce it based on the knowledge it has of the class structure
+and of the target ABI.
+
+To allow the producer to represent these attributes with as
+little additional space as possible, we should also add a new
+FORM code, DW_FORM_const_present, that encodes a constant
+value directly in the abbreviation declaration.
+
+
+Changes to the spec:
+
+Add the following rows to Table 2.2 (&quot;Attribute names&quot;):
+
+    Attribute        Identifies or Specifies
+    ---------        -----------------------
+    DW_AT_layout     Class layout
+
+    DW_AT_provided   How a special member function is
+                     provided in the source code
+
+Add the following non-normative paragraph to Section 5.7
+(&quot;Structure, Union, Class and Interface Type Entries&quot;):
+
+    C++ has the notion of a &quot;trivial&quot; class, whose objects can be
+    bitwise copied, and a &quot;POD&quot; (&quot;Plain Old Data&quot;) struct or
+    class, representing a structure that can be shared with code
+    written in other languages. Trivial or POD classes may have
+    different rules for passing objects of that type as
+    parameters or return values.
+
+Add the following paragraph to Section 5.7.1 (&quot;Structure, Union
+and Class Type Entries&quot;):
+
+    A structure type, union type or class type entry may have a
+    DW_AT_layout attribute, whose value indicates whether it is a
+    non-trivial, trivial, or POD type. If not present, the layout
+    is assumed to be unspecified. &lt;non-normative&gt;If unspecified,
+    a consumer may be able to deduce the layout based on its
+    knowledge of the type and the ABI.&lt;/non-normative&gt;
+
+Add the following paragraph to Section 5.7.7 (&quot;Member Function
+Entries&quot;):
+
+    If the member function entry describes a special member
+    function then that entry may have a DW_AT_provided attribute
+    whose value is one of the following:
+
+    * DW_PROV_declared (assumed if no DW_AT_provided attribute is
+    present) identifies a special member function that is
+    declared normally in the source code, whether or not there is
+    an explicit definition.
+
+    * DW_PROV_implicit_default identifies a special member
+    function that is not declared in the class, but was provided
+    as a default implementation by the compiler.
+
+    * DW_PROV_explicit_default identifies a special member
+    function that is declared in the class with &quot;= default&quot;.
+
+    * DW_PROV_explicit_delete identifies a special member
+    function that is declared in the class with &quot;= delete&quot;.
+
+In Section 7.5.3 (&quot;Abbreviations Tables&quot;), add the following
+paragraph immediately following the paragraph beginning &quot;Finally,
+the child encoding is followed by a series of attribute
+specifications&quot;:
+
+    The attribute form DW_FORM_const_present is a special case.
+    For attributes with this form, the attribute specification
+    contains a third part, which is a signed LEB128 number. The
+    value of this number is used as the value of the attribute,
+    and no value is stored in the .debug_info section.
+
+In Section 7.5.4 (&quot;Attribute Encodings&quot;), for class &quot;constant&quot;,
+change &quot;seven forms&quot; to &quot;eight forms&quot;, and add to the end of the
+paragraph:
+
+    There is also a implicit constant (DW_FORM_const_present),
+    whose value is provided as part of the abbreviation
+    declaration.
+
+Add the following rows to Table 7.5 (&quot;Attribute encodings&quot;):
+
+    Attribute name          Value   Classes
+    --------------          -----   -------
+    DW_AT_layout            xxx     constant
+    DW_AT_provided          xxx     constant
+
+Add the following row to Table 7.6 (&quot;Attribute form encodings&quot;):
+
+    Form name               Value   Classes
+    ---------               -----   -------
+    DW_FORM_const_present   xxx     constant
+
+Add the following sections to Chapter 7 (&quot;Data Representation&quot;):
+
+    7.X Class Layout Codes
+    
+    The encodings of the constants used in the DW_AT_layout
+    attribute are given in Table 7.XX.
+
+        Table 7.XX Class layout encodings
+
+        Layout code name         Value
+        ----------------         -----
+        DW_LAYOUT_unspecified     0x00
+        DW_LAYOUT_non_trivial     0x01
+        DW_LAYOUT_trivial         0x02
+        DW_LAYOUT_pod             0x03
+
+    7.Y Special Member Function Codes
+
+    The encodings of the constants used in the DW_AT_provided
+    attribute are given in Table 7.YY.
+
+        Table 7.XX Special member function encodings
+
+        Special member function code name    Value
+        ---------------------------------    -----
+        DW_PROV_declared                      0x00
+        DW_PROV_implicit_default              0x01
+        DW_PROV_explicit_default              0x02
+        DW_PROV_explicit_delete               0x03
+
+In Appendix A, Table A.1 (&quot;Attributes by tag value&quot;), add
+DW_AT_layout to DW_TAG_class_type, DW_TAG_struct_type, and
+DW_TAG_union_type. Add DW_AT_provided to DW_TAG_subprogram.
+
+--
+Revised - 11/14/2014
+Withdrawn -- 12/16/2014
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Indirect Address Table (Split DWARF, part 2/5)</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 130313.2: Indirect Address Table (Split DWARF, part 2/5)</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Cary Coutant</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Cary Coutant</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2013-03-13</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted with modifications</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>5</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section , pg 
+Introduction
+------------
+
+With the current DWARF format, the debug information is designed
+with the expectation that it will be processed by the linker to
+produce an output binary with complete debug information, and
+with fully-resolved references to locations within the
+application. For very large applications, however, this approach
+can result in excessively large link times and excessively large
+output files. Several vendors have independently developed
+proprietary approaches that allow the debug information to remain
+in the relocatable object files, so that the linker does not have
+to process the debug information or copy it to the output file.
+These approaches have all required that additional information be
+made available to the debug information consumer, and that the
+consumer perform some minimal amount of relocation in order to
+interpret the debug info correctly. The additional information
+required, in the form of load maps or symbol tables, and the
+details of the relocation are not covered by the DWARF
+specification, and vary with each vendor&#x27;s implementation.
+
+For more background information, see the GCC wiki page at:
+
+    http://gcc.gnu.org/wiki/DebugFission
+
+This is the second in a series of proposals to extend the DWARF
+specification to support the use of unlinked and unrelocated
+debug information.
+
+  * The first proposal introduces a mechanism for referring to
+    strings indirectly, collecting the string offsets into a new
+    section, and introducing a new form code for this purpose.
+
+  * This second proposal introduces a similar indirect mechanism
+    for referring to relocatable addresses in the loadable
+    segments of the program, collecting all such addresses in a
+    single section.
+
+  * The third proposal introduces a mechanism for referring to
+    range table entries in the .debug_ranges section with a
+    single relocation per compilation unit rather than one for
+    each reference.
+
+  * The fourth proposal introduces a mechanism for splitting the
+    DWARF debugging information into two sets of sections. One
+    set remains in the relocatable object (.o) files, and is
+    linked into the final executable; the other set is written to
+    a non-relocatable DWARF object (.dwo) file, and remains in
+    the build tree as an independent file where the debugger can
+    reference it as needed.
+
+  * The fifth proposal introduces a package file format for
+    collecting the DWARF object (.dwo) files so that the
+    debugging information can be easily saved and transported for
+    debugging applications outside of the build tree.
+
+
+Overview
+--------
+
+In order to reduce the quantity of relocations that reference
+code and data in the program, and to remove those relocations
+from the .debug_info and .debug_types sections, we propose a new
+.debug_addr section that contains all such addresses collected
+into one section. We add a new form and two new location
+expression operators that reference a location by its index in
+the .debug_addr section. The DW_FORM_addrx form code and the
+DW_OP_addrx and DW_OP_constx operators each take an unsigned
+LEB128 value to specify the index.
+
+When there are multiple references from the debug information to
+one address, this allows those references to be coalesced into a
+single entry in the .debug_addr section, with a single
+relocation, greatly reducing the number of relocations required
+for the debug information.
+
+
+Changes to the DWARF Specification
+----------------------------------
+
+Section 2.2 (&quot;Attribute Types&quot;)
+
+In Figure 2, add the following rows:
+
+    Attribute name            Identifies or Specifies
+    --------------            -----------------------
+    DW_AT_addr_base           Base offset for address table
+
+Secton 2.5.1.1 (&quot;Literal Encodings&quot;)
+
+Add the following items to the numbered list:
+
+    7.  DW_OP_addrx
+        The DW_OP_addrx operation has a single operand that
+        encodes an unsigned LEB128 value, which is a zero-based
+        index into the .debug_addr section, where a machine
+        address is stored.
+
+    8.  DW_OP_constx
+        The DW_OP_constx operation has a single operand that
+        encodes an unsigned LEB128 value, which is a zero-based
+        index into the .debug_addr section, where a constant, the
+        size of a machine address, is stored.
+
+        &lt;non-normative&gt;
+        The DW_OP_constx operation is provided for constants that
+        require link-time relocation but should not be
+        interpreted by the consumer as a relocatable address
+        (e.g., offsets to thread-local storage).
+        &lt;/non-normative&gt;
+
+Section 3.1.1 (&quot;Normal and Partial Compilation Unit Entries&quot;)
+
+In the numbered list introduced by &quot;Compilation unit entries may
+have the following attributes:&quot;, add the following item:
+
+    13. A DW_AT_addr_base attribute, whose value is a reference.
+        This attribute points to the beginning of the compilation
+        unit&#x27;s contribution to the .debug_addr section. Indirect
+        references (using DW_FORM_addrx, DW_OP_addrx, or
+        DW_OP_constx) within the compilation unit must be
+        interpreted as indexes relative to this base.
+
+Section 7.5.4 (&quot;Attribute Encodings&quot;)
+
+Replace the paragraph describing the &quot;address&quot; class with the
+following:
+
+    Represented as an object of appropriate size to hold an
+    address on the target machine (DW_FORM_addr), or as an
+    indirect index into a table of such addresses in the
+    .debug_addr section (DW_FORM_addrx). The size of an address
+    is encoded in the compilation unit header (see Section
+    7.5.1.1). This address is relocatable in a relocatable object
+    file and is relocated in an executable file or shared object.
+    The representation of a DW_FORM_addrx value is an unsigned
+    LEB128 value, which is interpreted as a zero-based index into
+    an array of addresses in the .debug_addr section.
+
+In Figure 20, add the following row to the table:
+
+    Attribute name            Value    Classes
+    --------------            -----    -------
+    DW_AT_addr_base           [TBA]    address
+
+In Figure 21, add the following row to the table:
+
+    Form name        Value    Class
+    ---------        -----    -----
+    DW_FORM_addrx    [TBA]    address
+
+Section 7.7.1 (&quot;DWARF Expressions&quot;)
+
+In Figure 24, add the following row to the table:
+
+    Operation       Code     No. of Operands    Notes
+&amp;#65532;   ---------       ----     ---------------    -----
+    DW_OP_addrx     [TBA]    1                  indirect address
+    DW_OP_constx    [TBA]    1                  indirect constant
+
+
+In Chapter 7, add a new section after Section 7.24:
+
+7.xx Address Table
+
+    Each set of entries in the address table contained in
+    the .debug_addr section begins with a header containing:
+
+        1.  unit_length (initial length)
+            A 4-byte or 12-byte length containing the length of
+            the set of entries for this compilation unit, not
+            including the length field itself. In the 32-bit
+            DWARF format, this is a 4-byte unsigned integer
+            (which must be less than 0xfffffff0); in the 64-bit
+            DWARF format, this consists of the 4-byte value
+            0xffffffff followed by an 8-byte unsigned integer
+            that gives the actual length (see Section 7.4).
+
+        2.  version (uhalf)
+            A 2-byte version identifier containing the value 1
+            (see Appendix F).
+
+        3.  address_size (ubyte)
+            A 1-byte unsigned integer containing the size in
+            bytes of an address (or the offset portion of an
+            address for segmented addressing) on the target
+            system.
+
+        4.  segment_size (ubyte)
+            A 1-byte unsigned integer containing the size in
+            bytes of a segment selector on the target system.
+
+    This header is followed by a series of segment/address pairs.
+    The segment size is given by the segment_size field of the
+    header, and the address size is given by the address_size
+    field of the header. If the segment_size field in the header
+    is zero, the entries consist only of an address.
+
+    The DW_AT_addr_base attribute must point to the first entry
+    following the header. The entries are indexed sequentially
+    from this base entry, starting from 0.
+
+
+Section 7.25 (&quot;Dependencies and Constraints&quot;)
+
+Replace the first sentence with the following:
+
+    The debugging information in this format is intended to exist
+    in the .debug_abbrev, .debug_aranges, .debug_frame,
+    .debug_info, .debug_line, .debug_loc, .debug_macinfo,
+    .debug_pubnames, .debug_pubtypes, .debug_ranges, .debug_str,
+    .debug_str_offsets, .debug_types, and .debug_addr sections of
+    an object file, or equivalent separate file or database.
+
+Appendix A (&quot;Attributes by Tag Value&quot;)
+
+In Figure 42, in the table entries for DW_TAG_compile_unit and
+DW_TAG_partial_unit, add DW_AT_addr_base.
+
+Appendix B (&quot;Debug Section Relationships&quot;)
+
+In Figure 43, add an arrow from .debug_info and .debug_types to a
+new box for DW_FORM_addrx, and an arrow from that box to a new
+section .debug_addr. Add an arrow from .debug_loc to a new box
+for DW_OP_addrx and DW_OP_constx, and an arrow from that box to
+.debug_addr. The note for both new boxes should read as follows:
+
+    .debug_addr
+        The value of the DW_AT_addr_base attribute in the
+        DW_TAG_compile_unit or DW_TAG_partial_unit DIE is the
+        offset in the .debug_addr section of the machine
+        addresses for that compilation unit or type unit.
+
+Appendix F (&quot;DWARF Section Version Numbers&quot;)
+
+In Figure 97, add the following row:
+
+    Section Name     V2    V3    V4    V5
+    ------------     --    --    --    --
+    .debug_addr       x     x     x     5
+
+
+
+---
+
+Revised March 25. 2013
+Revised May 26, 2013:  Change .debug_addr version to 5.
+Accepted with modifications April 23, 2013.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: DW_AT_allocated type</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 020101.1: DW_AT_allocated type</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Ron Brender</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Ron Brender</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2002-01-01</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Editorial</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted with modifications</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>3</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+QUESTION
+
+The following question was posted in January 2002:
+
+    I see the following on p.80 of Dwarf3-Draft7.
+
+    5.14.2 Allocation and Association Statues
+
+    ...these attributes (DW_AT_allocated and DW_AT_associated) are
+    defined specifically with Fortran 90 ALLOCATABLE and POINTER
+    types in mind...
+
+    ...For Fortran 90, if both attributes are present, then the type
+    should be assumed to have the POINTER property (and not
+    ALLOCATABLE); ...
+
+    Does this imply that, if we only have DW_AT_allocated present,
+    the type is assumed to have ALLOCATABLE?
+
+
+PRPOPSED RESPONCE
+
+Yes.
+
+
+PROPOSED EDITORIAL CLARIFICATION
+
+Add the following to the end of the italics paragraph that begins
+&quot;For Fortran 90...&quot; (quoted above):
+
+    /If the DW_AT_allocated attribute is present but not the
+    DW_AT_assciated attribute, the type may be assumed to have
+    the ALLOCATABLE property./
+
+==============================================================
+5/17/2005:  Accepted with modifications:
+   Add the following text instead of the text of the proposal:
+
+   *For F90, the DW_AT_allocated attribute serves two different
+   purposes. Used without a DW_AT_associated attribute it
+   indicates that the parent type is an ALLOCATABLE array. Used
+   it combination with DW_AT_associated, the DW_AT_associated
+   attribute indicates that the parent type is a POINTER type,
+   while the DW_AT_allocated attribute indicates that that
+   pointer is associated with a dynamically allocated object
+   rather than a static (or no) object. Use of a DW_AT_associated
+   attribute not in combination with the DW_AT_allocated
+   indicates a type with the POINTER property where either the
+   parent variable is never associated with a dynamic object or
+   the implementation does not track whether the associated
+   object is static vs dynamic.* 
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

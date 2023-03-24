@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Meanings of "basic_block" and "end_sequence"</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 050726.1: Meanings of "basic_block" and "end_sequence"</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>John Bishop</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>John Bishop</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2005-07-26</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Improvement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Rejected with explaination</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>3</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+I&#x27;ve been working with our local compiler guys on a bug, and it turns out that we
+had read two different meanings into the descriptions of the &quot;basic_block&quot; and 
+&quot;end_sequence&quot; flags in the line table.  I therefore suggest re-wording them and
+adding italicized sections as follow.
+
+    -John
+
+----
+basic_block
+   A boolean indication that the current instruction is the beginning of a 
+   basic block.
+
+*This is used to indicate the beginning of a set of instructions which has
+   a single executuion entry point.  It can be used to indicate the beginning
+   of a block in the source code set off by explicit delimiters, but should 
+   also be used on basic blocks without explicit delimiters.
+
+   For example, in the C code below, there are three basic blocks set off by
+   explicit brackets.  Each should have &quot;basic_block&quot; set:
+
+   line 17: (int i; a(i); {int i; b(i);}; (int i; c(i)}}
+
+   In the C code below, the instruction sets implementing the two branches of
+   the &quot;if&quot; (&quot;a()&quot; and &quot;b()&quot;) each constitute a basic block.  Each should have
+   the &quot;basic_block&quot; flag set.
+
+   line 15:  if (cond)
+   line 16:     a() else b();*
+
+
+end_sequence
+   A boolean indicating that the current address is that of an instruction after
+   the end of a sequence of target machine instructions.  It means that execution
+   may transfer to the current address without necessarily executing the previous
+   sequence of instructions.
+
+*This flag is used to represent breaks in execution flow.  It should be set on
+   any address which is the target of a jump, branch or call.  In the C code example
+   below, &quot;end_sequence&quot; should be set on whichever of the &quot;then&quot; or the &quot;else&quot;
+   branches is the one which is not the fall-though from the conditional evaluation:
+ 
+   line 15:  if (cond)
+   line 16:     {int j; j = a(); b();} else (c(); d();}
+
+   In this example, &quot;end_sequence&quot; should be set on the code for &quot;x()&quot; as it is
+   outside the loop and thus not part of the loop-body sequence:
+
+   line 19:  while (cond) {cond = foo(); bar()} x();*
+
+==================================================
+
+This proposal is rejected.
+
+Explaination:
+  basic_block is an flag used to identify the start of a sequence of machine
+  instructions which does not contain any branches.  A basic block is a 
+  attribute of the generated code, not of the source code.  
+
+  The lexical structure of a program is described by the debug information 
+  entries which have an inherent tree structure.  Given that a compiler may 
+  reorder, combine, or elminate instructions, especially when optimized, 
+  there may be no clear relationship between the source code and the generated 
+  code.  In the example above, there is no defined relationship between the
+  *lexical blocks* described and the generated code.  Without review of
+  the generated code, it cannot be determined which (if any) of the lexical
+  blocks described would be contained in sequence of instructions which 
+  represent a basic block.
+
+  end_sequence describes the end of a sequence of instructions.  It indicates
+  that the address identified with this flag may not contain an instruction and
+  may not be addressable.  It *does not* indicate that the location is
+  a valid instruction to which the program may branch.  As with basic_block, 
+  end_sequence is an artifact of the generated code and does not have a defined 
+  relationship with the source code or it&#x27;s lexical structure.
+
+  end_sequence may be used to identify tables (such as might be generated inline
+  for a C switch statement) or addresses (such as subroutine addresses) which 
+  should not be interpreted as instructions.  
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

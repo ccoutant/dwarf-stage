@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Support bundled instructions</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 070426.2: Support bundled instructions</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Cary Coutant</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td></td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2007-04-26</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Extension</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>4</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Background
+
+On many VLIW architectures (e.g., Itanium, ARM), several independent
+operations may be encoded into a single instruction. Even though the
+individual operations often cannot be individually addressed, they can
+often be executed individually, making it desirable to provide line
+number information at the operation level rather than the instruction
+level. This proposal describes a way to include that extra information
+within a DWARF line number table.
+
+In existing implementations, the compiler and debugger are left to
+agree on an ad hoc convention for how to represent the individual
+operations inside the instruction. On Itanium, for example, an
+instruction (called a &quot;bundle&quot;) is 16 bytes and contains 5 template
+bits plus three 41-bit operations (called &quot;slots&quot;). On HP-UX, the
+compiler uses the bundle address plus 0, 4, and 8 to represent the
+three individual slots, respectively; on Linux, the compiler instead
+uses the bundle address plus 0, 1, and 2. In the line number program
+on HP-UX, the compiler sets minimum_instruction_length to 4,
+permitting it to use increments of 1, 1, 2, 1, 1, 2, .... On Linux,
+however, minimum_instruction_length is set to 1, and uses increments
+of 1, 1, 14, 1, 1, 14, .... In both cases -- especially so on Linux --
+the precious space of special opcodes in the line table program is
+being used inefficiently. The ideal solution would be to set
+minimum_instruction_length to 16/3, so the compiler could just use
+uniform increments of 1 between all operations.
+
+Proposal
+
+The proposed changes to the DWARF specification are detailed below,
+keyed to the section numbering for the December 20, 2005 version of
+the DWARF-3 document.
+
+I&#x27;ve used single quotation marks for terms that would normally be set
+in a computer typeface.
+
+
+6.2.2  State Machine Registers
+
+Add the following new register:
+
+  op_index   An unsigned integer representing the index of an operation
+             within a VLIW instruction. The index of the first operation
+             in an instruction is 0. For non-VLIW architectures, this
+             register will always be 0.
+
+             The &#x27;address&#x27; and &#x27;op_index&#x27; registers, taken together,
+             form an &quot;operation pointer&quot; that can reference any
+             individual operation within the instruction stream.
+
+Just below the list of registers, add an initial value for op_index:
+
+  At the beginning of each sequence within a line number program, the
+state of the registers is:
+
+  address        0
+  op_index       0
+  file           1
+  ...
+
+
+6.2.4  The Line Number Program Header
+
+Modify the description of &#x27;minimum_instruction_length&#x27; and add a new
+item immediately following for &#x27;maximum_operations_per_instruction&#x27;:
+
+  4. mimimum_instruction_length (ubyte)
+
+     The size in bytes of the smallest target machine instruction. Line
+     number program opcodes that alter the address and op_index registers
+     use this and &#x27;maximum_operations_per_instruction&#x27; in their
+     calculations.
+
+  5. maximum_operations_per_instruction (ubyte)
+
+     The maximum number of individual operations that may be encoded in an
+     instruction. Line number program opcodes that alter the address and
+     op_index registers use this and &#x27;maximum_operations_per_instruction&#x27;
+     in their calculations.
+
+     For non-VLIW architectures, this field should be set to 1.
+
+     (Present only if the &#x27;version&#x27; field is greater than or equal to 4.)
+
+
+6.2.5.1  Special Opcodes
+
+Modify the description of the effect of &#x27;minimum_instruction_length&#x27;:
+
+  2. Modify the &quot;operation pointer&quot; by incrementing the &#x27;address&#x27; and
+     &#x27;op_index&#x27; registers. The arithmetic is described below.
+
+  ...
+
+  All of the special opcodes do those same six things; they differ from
+  one another only in what values they add to the &#x27;line&#x27;, &#x27;address&#x27;, and
+  &#x27;op_index&#x27; registers.
+
+(Note that the original wording for step 2 above implied that the
+&#x27;address&#x27; register was always advanced by a non-negative number. That
+was incorrect even for DWARF-2.)
+
+Further down in the section:
+
+  A special opcode value is chosen based on the amount that needs to be
+  added to the &#x27;line&#x27; register and the &quot;operation pointer&quot; (represented
+  by the &#x27;address&#x27; and &#x27;op_index&#x27; registers). ... The &quot;operation advance&quot;
+  represents the desired number of operations to skip when advancing the
+  &quot;operation pointer&quot;, based on the assumption that each instruction
+  contains exactly the number of operations given by the value of
+  &#x27;maximum_operations_per_instruction&#x27;. An &quot;operation advance&quot; equal to
+  &#x27;maximum_operations_per_instruction&#x27; will advance the &#x27;address&#x27;
+  register by &#x27;minimum_instruction_length&#x27; bytes, and will leave the
+  &#x27;op_index&#x27; register unchanged. The special opcode is then calculated
+  using the following formula:
+
+    opcode = (desired line increment - line_base) +
+               (line_range * operation advance) + opcode_base
+
+  ...
+
+  To decode a special opcode, subtract the &#x27;opcode_base&#x27; from the opcode
+  itself to give the adjusted opcode. The &quot;operation advance&quot; is
+  determined by dividing the adjusted opcode by &#x27;line_range&#x27;. The new
+  values of the &#x27;address&#x27; and &#x27;op_index&#x27; registers are calculated by
+  the following formulas:
+
+    new address = address + minimum_instruction_length *
+                             ((op_index + operation advance) div
+                              maximum_operations_per_instruction)
+
+    new op_index = ((op_index + operation advance) rem
+                    maximum_operations_per_instruction)
+
+  For these calculations, the &#x27;div&#x27; and &#x27;rem&#x27; operators are defined such
+  that:
+
+    a.  (a div b) is an integer;
+    b.  a = (a div b) * b + (a rem b); and
+    c.  0 &lt;= (a rem b) &lt; b.
+
+(We could add an explanatory note to the effect that when
+&#x27;maximum_operations_per_instruction&#x27; is 1, these calculations are
+equivalent to the line table version 3 specifications.)
+
+In the example given, change &quot;address advance&quot; to &quot;operation advance&quot;.
+
+
+6.2.5.2  Standard Opcodes
+
+Modify the description of DW_LNS_advance_pc:
+
+  2. DW_LNS_advance_pc
+
+     The DW_LNS_advance_pc opcode takes a single unsigned LEB128 operand
+     and advances the &quot;operation pointer&quot; by modifying the &#x27;address&#x27; and
+     &#x27;op_index&#x27; registers of the state machine according to the formulas
+     given in the preceding section.
+
+Modify the description of DW_LNS_const_add_pc and DW_LNS_fixed_advance_pc:
+
+  8. DW_LNS_const_add_pc
+
+     The DW_LNS_const_add_pc opcode takes no operands. It advances the
+     &quot;operation pointer&quot; by the increment corresponding to that of special
+     opcode 255, according to the formulas given in Section 6.2.5.1.
+
+    ...
+
+  9. DW_LNS_fixed_advance_pc
+
+     The DW_LNS_fixed_advance_pc opcode takes a single uhalf (unencoded)
+     operand, adds it to the &#x27;address&#x27; register of the state machine, and
+     sets the &#x27;op_index&#x27; register to 0. This is the only standard opcode
+     ...
+
+
+6.2.5.3  Extended Opcodes
+
+Modify the description of DW_LNE_set_address:
+
+  2. DW_LNE_set_address
+
+     The DW_LNE_set_address opcode takes a single relocatable address as
+     an operand. The size of the operand is the size appropriate to hold
+     an address on the target machine. It sets the &#x27;address&#x27; register to
+     the value given by the relocatable address, and sets the &#x27;op_index&#x27;
+     register to 0.
+
+
+7.21  Line Number Information
+
+Change the version number to 4:
+
+  The version number in the line number program header is 4 for DWARF
+  Version 4.
+
+
+Appendix F - Version Numbers
+
+Specify the version number for the .debug_line section to be 4 for
+DWARF Version 4.
+
+-----------------
+see also proposal 070519.1
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

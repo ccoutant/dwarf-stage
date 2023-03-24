@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Version Numbering</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 040308.1: Version Numbering</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Jason Molenda</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Jason Molenda</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2004-03-08</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Clarification</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted with modifications</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>3</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Jason Molenda
+Ron Brender
+Todd Allen
+David Anderson
+
+had a long email discussion titled
+    CFI parsing questions
+
+and a clear outcome of that discussion was
+a reminder that version numbering is difficult to find in the
+document.
+
+
+PROPOSAL:
+
+Add a new appendix, informative,
+
+Appendix F     Version Numbering
+
+Dwarf2 and dwarf 3 sections have a &#x27;version number&#x27; embedded
+so consumer code can tell what it is reading.
+Version numbers are 2 byte unsigned integers.
+
+This table shows what version numbers are in use for each section.
+The version number changes where there is an &#x27;incompatible change
+in layout&#x27; so that a consumer can correctly determine the contents.
+
+dwarf2: July 1993 public review document
+dwarf3: Draft 8, Nov 2001
+    - means a version number is not applicable.
+    x means that section was not defined
+      (so a version number is not applicable)
+
+                      dwarf2     dwarf3
+                        ver       ver
+ .debug_info             2         3
+ .debug_abbrev           -         -
+ .debug_frame            1         3
+ .debug_str              -         -
+ .debug_loc              -         -
+ .debug_line             2         3
+ .debug_aranges          2         2
+ .debug_ranges           x         -
+ .debug_pubtypes         x         2
+ .debug_pubnames         2         2
+ .debug_macinfo          -         -
+
+For .debug_frame, version 2 is unused.
+Higher numbers are reserved  for future use.
+
+========================================================================
+
+Revised text:
+
+Version Numbering
+
+Most Dwarf sections have a version number in the section header.   This
+version number is not tied to the Dwarf standard revision  numbers, but 
+instead is incremented when incompatible changes to that  section are made.  
+The Dwarf standard that a producer is generating  to is not explicitly encoded 
+in the file.  Version numbers in the  section headers are represented as two 
+byte unsigned integers.  This  table shows what version numbers are in use 
+for each section.
+
+There are sections with no version number encoded in them; they are  only 
+accessed via the .debug_info section and so an incompatible  change in 
+those sections&#x27; format would be represented by  the .debug_info&#x27;s version 
+number changing.
+
+&quot;dwarf2&quot; is the July 1993 public review document.  &quot;dwarf3&quot; is the  DWARF 3 
+standard.
+
+&quot;-&quot; means that a version number is not applicable (the section&#x27;s  header 
+does not include a version).
+&quot;x&quot; means that the section was not defined in that version of the  Dwarf 
+standard.
+
+                      dwarf2     dwarf3
+                        ver       ver
+ .debug_info             2         3
+ .debug_abbrev           -         -
+ .debug_frame            1         3
+ .debug_str              -         -
+ .debug_loc              -         -
+ .debug_line             2         3
+ .debug_aranges          2         2
+ .debug_ranges           x         -
+ .debug_pubtypes         x         2
+ .debug_pubnames         2         2
+ .debug_macinfo          -         -
+
+For .debug_frame, version 2 is unused.
+Higher numbers are reserved  for future use. 
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

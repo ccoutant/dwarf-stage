@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Return Address Clarification</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 030812.1: Return Address Clarification</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Unclear</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Todd Allen</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2003-08-12</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Editorial</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted pending revision</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>3</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+PROBLEM: Getting the call address context correct can be difficult.
+
+Andrew Cagney, Todd Allen, Chris Quenelle, Ron Brender
+all described manifestations of the following problem:
+
+ Functions (depending on hardware and software architectures)
+ generate a &#x27;return address register value&#x27;
+ which is what dwarf can record in
+ the Call Frame Information.
+
+ If the function is known not to return the compiler may elid
+ cleanup instructions.  Consequently the &#x27;return address&#x27;
+ may point to a context which is actually in a different
+ function or a different source line or a completely different function.
+
+Hardware architectures that have instructions of different lengths
+often have no way to turn the &#x27;return address&#x27; into a reliable
+&#x27;calling address&#x27;.
+
+------- Andrew Cagney&#x27;s initial example where &#x27;return address&#x27;
+points to another function ----
+The problem I&#x27;ve encountered is that the RA provided by func&#x27;s CFI could
+end up pointing at totally unrelated instruction  For instance the code:
+
+    bar()
+    {
+      func () // no return
+    }
+
+    baz ()
+    {
+      ...
+
+could become:
+
+    bar:
+        push arguments
+        call func
+    baz:
+        prologue of baz &lt;- RA
+
+leading to a bogus unwind (other more edgy cases occure when the call is
+at the end of a block - this one is easier to explain :-).
+-------------
+
+A typical workaround for the ia36 architecture is always to
+subtract 1 from the return address to get the right &#x27;context&#x27;
+(even though the address involved may not be the beginning of the call
+instruction, it is &#x27;inside&#x27; the call instruction, so in the right
+context).
+
+PROPOSAL:
+
+Add italics in the CFI information section.
+
+ 6.4.3  Call Frame Instruction usage
+
+
+At the end of this section, add
+
+&quot;Typically one of the registers restored by Call Frame Information
+is the Return Address register.   When a debugger unwinds call
+information it really normally wants the call-site address, but
+that is normally not recorded anywhere.
+
+&quot;In most cases the return address is the same context as the
+call, but that need not be the case, especially if the
+compiler knows (in some way) the call will never return.
+The context of the &#x27;return address&#x27; might be off the end
+of the calling function entirely. As a result, a stack traceback
+may partially or completely fail.
+
+&quot;For example, the x86
+architecture has variable length instructions
+so there is no certain way to get back from the &#x27;return address&#x27;
+to the &#x27;call instruction&#x27;.
+A simple workaround adopted by debugger implementations is
+to subtract 1 from the &#x27;return address&#x27;. While
+This does not get the caller address, it does get an address
+inside the calling instruction, so the right context is known
+and a traceback can function reasonably.&quot;
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

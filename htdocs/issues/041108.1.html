@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Is Extra Padding Allowed</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 041108.1: Is Extra Padding Allowed</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>David Anderson</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Matthew Gretton-Dann</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2004-11-08</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Clarification</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Closed with no change</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>3</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+See Draft 8 dwarf3 sec 7.19.
+
+The Name Lookup Table has
+        unit_length
+giving the net length of the entries for a CU.
+
+The Tuple set describes how a final offset-of-0
+defines the end of the Tuple set.
+
+Question:  Is it legal for a compiler to emit a
+unit_length which &#x27;goes past&#x27; the end of the final offset-of-0.
+(ie, which  counts some padding-bytes at the end)
+In other words, is it legal for a compiler to have padding
+bytes at the end of the Name Lookup Table for a CU?
+
+Apparently
+        armcc ARM C Compiler , ADS 1.2 [Build 805]
+does have such padding. Is it legal dwarf2/3?
+
+I cannot find anything forbidding such padding.
+
+
+Ron Bender writes:
+
+
+I agree the DWARF spec is not clear in this regard.
+Moreover, it appears that such an inflated length is quite
+benign.
+
+I suppose the same answer should apply to .debug_aranges.
+
+Also .debug_info, which explicitly allows zero padding.
+I think it also &quot;works&quot; OK for .debug_line?
+
+Chris Quenelle writes:
+
+I had a similar problem.  For us, the padding was
+inserted by the linker in between blocks generated
+by the compiler.  I think the wording in the standard
+is pretty clear.  Exactly one zero entry should be included
+in the length.
+
+Unfortunately this is redundant information.
+There seem to be several places where the boundary
+of a data block is described by both a length and
+a terminating entry.
+
+It is left up to the implementation to decide what
+to do when the two pieces of information conflict with
+each other.
+
+To deal with our linker padding problem, I had to
+teach libdwarf to accept a zero value for
+the initial length, and skip over that looking for
+the next block.
+
+I also had to pad the .debug_info blocks generated
+by the compiler so they were all a multiple for 4 bytes.
+This was needed to guarantee that the padding was always
+in units of 4 bytes so that they could be skipped.
+
+In answer to your question, it seems like a good idea
+to extend the definition of Name Tables so that
+any number of zero offsets can occur at the end
+of the block (within the bounds defined by the
+inital length field).
+
+==============================
+
+Closed:  It was felt that the standard is clear.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

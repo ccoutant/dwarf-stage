@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Discontiguous scopes</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 050808.1: Discontiguous scopes</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>John Bishop</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Ron Brender</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2005-08-08</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Clarification</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted without change</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>3</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section: 2.16.3, 4.1
+Page: 59
+
+This is a follow-up to issue 030626.1; Chris Quenelle [Chris.Quenelle@Sun.COM]
+was too busy to do a write-up, so I volunteered.  If I&#x27;ve understood things
+correctly, the initial issue was left unresolved and a subsidiary issue was 
+resolved.  Chris was going to design a system which tied the discontiguous
+scopes to source locations rather than to machine instructions, but he now
+believes that&#x27;s too open a topic to bring up for V3.  I&#x27;m not addressing that
+issue, but am adressing the initial issue from the 030626.1.
+
+The issue is this: given a variable which has a &quot;live&quot; scope in a source block
+that has been itself chopped into a set of discontiguous (and possibly re-ordered
+set of instruction blocks), how do we represent the sub-blocks in which the variable
+is live, and where does that &quot;liveness&quot; start?  I&#x27;ll note in passing that it might
+make semantic sense for the liveness to start and stop more than once, given the
+re-ordering.
+
+The current state is this text in 4.1, bullet 11:
+
+   If the containing scope is non-contiguous
+   (see Section 2.16.3), the value of this attribute is
+   the offset in bytes of the beginning of the scope
+   for the object from the beginning of the first range
+   list entry (that is not a base selection entry or an
+   end of list entry).
+
+   [editing note: I&#x27;d remove the parentheses around  &quot;(that...entry)&quot;;
+    I think they&#x27;re unneeded.]
+
+This describes an object scope which begins somewhere after the
+start of the source code scope&#x27;s ranges, but which is &quot;live&quot; from that 
+point to (implicitly) the end of the source code&#x27;s ranges.  This means
+it is live even during intervening ranges from other bits of source,
+so it&#x27;s not completely accurate.
+
+However, I believe that text will do for V3, so 030626.1 can stay resolved!
+
+Here is the proposal for V3+, based on the suggestions (e.g. from Jim 
+Blandy and David Anderson) in topic 030626.1:
+
+Add after the above quote (4.1, bullet 11)
+
+[added text]
+    If the scope of the object itself is discontiguous, the scope has
+    more than one start location, or DW_AT_start_scope for some reason
+    will not correctly represent the scope of the object, the object
+    entry may instead have a DW_AT_scope_ranges attribute.  The value of this
+    attribute is a rangelist of the ranges in which the object is in scope.
+[end added text]
+
+Given that this is a rangelist, we don&#x27;t need to add text explaining
+what the offsets are from: that&#x27;s already defined.
+
+Given that the object ranges are discontiguous, there&#x27;s no need to
+call out any one of the &quot;starts&quot; as _the_ start, so the two attributes
+aren&#x27;t going to co-occur and we can then make them alternates.
+
+Note that the use of DW_AT_scope_ranges is not restricted to the case
+that the enclosing code scope is discontiguous.
+
+Proposal (Ron Brender, 7/8/2007):
+
+1) In Section 2.17, page 32, insert the following just before the
+beginning of Section 2.17.1:
+
+     &quot;In addition, a non-contiguous range of addresses may also be
+     specified for the DW_AT_start_scope attribute as described in
+     Section 2.17.3.&quot;
+
+
+2) In Section 2.17.3, append to the first paragraph:
+
+     &quot;Similarly for a DW_AT_start_scope attribute.&quot;
+
+
+3) In Section 4.1, p61, replace the first paragraph of bullet 11, namely
+
+     &quot;11. If the scope of an object begins sometime after the low pc       
+     value for the scope most closely enclosing the object, the
+     object entry may have a DW_AT_start_scope attribute. If the
+     containing scope is contiguous, the value of this attribute is
+     the offset in bytes of the beginning of the scope for the
+     object from the low pc value of the debugging information entry
+     that defines its scope. If the containing scope is
+     non-contiguous (see Section 2.17.3), the value of this
+     attribute is the offset in bytes of the beginning of the scope
+     for the object from the beginning of the first range list entry
+     that is not a base selection entry or an end of list entry.&quot;
+
+with the following:
+
+     &quot;11. If the scope of an object is smaller than (that is, a subset
+     of the addresses) for the scope most closely enclosing the object,
+     the object entry may have a DW_AT_start_scope attribute. There are
+     two cases:
+
+      1) If the scope of the object entry includes all of the containing
+         scope except for a contiguous sequence of bytes at the beginning
+         of that containing scope, then the scope of the object is
+         specified using a value of class constant. If the containing
+         scope is contiguous, the value of this attribute is the offset
+         in bytes of the beginning of the scope for the object from the
+         low pc value of the debugging information entry that defines
+         its scope. If the containing scope is non-contiguous (see
+         Section 2.17.3), the value of this attribute is the offset in
+         bytes of the beginning of the scope for the object from the
+         beginning of the first range list entry that is not a base
+         selection entry or an end of list entry.
+
+      2) Otherwise, the scope of the object is specified using a value
+         of class rangelistptr. This value indicates the beginning of
+         a range list (see Section 2.17.3).
+
+     *Due to optimization, the scope of an object may be non-
+     contiguous and require use of a range list even when the containing
+     scope is contiguous. Conversely, the scope of an object may not
+     require its own range list even when the containing scope is non-
+     contiguous.*&quot;
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

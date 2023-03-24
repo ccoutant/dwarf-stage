@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Extend Memory Location Descriptions</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 230120.3: Extend Memory Location Descriptions</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Tony Tye</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Tony Tye</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2023-01-20</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Improvement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Open</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>6</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<p>Section various, pg various</p>
+<h2>BACKGROUND</h2>
+<p>The changes proposed below introduce the concept of distinct memory storage for
+each address space supported by a target architecture, and a default address
+space for the target architecture. Subsequent proposals will make use of this,
+allowing memory location descriptions to specify address spaces other than the
+default one.</p>
+<h2>PROPOSED CHANGES</h2>
+<p>In Section 2.6.1.1.2, add the following after the first paragraph:</p>
+<blockquote>
+<p>Each of the target architecture specific address spaces has a
+corresponding memory location storage that denotes the linear
+addressable memory of that address space. The size of each memory
+location storage corresponds to the range of the addresses in the
+corresponding address space.</p>
+<p><em>It is target architecture defined how address space
+location storage maps to target architecture physical memory. For
+example, they may be independent memory, or more than one location
+storage may alias the same physical memory possibly at different
+offsets and with different interleaving. The mapping may also be
+dictated by the source language address classes.</em></p>
+<p>A memory location description specifies a memory location storage.
+The bit offset corresponds to a bit position within a byte of the
+memory. Bits accessed using a memory location description, access
+the corresponding target architecture memory starting at the bit
+position within the byte specified by the bit offset.</p>
+<p>A memory location description that has a bit offset that is a
+multiple of 8 (the byte size) is defined to be a byte address memory
+location description. It has a memory byte address <code>A</code> that is equal
+to the bit offset divided by 8.</p>
+<p>A memory location description that does not have a bit offset that
+is a multiple of 8 (the byte size) is defined to be a bit field
+memory location description. It has a bit position <code>B</code> equal to the
+bit offset modulo 8, and a memory byte address <code>A</code> equal to the bit
+offset minus <code>B</code> that is then divided by 8.</p>
+<p>The address space <code>AS</code> of a memory location description is defined to
+be the address space that corresponds to the memory location storage
+associated with the memory location description.</p>
+<p>A location description that is comprised of one byte address memory
+location description <code>SL</code> is defined to be a memory byte address
+location description. It has a byte address equal to <code>A</code> and an
+address space equal to <code>AS</code> of the corresponding <code>SL</code>.</p>
+</blockquote>
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

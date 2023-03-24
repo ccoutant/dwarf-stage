@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: DWARF and source text embedding</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 180201.1: DWARF and source text embedding</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Scott Linder</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Tony Tye</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2018-02-01</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted with modifications</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>6</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<p>Section 6.2, 7.27, pg 159, 237</p>
+<h2>PROBLEM DESCRIPTION</h2>
+<p>Programming models such as OpenCL can often have source generated at runtime, 
+which is compiled online, with its output not written to file. This raises an
+issue for the compiler: in the generated DWARF, what should it put as the
+file name of the compile unit and associated line table information?</p>
+<p>Common solutions to this problem include generating some temporary source
+file name and having a contract with the debugger to get the source somehow
+and write it out to that file. Since OpenCL and friends generally have quite
+small source files, it's quite reasonable to embed the entire source in the
+binary, then have the debugger look in a known section or address to extract
+the source. If there was a way to express this in DWARF, then runtime-
+generated source files could work without an additional contract between the
+compiler and debugger. This is particularly important when dealing with
+platforms where the filesystem is not writable, which is a common situation
+in mobile computing.</p>
+<p>The proposal allows the source text to be optional for each of the files of a
+compilation unit. This supports producers that may result in mixed properties
+for the files of a compilation unit. An example of this can happen for link time
+optimizations (LTO) that may result in code from other translation units being
+mixed into another compilation unit.</p>
+<p>The proposal embeds the source text directly in the line number program header.
+This ensures the source text is available even if the rest of the debug
+information is stripped which is a common practice.</p>
+<h2>MOTIVATION</h2>
+<p>It is common practice in applications that use OpenCL to construct the
+source text of the OpenCL program on the fly as part of the program
+execution at “run time”. For example, the application computes what kind of
+kernel is needed to solve the problem and conditionally pastes together that
+kernel’s source text. An example is the OpenCL backend of the
+<a href="https://www.gromacs.org/">Gromacs</a> molecular modeling application.</p>
+<p>This source text is passed to an OpenCL runtime API such as
+<a href="https://www.khronos.org/registry/OpenCL/sdk/1.2/docs/man/xhtml/clCompileProgram.html">clCompileProgram</a>.
+The act of compiling creates a code object that contains both the executable code
+and the DWARF debug information. This executable can then be linked, loaded and
+executed. This is typically all done without using a disk file system.</p>
+<p>Notice how clCompileProgram takes an optional set of “header files” specified
+by their names and contents. #include directives can be used to specify one of
+these “header file names”. The debugger would presumably want to present the
+source positions in terms of the “header file names” specified in the original
+compilation request, so the notion of the “files” having names still exists
+even when the contents of these “source files” do not exist on disk.</p>
+<p>The CUDA and HIP languages have similar run time compilation capabilities.</p>
+<p>The Clang compiler has the <code>-gembed-source</code>
+(<a href="https://clang.llvm.org/docs/ClangCommandLineReference.html#cmdoption-clang-gembed-source">here</a>
+and <a href="https://llvm.org/docs/AMDGPUUsage.html#amdgpu-clang-debug-options-table">here</a>)
+option which puts the contents of the “file” into the DWARF regardless of
+whether the source comes from a disk file or an in memory virtual “file system”.
+It uses the “file name” that was specified in the source input (for example
+the #include names) when generating DWARF even if it embeds the source text.</p>
+<h2>HISTORY</h2>
+<p>Issue <a href="161018.1.html">161018.1</a> was the initial proposal to support embedding source text into
+DWARF to support languages that support online compilation. It was based on the
+DWARF 4 standard which did not have a line table entry for the main file and so
+used a DW_AT_source attribute on the compilation unit. It also used a more
+complex method to support mixed file properties.</p>
+<p>The original proposal was revised by issue <a href="180201.1.html">180201.1</a>. This was based on DWARF 5
+and so no longer needed the DW_AT_source compilation unit attribute. It did not
+completely address the mixed file properties as the MD5 property cannot be
+optional.</p>
+<p>This proposal is a revision of <a href="180201.1.html">180201.1</a> that simplifies supporting optional
+source text by defining the empty null terminated string as a sentinel value
+indicating the source text is not available.</p>
+<h2>PROPOSED RESOLUTION</h2>
+<p>This augments DWARF Version 5 section 6.2.4.1.</p>
+<pre><code>6.  DW_LNCT_source
+
+    The component is a null-terminated UTF-8 source text string with
+    "\n" line endings. This content code is paired with the same forms as
+    DW_LNCT_path. It can be used for entries in the file_names field to
+    provide the source text contents of the file.
+
+    The value is an empty null-terminated string if no source is available. If
+    the source is available but is an empty file then the value is a
+    null-terminated single "\n".
+
+    *When the source field is present, consumers can use the embedded source
+    instead of attempting to discover the source on disk using the file path
+    provided by the DW_LNCT_path field. When the source field is absent,
+    consumers can access the file to get the source text.*
+
+    *This is particularly useful for programming languages that support runtime
+    compilation and runtime generation of source text. In these cases, the
+    source text does not reside in any permanent file. For example, the OpenCL
+    language supports online compilation.*
+</code></pre>
+<p>This augments DWARF Version 5 section 7.22 and Table 7.27.</p>
+<p>The following table gives the encoding of the additional line number header
+entry formats.</p>
+<pre><code>Table 7.27: Line number header entry format encodings
+====================================  =====
+Line number header entry format name  Value
+====================================  =====
+DW_LNCT_source                         0x6
+====================================  =====
+</code></pre>
+<hr />
+<p>2021-03-05: Revised.  Previous version: http://dwarfstd.org/issues/180201.1-1.html<br />
+2021-07-25: Revised non-normative text for DW_LNCT_is_MD5.<br />
+2021-08-10: Added motivation section<br />
+2022-03-05: Remove MD5 proposal.  See http://dwarfstd.org/issues/220304.1.html<br />
+2022-03-08: Add history, remove alternatives.<br />
+            Previous version: http://dwarfstd.org/issues/180201.1-3.html<br />
+2022-07-11: Accepted with modifications:  Remove "with "\n" line endings" in 
+            6. DW_LNCT_source; remove second paragraph under 6. DW_LNCT_source.</p>
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

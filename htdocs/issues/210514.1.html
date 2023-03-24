@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Add GPU shading and kernel languages</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 210514.1: Add GPU shading and kernel languages</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Stuart Brady</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Michael Eager</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2021-05-14</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Incomplete</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>6</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section 7.12, pg 231
+Please add the following GPU shading and kernel language names:
+
+DW_LANG_GLSL    | OpenGL Shading Language
+DW_LANG_GLSL_ES | OpenGL ES Shading Language
+DW_LANG_HLSL    | High-Level Shading Language
+
+DW_LANG_OpenCL_CPP     | OpenCL C++
+DW_LANG_CPP_for_OpenCL | C++ for OpenCL
+DW_LANG_SYCL           | SYCL
+
+
+Minor side-request
+------------------
+
+DW_LANG_OpenCL is unfortunately a misnomer.  The correct name would have
+been DW_LANG_OpenCL_C, as OpenCL refers to the host API and C-based kernel
+language collectively, rather than the kernel language alone, which would
+be more properly referred to as &quot;OpenCL C&quot;.
+
+It would be incorrect to use DW_LANG_OpenCL to refer to C++ for OpenCL
+code, regardless of whether the OpenCL host API is used.  Also, OpenCL C
+can be used with other host APIs, e.g. a subset of the language can be
+used with the Vulkan API.
+
+If possible, it would therefore be desirable to rename DW_LANG_OpenCL to
+DW_LANG_OpenCL_C, and to add DW_LANG_OpenCL as a (possibly deprecated)
+alias for compatibility purposes, to avoid potential confusion.
+
+
+Exposition and rationale
+------------------------
+
+Note that &quot;C++ for OpenCL&quot; and &quot;OpenCL C++&quot; are distinct languages.
+Although the latter is deprecated in OpenCL 3.0, its language ID within
+the SPIR-V specification can still occur in the SPIR-V representation of
+DWARF information provided by SPIR-V&#x27;s &quot;NonSemantic.Shader.DebugInfo.100&quot;
+and &quot;OpenCL.DebugInfo.100&quot; specifications, and so requires a corresponding
+DWARF language ID.
+
+GLSL ES is often known as ESSL (and is referred to as ESSL within the
+SPIR-V specification).  However, the name &quot;GLSL ES&quot; may be more meaningful
+to those not deeply familiar with these languages.
+
+GLSL ES could be considered to be its own set of GLSL language versions,
+but it seems beneficial to treat GLSL and GLSL ES as separate languages,
+given that they have separate version histories.
+
+This request does not list specific versions of each of the shading and
+kernel languages, partly on the basis that 210419.1 (or a refinement of
+that proposal) may be accepted.  There are a great many versions of GLSL,
+in particular, and so adding separate language IDs for each language
+version does not seem practical.  However, it would be desirable if a
+source language could be specified as being one of the shading or kernel
+languages without implicitly specifying a specific default version.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

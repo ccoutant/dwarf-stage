@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: C11 _Noreturn function specifier attribute DW_AT_noreturn</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 140331.1: C11 _Noreturn function specifier attribute DW_AT_noreturn</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Mark Wielaard</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Adrian Prantl</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2014-03-31</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>5</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section 3.3.1, pg 55
+C11 introduces the new keyword _Noreturn that can be used as function specifier like 
+inline. A function declared with a _Noreturn function specifier shall not return to 
+its caller (it causes undefined behavior if it would). Similar functionality is available
+in the GNU Toolchain through the noreturn function attribute. It is sometimes useful for 
+a debugger to know which functions can only be called, but shall never return.
+
+Figure 2. Attribute names
+Add DW_AT_noreturn Specifies a function that doesn&#x27;t return to its caller.
+
+3.3.1 General Subroutine and Entry Point Information
+Add a paragraph at the end saying:
+A subprogram entry may have a DW_AT_noreturn attribute, which is a flag. The attribute 
+indicates whether the subroutine was declared with the &quot;noreturn&quot; keyword or property 
+indicating that the function can be called, but will never return to its caller.
+
+Figure 20. Attribute encodings
+Add DW_AT_noreturn 0xXX flag.
+
+APPENDIX A ATTRIBUTES BY TAG VALUE
+Add DW_AT_noreturn to DW_TAG_subprogram.
+
+--
+5/14/2014 -- Accepted.  Value to be assigned by Editor.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

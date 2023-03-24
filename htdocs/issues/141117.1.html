@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Arbitrary expressions as formal parameter default values</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 141117.1: Arbitrary expressions as formal parameter default values</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Adrian Prantl</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Adrian Prantl</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2014-11-17</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted with modifications</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>6</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<p>Section 4, pg </p>
+<h1>Background for discussion</h1>
+<p>Languages such as C++ allow for arbitrary expressions to be provided
+as default arguments. In particular, C++11 allows any initializer
+expression as a default argument as the following example from the
+language specification illustrates::</p>
+<pre><code>int a = 1;
+int f(int);
+int g(int x = f(a));
+void h() {
+  a = 2;
+  int a = 3;
+  g(); // g(f(::a)) --&gt; g(f(2))
+}
+
+from (8.3.6) &lt;http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3690.pdf&gt;
+</code></pre>
+<p>It would be useful to encode default arguments in DWARF because
+developers may want to evaluate expressions in the context of the
+program. Currently, it is possible to encode constant-value default
+arguments in DWARF. While at first it may seem tempting to try and
+encode default arguments using DWARF expressions, this is actually not
+possible, because DWARF expressions cannot call into user code; i.e.,
+it would be impossible to express the above default argument of
+::f(::a) as a DWARF expression.</p>
+<p>We therefore suggest encoding complex default arguments as strings
+containing a fragment in the programming language specified by the
+compile unit. A consumer that is sophisticated enough to make use of a
+default expression should also be able to evaluate a source language
+fragment.</p>
+<h1>Changes</h1>
+<h2>Section 4.1 Data Object Entries</h2>
+<p>[after]</p>
+<blockquote>
+<p>A DW_AT_default_value attribute for a formal parameter entry. The
+value of this attribute may be a constant, or a reference to the
+debugging information entry for a variable, or a reference to a
+debugging information entry containing a DWARF procedure.</p>
+</blockquote>
+<p>[add]</p>
+<blockquote>
+<p>, or a string containing a source language fragment.<br />
+...<br />
+If the attribute form is of class string, that string is interpreted
+as an expression in the source language defined by the compilation
+unit's DW_AT_language attribute that is to be evaluated according to
+the rules defined by the source language.</p>
+</blockquote>
+<h2>Table 7.5: Attribute encodings</h2>
+<pre><code>DW_AT_default_value    0x1e   constant, reference, flag, string
+</code></pre>
+<h2>Appendix D</h2>
+<p>[add new section]</p>
+<h2>Default value examples</h2>
+<p>The default expression for parameter "x" in the C++ function
+declaration in Figure [1] can be described in DWARF as illustrated in
+Figure [2].</p>
+<p>Figure 1.</p>
+<pre><code>void g (int x = 13;
+        int y = f());
+</code></pre>
+<p>Figure 2.</p>
+<pre><code>DW_TAG_subprogram
+    DW_AT_name ("g")
+
+    DW_TAG_formal_parameter
+       DW_AT_name ("x")
+       DW_AT_type (reference to type "int")
+       DW_AT_default_value@DW_FORM_sdata (13)
+
+    DW_TAG_formal_parameter
+       DW_AT_name ("y")
+       DW_AT_type (reference to type "int")
+       DW_AT_default_value@DW_FORM_string ("f()")
+</code></pre>
+<p>Notes for Figure 2:</p>
+<ol>
+<li>This figure explicitly shows the form used by certain attributes
+     (indicated by a trailing @DW_FORM_xxx) when it is critical, while
+     the form is most often left implicit.</li>
+<li>The string value for 'y' is three characters in length and
+     does not include any quotes. (The quotes are an artifact of the
+     presumed dumper tool that created this interpretation.)</li>
+<li>The default value for x could also be encoded as
+     DW_AT_default_value@DW_FORM_string("13"); however. this is generally
+     a less convenient form for consumers to process.</li>
+</ol>
+<p>A string FORM in DW_AT_default_value always represents a source
+code fragment, even in languages that have a native string type. For
+example, the default string parameter of the Ada function in Figure
+[3] is encoded in DWARF as a string containing the Ada string literal
+including the quotation marks (see Figure [4]).</p>
+<p>Figure 3.</p>
+<pre><code>procedure s (x : string := "abc";
+             y : string := "abcd"+10) is
+begin
+end s;
+</code></pre>
+<p>Figure 4.</p>
+<p>[NOTE TO THE EDITOR: Ideally we can use two different kinds of quotes
+here to distinguish the literal double-quotes in the default value
+from the ones that dwarfdump adds.]
+[NOTE FROM EDITOR: Agreed. LaTeX can surely help here...]</p>
+<pre><code>DW_TAG_subprogram
+   DW_AT_name (“s”)
+   DW_TAG_formal_parameter
+      DW_AT_name (“x”)
+      DW_AT_type (reference to type “string”)
+      DW_AT_default_value@DW_FORM_data4 (0x61626364)    \\ Big-endian
+   DW_TAG_formal_parameter
+      DW_AT_name (“y”)
+      DW_AT_type (reference to type “string”)
+      DW_AT_default_value@DW_FORM_string (“"abcd"+10”)
+</code></pre>
+<hr />
+<p>2014-11-19 -- Deferred to version 6.<br />
+2022-09-19 -- Updated examples.<br />
+2022-10-21 -- Updated examples.<br />
+2022-10-21 -- Accepted with modifications (non-normative text TBD)</p>
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

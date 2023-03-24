@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: FORM Reform Proposal 2: Block Class Forms and Expressions</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 080112.2: FORM Reform Proposal 2: Block Class Forms and Expressions</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Cary Coutant</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Cary Coutant</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2008-01-12</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Extension</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted with changes</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>4</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Background
+
+Since expressions can contain reference to DIEs, it&#x27;s important for any 
+generic DWARF consumer to be able to identify and parse expressions without 
+a complete understanding of what attributes may have blocks that should be 
+treated as expressions. This proposal adds a new form, DW_FORM_expr, which 
+takes a ULEB128 length parameter, followed by &quot;length&quot; bytes interpreted as 
+an expression.
+
+I don&#x27;t believe that fixed 1-, 2-, 4-, and 8-byte lengths are necessary 
+here -- any producer should be able to determine how long the expression 
+is before it needs to emit the length field.
+
+This proposal also deprecates DW_FORM_block1, block2, and block4 in favor 
+of DW_FORM_block. For blocks that aren&#x27;t expressions (e.g., constant values 
+expressed as a block of bytes), the length of the block can just as easily 
+be expressed as a ULEB128. Any producer can reasonably be expected to know 
+how long the block is before it needs to emit the length.
+
+
+Proposal
+
+The proposed changes to the DWARF specification are detailed below, keyed 
+to the section numbering for the December 20, 2005, version of the DWARF-3 
+document.
+
+In Section 2.2, &quot;Attribute Types,&quot; add the following row to the table of 
+Figure 3:
+
+ expr     An arbitrary number of bytes of data, interpreted
+          as a DWARF expression (see Section 2.5).
+
+[Note: The terminology for DWARF expressions has been under discussion. 
+This proposal may need to be updated to be consistent with the final 
+terminology.]
+
+In Section 6.4.2.2, &quot;CFA Definition Instructions,&quot; Item 6, 
+&quot;DW_CFA_def_cfa_expression&quot;, change &quot;DW_FORM_block&quot; to &quot;DW_FORM_expr&quot;.
+
+In Section 7.5.4, &quot;Attribute Encodings,&quot; add the following paragraph to 
+the description of class block:
+
+ The use of forms DW_FORM_block1, DW_FORM_block2,
+ and DW_FORM_block4 is deprecated. Producers should
+ use DW_FORM_block instead.
+
+Add the following paragraphs immediately preceding the description for 
+class flag:
+
+ expr
+
+   Represented as an unsigned LEB128 length followed by the
+   number of bytes specified by the length (DW_FORM_expr).
+   The information bytes contain a DWARF expression (see
+   Section 2.5).
+
+In FIgure 20, &quot;Attribute encodings,&quot; change &quot;block&quot; to &quot;expr&quot; in the 
+&quot;Classes&quot; column for the following attributes:
+
+ DW_AT_location
+ DW_AT_byte_size
+ DW_AT_bit_offset
+ DW_AT_bit_size
+ DW_AT_string_length
+ DW_AT_lower_bound
+ DW_AT_return_addr
+ DW_AT_upper_bound
+ DW_AT_count
+ DW_AT_data_member_location
+ DW_AT_discr_list
+ DW_AT_frame_base
+ DW_AT_namelist_item
+ DW_AT_segment
+ DW_AT_static_link
+ DW_AT_use_location
+ DW_AT_vtable_elem_location
+ DW_AT_allocated
+ DW_AT_associated
+ DW_AT_data_location
+ DW_AT_byte_stride
+
+In Figure 21, add the following row:
+
+ Form name       Value    Class
+
+ DW_FORM_expr    0x18     expr
+
+--
+
+Accepted with changes:
+  1.  Remove DW_AT_namelist_item from list of changes
+  2.  Fix typo on pg. 136 -- DW_AT_namelist_item is reference, not block
+  3.  No deprecation of block1-4
+  4.  Clarify block form description (pg. 126) with reference to expr.  
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

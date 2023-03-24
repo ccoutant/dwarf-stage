@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Thread-local Storage</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 020612.1: Thread-local Storage</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Jim Blandy</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Jim Blandy</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2002-06-12</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Extension</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted with modifications</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>3</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+I&#x27;d like to propose an addition to Dwarf.  Red Hat is putting together
+an initial implementation of this as a vendor extension; we&#x27;ll report
+back to this list once it&#x27;s done, and make this into an official
+proposal.
+
+(The function of DW_OP_push_tls_address is similar to that of the
+run-time function __get_tls_addr, so it was tempting to name the
+operation DW_OP_get_tls_addr.  However, DW_OP_push_tls_address is more
+consistent with the names of the other operations, especially
+DW_OP_push_object_address.)
+
+
+To section 2.4.1.3, &quot;Stack Operations&quot;, add the following paragraphs
+after DW_OP_push_object_address:
+
+12. DW_OP_push_tls_address
+
+The DW_OP_push_tls_address operation pushes the base address of the
+current thread&#x27;s thread-local storage block.  If the expression occurs
+in the Dwarf information for a dynamically loaded library, then
+DW_OP_push_tls_address pushes the base address of that library&#x27;s block
+for the current thread.  If the library&#x27;s storage for the current
+thread has not yet been allocated, a Dwarf consumer may arrange for it
+to be allocated now, or report an error to the user.
+
+&lt;rationale italics&gt;
+Some implementations of C and C++ support a “__thread” storage
+class, for variables that occupy distinct memory in distinct threads.
+For example, the definition:
+
+       __thread int foo;
+
+declares an integer variable named “foo” which has a separate value
+and address in each thread, much as a variable declared “auto” has a
+separate value and address in each invocation of the function
+containing its declaration.  Creating a new thread creates a new
+instance of “foo”, and when the thread exits, the storage for
+“foo” is freed.
+
+Typically, a program includes an “initialization image” --- a block
+of memory containing the initial values for any thread-local variables
+it defines.  When the program creates a new thread, the run-time
+system allocates a fresh block of memory for those thread-local
+variables, and copies the initialization image into it to give the
+variables their initialized values.
+
+A dynamically loaded library may also define thread-local variables.
+Some implementations delay allocating memory for such variables until
+the thread actually refers to them for the first time.  This avoids
+the overhead of allocating and initializing the library&#x27;s thread-local
+storage for all the threads present in a program when the library is
+loaded, even though only a few threads might actually use the library.
+
+However, when an implementation allocates thread-local storage on
+demand, this makes it hard to describe the location of a thread-local
+variable using ordinary Dwarf expressions: referencing the storage may
+entail allocating memory, copying an initialization image into place,
+registering it with the thread, and so on.  A dedicated operation like
+DW_OP_push_tls_address leaves delegates the request to the debugger,
+which is presumably already familiar with the program&#x27;s ABI and thread
+system, and can handle the request appropriately.
+&lt;/rationale italics&gt;
+
+---------------------
+added 05/11/2005:
+
+PROPOSED TEXT:
+
+[To section 2.4.1.3, &quot;Stack Operations&quot;, add the following paragraphs
+after DW_OP_push_object_address]
+
+12. DW_OP_push_tls_address
+
+The DW_OP_push_tls_address operation pops a value from the stack, and
+treats it as an offset into a thread-local storage block.  If the
+DWARF expression containing the DW_OP_push_tls_address operation
+belongs to the main executable&#x27;s DWARF info, the main executable&#x27;s
+thread-local storage block is used; if the expression belongs to a
+shared library&#x27;s DWARF info, then that shared library&#x27;s thread-local
+storage block is used.  The operation then pushes the address of the
+byte at the given offset in the current thread&#x27;s instance of the
+thread-local storage block.
+
+If the chosen thread-local storage block has not yet been allocated, a
+DWARF consumer may arrange for it to be allocated immediately, or
+report an error to the user.
+
+&lt;rationale italics&gt;
+Some implementations of C and C++ support a “__thread” storage
+class.  Variables having this storage class occupy distinct memory
+locations in distinct threads.  For example, the C declaration:
+
+       __thread int foo;
+
+defines an integer variable named “foo” which has a separate value
+and address in each thread, much as a variable declared “auto” has a
+separate value and address in each invocation of the function
+containing its declaration.  Creating a new thread creates a new
+instance of “foo”, and when the thread exits, the storage for
+“foo” is freed.
+
+Typically, a program includes an “initialization image” --- a block
+of memory containing the initial values for any thread-local variables
+it defines.  When the program creates a new thread, the run-time
+system allocates a fresh block of memory for those thread-local
+variables, and copies the initialization image into it to give the
+variables their initialized values.
+
+A dynamically loaded library may also define thread-local variables.
+Some implementations delay allocating memory for such variables for
+each thread until the thread actually refers to them for the first
+time.  This avoids the overhead of allocating and initializing the
+library&#x27;s thread-local storage for all the threads present in a
+program when the library is loaded, in cases where only a few threads
+actually use the library.
+
+However, when an implementation allocates thread-local storage on
+demand, this makes it hard to describe the location of a thread-local
+variable using ordinary Dwarf expressions: referencing the storage may
+entail allocating memory, copying an initialization image into place,
+registering the memory with the thread, and so on.  A dedicated
+operation like DW_OP_push_tls_address leaves delegates the request to
+the debugger, which is presumably already familiar with the program&#x27;s
+ABI and thread system, and can handle the request appropriately.
+&lt;/rationale italics&gt;
+
+[To Figure 22 add the following row after DW_OP_call_ref and before
+DW_OP_lo_user]
+
+Operation              Code No of operand Notes
+DW_OP_push_tls_address 0x9b 0             [Empty]
+
+=============================================================
+5/17/2005:  Accepted with modifications:
+
+[To section 2.4.1.3, &quot;Stack Operations&quot;, add the following paragraphs
+after DW_OP_push_object_address]
+
+12. DW_OP_form_tls_address
+
+The DW_OP_form_tls_address operation pops a value from the stack,
+translates it into an address in the current thread&#x27;s thread-local
+storage block, and pushes the address.  If the DWARF expression
+containing the DW_OP_form_tls_address operation belongs to the main
+executable&#x27;s DWARF info, the operation uses the main executable&#x27;s
+thread-local storage block; if the expression belongs to a shared
+library&#x27;s DWARF info, then it uses that shared library&#x27;s thread-local
+storage block.
+
+*Some implementations of C and C++ support a “__thread” storage
+class.  Variables with this storage class have distinct values and
+addresses in distinct threads, much as “auto” variables have
+distinct values and addresses in each function invocation.
+
+Typically, there is a single block of storage containing all __thread
+variables declared in the main executable, and a separate block for
+the variables declared in each dynamically loaded library.  Computing
+the address of the appropriate block can be complex (in some cases,
+the compiler emits a function call to do it), and difficult to
+describe using ordinary Dwarf location expressions.
+DW_OP_form_tls_address leaves the computation to the consumer.*
+
+[To Figure 22 add the following row after DW_OP_call_ref and before
+DW_OP_lo_user]
+
+Operation              Code No of operand Notes
+DW_OP_form_tls_address 0x9b 0             [Empty]
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

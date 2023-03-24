@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Clarify recommendations for filenames</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 080128.1: Clarify recommendations for filenames</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Cary Coutant</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Cary Coutant</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2008-01-28</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Improvement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted with modification</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>4</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Revised 2008-05-30.  Previous version can be found at
+http://www.dwarfstd.org/issues/080128.1-1.html
+
+Section: 3.1.1, 6.2.4, 6.2.5.3, 7.5.4
+Page: 40, 97, 103, 138
+
+Background
+
+(A) In Section 3.1.1, &quot;Normal and Partial Compilation Unit Entries,&quot;
+on page 40, the current spec says (in non-normative text):
+
+  The suggested form for the value of the DW_AT_comp_dir attribute on
+  UNIX systems is &quot;hostname:pathname&quot;. If no hostname is available, the
+  suggested form is &quot;:pathname&quot;.
+
+This suggestion is incompatible with DOS filenames, and is rarely
+used. It would seem better to provide a separate attribute,
+DW_AT_host, to provide the hostname in the unusual cases where it
+needs to be specified.
+
+(B) In Section 6.2.4, &quot;The Line Number Program Header,&quot; item 10,
+&quot;include_directories&quot;, it says &quot;Each path entry is either a full path
+name or is relative to the current directory of the compilation.&quot; But
+later in the same paragraph, it says &quot;Each entry is a null-terminated
+string containing a full path name.&quot; For consistency, we should change
+the second sentence to make it clear that a relative pathname is
+allowed.
+
+(C) We&#x27;ve found that gdb currently has a problem when the filename as
+specified in DW_AT_comp_dir + DW_AT_name doesn&#x27;t exactly match the
+filename as specified by the directory and file name entries in the
+line number program. Gdb attempts to canonicalize the names before
+comparing them, but this is problematic in the case of mount points
+and symbolic links, and it doesn&#x27;t always work right if the producer
+doesn&#x27;t output the names consistently. We should at least recommend
+(if not require) that the pathnames and filenames used in the
+.debug_info sections are consistent with the pathnames and filenames
+used in the .debug_line sections.
+
+
+Proposal
+
+(A) In Section 3.1.1, &quot;Normal and Partial Compilation Unit Entries,&quot;
+on page 40, remove the following non-normative text:
+
+  The suggested form for the value of the DW_AT_comp_dir
+  attribute on UNIX systems is &quot;hostname:pathname&quot;. If no
+  hostname is available, the suggested form is &quot;:pathname&quot;.
+
+Insert the following additional bullet item immediately following item
+6 (renumbering the following items appropriately):
+
+  7.  A DW_AT_host attribute whose value is a
+  null-terminated string containing the hostname where the
+  source files are stored. If a hostname is unavailable or
+  unnecessary, this attribute may be omitted.
+
+In Section 7.5.4, &quot;Attribute Encodings,&quot; on page 138, add the
+following row to Figure 20:
+
+  Attribute name    Value    Classes
+  --------------    -----    -------
+  DW_AT_host        0x??     string
+
+(Assign the next available attribute value, which would be 0x69 based
+on the latest draft of the DWARF-3 specification.)
+
+(B) In Section 6.2.4, &quot;The Line Number Program Header,&quot; item 10,
+&quot;include_directories&quot;, on page 97, replace this sentence:
+
+  Each entry is a null-terminated string containing a full
+  path name.
+
+with this:
+
+  Each entry is a null-terminated string containing the full
+  or relative path name of a directory where source files
+  may be located.
+
+(C) In Section 6.2.4, &quot;The Line Number Program Header,&quot; item 11,
+&quot;file_names&quot;, on page 97, replace the first two bullet items with the
+following:
+
+  * A null-terminated string containing the full or relative
+  path name of a source file. If the entry contains a simple
+  file name or a relative path name, the file is located
+  relative to either the compilation directory (as specified
+  by the DW_AT_comp_dir attribute given in the compilation
+  unit) or one of the directories listed in the
+  include_directories section.
+
+  * An unsigned LEB128 number representing the directory
+  index of a directory in the include_directories section.
+
+Following the fourth bullet item, add the following paragraph:
+
+  The primary source file should be described by an entry
+  whose path name exactly matches that given in the
+  DW_AT_name attribute given in the compilation unit, and
+  whose directory index is 0.
+
+In Section 6.2.5.3, &quot;Extended Opcodes,&quot; item 3, &quot;DW_LNE_define_file,&quot;
+on page 103, replace the first two numbered items with the following:
+
+  1. A null-terminated string containing the full or relative
+  path name of a source file. If the entry contains a simple
+  file name or a relative path name, the file is located
+  relative to either the compilation directory (as specified
+  by the DW_AT_comp_dir attribute given in the compilation
+  unit) or one of the directories listed in the
+  include_directories section.
+
+  2. An unsigned LEB128 number representing the directory
+  index of a directory in the include_directories section.
+
+Following the fourth item, add the following paragraph:
+
+  The primary source file should be described by an entry
+  whose path name exactly matches that given in the
+  DW_AT_name attribute given in the compilation unit, and
+  whose directory index is 0.
+
+========
+
+Accepted, except for DW_AT_host, which is removed.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

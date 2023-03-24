@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Describing the Stack Pointer in the Call Frame Information</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 020902.1: Describing the Stack Pointer in the Call Frame Information</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>David Anderson</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Matthew Gretton-Dann</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2002-09-02</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Extension</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted with modifications</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>3</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Keith Walker:
+I believe that I have spotted and error/deficiency in the Call Frame
+Information Example is DWARF3 Draft 8 Appendix D.5.
+
+The problem is the incorrect description of the Stack Pointer (R7) in the
+generated conceptual matrix.
+
+On entry to the function, the matrix at address &quot;foo&quot; has the rule for R7
+as &quot;same value&quot;.  This is correct.
+
+The code then executes the instruction &quot;sub R7, R7, &lt;fs&gt;&quot;
+
+The next entry in the matrix at address &quot;foo+4&quot; still has the rule for R7
+as &quot;same value&quot;.    But this cannot be true as the executed instruction has
+just altered the value of R7.    Unfortunately there isn&#x27;t a Call Frame
+Instruction which allows the previous value of R7 to be correctly described.
+
+
+
+In order for this register to be correctly described I believe that maybe
+what is required is a new Call Frame Instruction similar to
+DW_CFA_expression but which computes the actual value of the previous value
+of the register (rather than the location of the value).
+
+Keith.Walker
+
+I would first like to clarify that I agree with you on how the CFA is
+implemented,  I just think that the way it is expressed is unclear and the
+example provided incorrect.
+
+Dave Anderson At 09:11 AM 02-09-02 -0700, you wrote:
+
+&gt;a) In dwarf3 sec 6.4.1, the &#x27;register rules&#x27; are listed.
+&gt;   Register values are recovered via these rules.
+&gt;   None of them other than &#x27;architectural&#x27; allow for
+&gt;   registers to be recovered via calculation: they only
+&gt;   allow for registers to be recovered via copying from the stack
+&gt;   or from other registers.
+&gt;
+&gt;
+&gt;b) The stack pointer is special. It does not follow a)!
+
+Surely this by definition means that it invokes the &#x27;architectural&#x27; rule.
+
+&gt;   In 6.4 (italics) it says:
+&gt;    CFA is typically defined to be the value of the
+&gt;        stack pointer in the previous frame
+
+But as this is in italics this is not part of the specification&#x27;s formal
+definition.
+
+Therefore I assume that this means that each implementation which follows
+this model needs to state this in it&#x27;s implementation specification.
+This would therefore also state (or imply) the &#x27;architectural&#x27; rule for
+obtaining the stack pointer&#x27;s value.
+
+&gt;   In your case in hand the SP value does not change in dwarf, 
+&gt;   but the CFA changes by  &lt;fs&gt;, the size of the stack pointer change.
+&gt;   In other words, the &#x27;sp&#x27; register rule (R7 in your email)
+&gt;   is useless and
+&gt;   unused for this with this sort of code generation.
+&gt;   &#x27;undefined value&#x27; is appropriate for the register rule once
+&gt;   the register is incremented.
+&gt;
+&gt;   Notice that in D.5, indeed CFA changes in the example.
+
+So I think that we are agreed that the current example in D.5 is incorrect
+in have &#x27;s&#x27; in all the rows.
+
+I now think that the R7 column should probably have an &#x27;a&#x27; with the
+following added to the notes for Figure 56:
+    6. a = architectural rule
+
+Also the description of the hypothetical RISC machine should also state:
+    The CFA is defined to be the value of the stack pointer in the previous
+frame.
+
+
+This would make it much clearer that in fact most implementations invoke
+the architectural rule and need to define it for their implementation.
+
+
+Proposal by David Anderson based on Keith Walker&#x27;s comments.
+PROPOSAL:
+
+In Appendixd D.5 Call Frame Infomation Example
+
+Add a new bullet item
+
+&quot;o The CFA value in the current frame is defined to be the
+value of the stack pointer in the previous frame.&quot;
+
+In the R7 column of  figure 56:
+The all lines should be &#x27;a&#x27; in the r7 column.
+
+Following figure 56, we should have a small table
+containing some thing like
+
+ u means the register is &#x27;undefined value&#x27;, not not restorable.
+ s means the register is &#x27;same value&#x27; so on restoring the previious
+   frame the value is correct as is.
+ a means the rule is architectural: on restoring the previous frame
+   for the hypothetical architecture, insert the value of the CFA.
+ c-N means the rule is take the cfa value, subtract N from it,
+    getting a stack address where the previous frame&#x27;s value is located,
+    use that value-on-the-stack in restoring the previous frame.
+ 
+---------------------------------------------------------------
+
+Accepted as follows:
+Replace all of the R7 values in Figure 56 with &#x27;a&#x27; and add some 
+text an entry to the explanations after Figure 56.  It could be 
+&#x27;s&#x27; on the first and last instructions, it&#x27;s been pointed out, 
+but that is a result of being architecturally defined, not by 
+construction.
+
+Clarification:  Jim says that in 6.4.1 the description refers to
+&quot;the table&quot;.  In Figure 56 instead of &quot;conceptual matrix&quot; he suggests
+&quot;conceptual table&quot; (I think he suggested), plus cross references
+between 6.4.1 and Figure 56. 
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

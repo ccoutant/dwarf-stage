@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Include enumerators from non-enum-class enumerations in debug_names</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 230224.1: Include enumerators from non-enum-class enumerations in debug_names</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>David Blaikie</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td></td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2023-02-24</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Improvement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Open</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>6</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<p>Section 6.1.1.1, pg 137</p>
+<p>(Should probably consider this issue alongside <a href="230206.1.html">230206.1</a> - they're 
+both adding things to the index for similar reasons)</p>
+<h2>Proposal</h2>
+<p>Add <code>DW_AT_enumerator</code> entries to name index for accelerated lookup.</p>
+<h2>Background</h2>
+<p>C and C++ support the ability to create unscoped enumerations.</p>
+<p>Example — C unscoped enumeration.</p>
+<pre><code>enum X {
+  Y
+};         
+int main() { return Y; }
+
+DW_TAG_enumeration_type
+  DW_AT_type      (0x00000030 "unsigned int")
+  DW_AT_name      ("X")
+  DW_AT_byte_size (0x04)
+  DW_AT_decl_file ("/usr/local/google/home/blaikie/dev/scratch/test.c")
+  DW_AT_decl_line (1)
+
+  DW_TAG_enumerator
+    DW_AT_name    ("Y")
+    DW_AT_const_value     (0)
+</code></pre>
+<p>Even though "X" is in the index, "Y" can be used without qualification &amp;
+so a consumer would benefit from "Y" being in the index to avoid having
+to scan through all the debug info to find it.</p>
+<p>C++ also supports scoped enumerations, via the "enum class" syntax, in
+which case they need to be qualified, like "X::Y" and so there would be
+less need/benefit to including these enumerators in the index as they can
+be found via their scope (like class members are expected to be as well).</p>
+<p>This proposal extends the list of tags that may be put into the name 
+index further to include <code>DW_TAG_enumerator</code> for unscoped enumerations
+to simplify the work consumers have to do to find namespace alias DIEs
+by name.</p>
+<h2>Document changes</h2>
+<p>6.1.1.1 Contents of the Name Index</p>
+<p>[ORIGINAL TEXT]</p>
+<blockquote>
+<p>The name index must contain an entry for each debugging information entry that 
+defines a named subprogram, label, variable, type, or namespace, subject to the 
+following rules: </p>
+</blockquote>
+<p>[NEW TEXT]</p>
+<blockquote>
+<p>The name index must contain an entry for each debugging information entry that 
+defines a named subprogram, label, variable, type, namespace, or enumerator in
+a non-enum-class enumeration subject to the following rules: </p>
+</blockquote>
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Alternate debug sections</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 120604.1: Alternate debug sections</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Jakub Jelinek</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Jakub Jelinek</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2012-06-04</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>ACCEPTED with modifications</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>5</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+BACKGROUND
+
+Appendix E shows how DW_TAG_imported_unit can be used to reduce duplicate
+information, but that allows only to reduce duplicate information within
+debug information of each shared object or executable.  Often there is
+quite a lot of debug information duplication also in between different
+executables or shared objects (usually from the same project).
+
+OVERVIEW
+
+The following proposal adds 2 new forms and 3 new .debug_macro opcodes
+that allow reducing duplicate information in between different
+executables or shared objects.  Each executable or shared object then has
+its own set of debug sections, and in addition to that there can be some
+other object with another set of debug sections, which contain information
+shared between several executables or shared objects.  How to find this
+additional set of debug sections is implementation defined.
+
+It has been implemented in th DWZ utility as a GNU extension.
+
+The current forms used to reference information are references
+within the same set of debug sections (same executable, same shared object
+or from within the additional set of debug sections within that set).
+The new forms allow references from the executable or shared object debug
+sections to debug information within the additional set of debug sections.
+
+PROPOSAL
+
+Here are preliminary DWARF edits for the proposal (on top of the latest
+draft):
+
+2.1
+
+Add at the end:
+
+&quot;Optionally, the debugging information entries that are the same in
+ between multiple executables or shared objects may be also contained
+ in alternate .debug_info sections in an extra object
+ file.  The executable or shared object which contains references to
+ those debugging information entries shall contain a .debug_alt section
+ with information how to find the extra object file, and the extra
+ object file should alongside the .debug_info section contain also
+ .debug_alt section.&quot;
+
+6.3.2
+  Append to end:
+  &quot;DW_MACRO_define_indirect_alt        A macro definition (indirect name string in
+                    alternate object file)
+   DW_MACRO_undef_indirect_alt      A macro undefinition (indirect name string in
+                    alternate object file)
+   DW_MACRO_transparent_include_alt Include a sequence of entries from given offset of
+                    .debug_macro section in alternate object file&quot;
+
+Add new section:
+6.3.2.1.4  Define and Undefine Using Indirect Strings in Alternate Object File.
+  &quot;A DW_MACRO_define_indirect_alt or DW_MACRO_undef_indirect_alt entry has
+   two operands.  The first operand encodes the line number of the source line
+   on which the relevant defining or undefining macro directives appeared.
+   The second operand consists of an offset into a string table contained in
+   the .debug_str section of the alternate object file.  The size of the operand is
+   given in the section header offset_size.  Apart from the
+   encoding of the second operand these entries are equivalent to
+   DW_MACRO_define_indirect resp. DW_MACRO_undef_indirect.&quot;
+
+6.3.2.4:
+  Append:
+  &quot;A DW_MACRO_transparent_include_alt entry has one operand, offset from the
+   start of the .debug_macro section in alternate object file.  The size of
+   the operand is given in the section header offset size.  Apart from the
+   different location where to find the sequence of macro information entries this entry
+   type is equivalent to DW_MACRO_transparent_include.  This entry type is aimed
+   at sharing duplicate sequences of macro information entries between .debug_macro
+   sections from different executables or shared objects.  From within alternate
+   .debug_macro section, DW_MACRO_define_indirect and
+   DW_MACRO_undef_indirect entry types refer to the alternate .debug_str
+   section and DW_MACRO_transparent_include refers to the alternate
+   .debug_macro section.&quot;.
+
+Add new section:
+7.3.6  DWARF Alternate Section Files
+In order to further reduce size of the debugging information, it is possible
+to move duplicate debug information entries, strings and macro entries from
+several executables or shared objects into another object file by some
+post-linking utility and the moved entries and strings can be then referenced
+from the debugging information of each of those executables or shared objects.
+
+A DWARF alternate section file is itself an object file, using the same object
+file format, byte order, and size as the corresponding application executables
+or shared libraries. It consists only of a file header, section table, and
+a number of DWARF debug information sections.  Both the alternate section file
+and all the executables or shared objects that will reference entries or strings
+moved to the alternate section file should contain a .debug_alt section.
+
+The .debug_alt section should contain:
+
+1. version (uhalf)
+A 2-byte unsigned integer representing the version of the DWARF
+information for the compilation unit (see Appendix G). The
+value in this field is 5.
+
+2. is_alternate (ubyte)
+A 1-byte unsigned integer, which should contain value 1 if it is the
+alternate section file other executables or shared objects refer to, or
+0 if it is an executable or shared object referring to alternate section object
+file.
+
+3. alt_filename (null terminated filename)
+If is_alternate is 0, this should contain either absolute filename of the
+alternate section object file, or a filename relative to the object file
+containing the .debug_alt section.  If is_alternate is 1, the filename
+is not needed and can be an empty string.
+
+4. alt_checksum_len (unsigned leb128)
+Length of the following checksum field, can be 0 if no checksum is provided.
+
+5. alt_checksum (array of ubyte)
+Some checksum or cryptographic hash function of the .debug_info, .debug_str and
+.debug_macro sections of the alternate object file, or some unique identifier
+which the implementation can choose to verify that the alternate section object
+file matches what the debug information in the executables or shared objects
+expects.
+
+*Debug information entries that refer to executable&#x27;s or shared
+object&#x27;s addresses shouldn&#x27;t be moved to alternate section files, that will
+unlikely be beneficial as the addresses will be different, and similarly
+entries referenced from within expression locations or using loclistptr
+form attributes.*
+
+Executable or shared object compilation units then can use
+DW_TAG_imported_unit with DW_FORM_ref_alt form DW_AT_import attribute
+to import entries from the alternate sections, other DW_FORM_ref_alt
+attributes to refer to them and DW_FORM_strp_alt form attributes to
+refer to strings that are used by debug information of multiple
+executables or shared objects.  Within the alternate section file&#x27;s
+debugging sections DW_FORM_ref_alt or DW_FORM_strp_alt forms should
+not be used, and all reference forms referring some other sections
+refer the sections in the alternate section file, rather than
+the DWARF sections of the executable or shared objects which is
+referring to the alternate section object file.
+
+In macro information DW_MACRO_define_indirect_alt or
+DW_MACRO_undef_indirect_alt opcodes can refer to strings in the alternate
+.debug_str section, or DW_MACRO_transparent_include_alt can refer
+to alternate .debug_macro section opcodes.  Within the alternate
+.debug_macro section, DW_MACRO_define_indirect and DW_MACRO_undef_indirect
+opcodes refer to the alternate .debug_str section, not the one in
+the executable or shared object.&quot;
+
+7.4
+  3. Add:
+     DW_FORM_ref_alt        offset in .debug_info section in alternate object file
+     DW_FORM_strp_alt       offset in .debug_str section in alternate object file
+
+7.5.4
+  &quot;reference&quot;
+  Replace:
+  &quot;There are three types of reference.&quot;
+  with:
+  &quot;There are four types of reference.&quot;
+
+  After:
+  &quot;of the target executable or shared object&quot;
+  add:
+  &quot;, or, for references from within alternate .debug_info
+  sections, an offset from the beginning of the alternate .debug_info section&quot;.
+
+  After:
+  &quot;that was computed for the type&quot;
+  add:
+  &quot;The fourth type of reference is a reference from within the .debug_info
+  section of the executable or shared object to
+  a debugging information entry in the .debug_info section of alternate object file.
+  This type of reference (DW_FORM_ref_alt) is an offset from the beginning
+  of the alternate .debug_info section&quot;.
+
+  Replace:
+  &quot;second and third&quot;
+  with:
+  &quot;second, third and fourth&quot;.
+
+  After:
+  &quot;across compilation units&quot;
+  add:
+  &quot;, the fourth type for sharing of information across compilation units
+  from different executables or shared objects&quot;. 
+
+  After:
+  &quot;(DW_FORM_strp)&quot;
+  add:
+  &quot;or may be represented as an offset into a string table contained in the
+  alternate .debug_str section (DW_FORM_strp_alt).  DW_FORM_strp offsets
+  from compilation units in alternate .debug_info or .debug_types sections
+  refer to the alternate .debug_str section, not .debug_str in the
+  executable or shared object&quot;.
+
+  In figure 21 add:
+  &quot;DW_FORM_ref_alt 0x1c    reference&quot;
+  &quot;DW_FORM_strp_alt    0x1d    string&quot;
+
+7.22
+  In figure 39 add:
+  &quot;DW_MACRO_define_indirect_alt        0x08
+   DW_MACRO_undef_indirect_alt      0x09
+   DW_MACRO_transparent_include_alt 0x0a&quot;
+--
+
+Defered -- 1/21/2014 -- depends on 110722.1.
+Revised -- 7/14/2014.
+Accepted -- 9/16/2014.  Editorial changes/clarifications:  Better name 
+  for debug_alt.  Use &quot;shr&quot; instead of &quot;alt&quot;.  
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

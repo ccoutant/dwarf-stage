@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Location list entries should allow ending address to be same as starting address</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 050222.1: Location list entries should allow ending address to be same as starting address</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Daniel Berlin</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Daniel Berlin</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2005-02-22</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Error</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>3</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Re: Section 2.5.4, Page: 24
+
+As previously posted to the mailing list, i&#x27;m just submitting it as an &quot;official public comment&quot;
+
+The standard currently specifies that the end address of a location list
+entry *must* be greater than the beginning address (except for the
+location list terminator):
+
+&quot;2. An ending address, again relative to the applicable base address of
+the compilation unit referencing this location list. It marks the first
+address past the end of the address range over which the location is
+valid. The ending address must be greater than the beginning address.&quot;
+
+This causes significant problems for gcc 4.0 when trying to produce
+location lists (and i assume other producers have the same problem,
+whether they know it or not).
+
+The reason is that we (being gcc and others that genreate debug info in 
+the compiler, not the assembler or linker) can&#x27;t know, at a minimum until 
+well after we&#x27;ve output the assembly code (at a minimum, we can&#x27;t know 
+until the assembly file is assembled), whether the two labels we&#x27;ve put 
+in our IL, and that get output to the assembly,will actually have two 
+different addresses in memory.
+
+This is in part because the backend may decide, when expanding the
+instructions to assembly, not to actually output anything for a given
+instruction, at assembly output time.  So there is no way to know where
+to put the label such that it is at least 1 greater than begin label.
+
+There is also the case when the user uses inline assembly (in which case
+we just paste their inline assembly into the right place in the
+assembler file), and their inline assembly may or may not have actual
+instructions in it.
+
+So we can, and do, end up with the following assembly:
+
+LVL2 &lt;---- location list begin address label
+L3:  
+LVL3 &lt;--- location list end address label
+
+
+..
+LLST1:
+...
+        .long   .LVL2-.Ltext0   # Location list begin address (*.LLST1)
+        .long   .LVL3-.Ltext0   # Location list end address (*.LLST1)
+        .value  0x1     # Location expression size
+        .byte   0x51    # DW_OP_reg1
+...
+        .long   .LVL4-.Ltext0   # Location list begin address (*.LLST1)
+        .long   .LFE2-.Ltext0   # Location list end address (*.LLST1)
+        .value  0x1     # Location expression size
+        .byte   0x51    # DW_OP_reg1
+        .long   0x0     # Location list terminator begin (*.LLST1)
+        .long   0x0     # Location list terminator end (*.LLST1)
+
+
+Note that this location list entry becomes invalid when assembled,
+though we can&#x27;t determine this at the time when we output it.
+
+Besides this, things can get worse if your assembler does any
+optimization and goes to update the debug info.  It now has to try to
+prove that the addresses are different in order to keep the entry there,
+otherwise it would have to presumptively delete it to keep the info
+valid and we lose possibly valuable information.
+Same with the linker.
+
+This all seems harsh, and for the convience of the consumer.
+The final consumer of this debug info could simply ignore location list
+entries that have the same begin and end address, without any trouble at
+all.
+
+Therefore, i&#x27;d like to propose that the standard explicitly allow the
+begin and end address to be the same for a location list entry, and in
+that case, the consumer should simply ignore it.
+
+This is not optimal from a space perspective, but this is a matter of
+something that is simply impossible for a producer to always get right.
+
+PROPOSAL:
+
+    *A location list entry (but not a base address selection or end of
+    list entry) whose beginning and ending addresses are equal has no
+    effect because the size of the range covered by such an entry is
+    zero.*
+
+Also, make a similar addition regarding a range list entry in Section
+2.16.3.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

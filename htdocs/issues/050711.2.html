@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Add DW_AT_object_pointer for "this" parameters</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 050711.2: Add DW_AT_object_pointer for "this" parameters</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Chris Quenelle</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Chris Quenelle</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2005-07-11</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted with modifications</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>3</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section: 5.6.7
+
+PROPOSAL:
+
+Add a DW_AT_object_pointer attribute to Dwarf 3 and
+require it to be added to the appropriate DW_TAG_formal_parameter
+die in languages that have a &quot;this&quot; or a &quot;self&quot; pointer that
+is passed as a function parameter.
+
+See issue : 040511.1  Static Member Function
+Also see the minutes for the con-call of June 28, 2005
+
+This doesn&#x27;t invalidate the recent additions that require
+the &quot;this&quot; formal parameter to be marked &quot;const&quot; for const
+members, and marked as artificial.  Those are
+still required.  If the new attribute is used, then
+the parameter would not need to be first, or named
+with any special name.
+
+Some of what we added recently would move to an italics
+section describing what implementations do when they
+don&#x27;t use DW_AT_object_pointer.  Specifically the
+special name, and the required position in the list.
+
+If this proposal is generally accepted, I&#x27;ll write up the exact
+wording and send it to the alias.
+
+Notes:
+
+I&#x27;ll remind everyone that we accepted Mathhew&#x27;s proposal.
+I think what we already have is a workable solution to
+the problem.  But I think we can do better.
+
+I don&#x27;t like the idea of requiring special parameter names
+to denote special semantics.  Function declarations in my
+compiler don&#x27;t usually have parameter names.  Our compiler
+will need to attach that name as special case.  If we
+want to denote some special semantics for one particular
+parameter, the right way to do that is to use an attribute.
+
+Making this change doesn&#x27;t cause any dwarf generators to
+be &quot;non-compliant&quot; because none of them can be dwarf 3
+compliant until we standardize the spec.  Until then, they are
+&quot;dwarf 2 with extensions&quot;.
+
+I wouldn&#x27;t worry that adding DW_AT_object_pointer will cause
+any dwarf readers to immediately rush off and remove support
+for compilers that don&#x27;t emit the new attribute. 1) I don&#x27;t
+think that&#x27;s going to happen.  2) I don&#x27;t think it&#x27;s our
+problem to worry about, it&#x27;s a quality of implementation issue.
+
+================================================
+
+Revised proposal:
+
+Section: 5.6.7
+
+BACKGROUND:
+
+There is no explicit way to know if a C++ member function
+is declared static or const.  Both of these properties can
+be deduced in a straight forward way if the dwarf consumer
+can identify whether the function has a &quot;this&quot; pointer
+and if that pointer is a &quot;const&quot; pointer.  The same
+problem applies to other languages (Objective C/C++).
+
+Based on a recent addition, dwarf 3 requires that the
+&quot;this&quot; pointer (if preset) must be the first DW_TAG_formal_paremeter
+child of the DW_TAG_sunprogram die, and it must have the
+name &quot;this&quot; (or &quot;self&quot; if that&#x27;s appropriate for the language).
+
+We should be more explicit about marking the &quot;this&quot; parameter.
+If the pointer is marked explicitly there would be no need
+for an artificial restriction on ordering or naming.
+
+For more background see issue : 040511.1  Static Member Function
+Also see the minutes for the con-call of June 28, 2005
+which were sent to the dwarf-workgroup alias.
+
+I didn&#x27;t create an example for this, but I can do that
+if people think it&#x27;s appropriate.
+
+PROPOSAL:
+
+Add an attribute DW_AT_object_pointer which is a reference
+to a die representing the object pointer for this function.
+
+In section 5.6.7:
+ append to the end of the section:
+
+  For member functions which are not static, the DW_AT_object_pointer
+  attribute is used on the DW_TAG_subprogram to specify the &quot;this&quot;
+  pointer (for C++) or the &quot;self&quot; pointer (in Objective C/C++).
+  Often, this attribute will point to a DW_TAG_formal_parameter
+  die, but it may also point to a variable die.
+
+  *In older implementations where DW_AT_object_pointer is not used,
+  one of the parameters should be named &quot;this&quot;, and should appear
+  first in the list of parameters.*
+
+  The object pointer isn&#x27;t explicitly declared in the source code,
+  so the die that represents the object pointer should be marked
+  with the DW_AT_artificial flag.
+
+  If the DW_AT_type for an object pointer points to a &quot;const&quot; qualified
+  type, then the member function was declared as &quot;const&quot; in the source code.
+
+  If the DW_AT_type for an object pointer points to a &quot;volatile&quot; qualified
+  type, then the member function was declared as &quot;volatile&quot; in the source code.
+
+(I&#x27;ll leave the list of table updates to the editor.  It will
+be similar to the DW_AT_explicit proposal, for example.)
+
+-------------------------
+
+So that people can compare my proposal with what was
+previously suggested on the alias, I&#x27;ve copied some
+paragraphs from previous emails so you can compare.
+
+Ron previously suggested the following wording:
+
+    &quot;If the member function entry describes a non-static member
+    function then that entry owns at least one formal parameter
+    entry. The first such formal parameter entry
+    corresponds to the object for which the function is called.
+    The name attribute of that first formal parameter is defined by
+    the current language (for example &lt;code&gt;this&lt;/code&gt; for C++ or
+    &lt;code&gt;self&lt;/code&gt; for Objective-C++ and some other languages).
+    The parameter also has a DW_AT_artificial attribute whose value
+    is true. Conversely, if any of these properies does not apply
+    then the member function entry describes a static member function.
+
+    &quot;If the member function entry describes a &lt;code&gt;const&lt;/code&gt;
+    non-static member function, then the entry describes a non-static
+    member function whose first formal parameter entry has a type
+    that is const qualified.
+
+    *For simplicity, the type of the first formal parameter
+    of a non-static member function need not be checked by a
+    consumer to confirm that it is a pointer to the parent
+    class or a const qualified variant thereof.*
+
+Matt previously suggested:
+
+    &quot;If the member function entry describes a non-static member function
+    that has a const-volatile qualification, then the entry describes a
+    non-static member function whose first formal parameter has a type
+    that has an equivalentl const-volatile qualification.&quot;
+
+===================================
+
+Revised proposal accepted with following modifications:
+  Replace &quot;die&quot; with &quot;debug information entry&quot;.
+  Replace &quot;DW_AT_sunprogram&quot; with &quot;DW_AT_subprogram&quot;.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

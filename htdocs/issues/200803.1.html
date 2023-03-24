@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Add DW_LNS_jmp - modify file offset of line number program</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 200803.1: Add DW_LNS_jmp - modify file offset of line number program</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Andrew Kelley</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Hafiz Abid Qadeer</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2020-08-03</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Rejected</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>6</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section 6.2.5.2, pg 162
+
+The DW_LNS_jmp standard opcode takes a single signed LEB128 operand, which is a 
+byte offset affecting not the virtual address program counter, but the file offset 
+of the Line Number Program itself. The new Line Number Program position is adjusted 
+by this offset.
+
+Use case: This allows line number programs to move the control flow of the line 
+number program itself forward and backward by arbitrary amounts. This facilitates 
+incremental compilation, because it allows individual functions to be added and 
+resized without having to move other ones within the .debug_line section.
+
+Related downstream issue report: https://github.com/ziglang/zig/issues/5963
+Partially copied here:
+
+for each file: (starts out at line 1 column 0)
+  DW_LNS_set_file
+
+  for each function (sorted according to source order):
+    DW_LNE_set_address  xx xx xx xx (relocatable address, move with the function)
+    DW_LNS_set_prologue_end
+    DW_LNS_advance_line (relocatable, advance to the opening `{`)
+    DW_LNS_copy
+    process the IR debug info instructions using DW_LNS_advance_line, DW_LNS_advance_pc, DW_LNS_copy
+    DW_LNS_set_epilogue_begin
+    DW_LNS_advance_line (advance to the terminating `}`)
+    DW_LNS_copy
+    NOPs used as padding so the function can grow
+
+  DW_LNE_end_sequence
+  NOPs used as padding so the file can grow
+
+
+This strategy depends on &quot;NOPs used as padding&quot;. There are two ways currently to
+ achieve this effect:
+
+ * Using an extended opcode with an arbitrary (unsigned) length and DW_LNE_user_hi
+   - Unfortunately not supported by gdb (see https://sourceware.org/bugzilla/show_bug.cgi?id=26333)
+   - Only allows skipping forward, not backward
+
+ * Using {DW_LNS_negate_stmt, DW_LNS_negate_stmt} as a 2-byte NOP
+   - Requires writing unnecessary bytes to the .debug_line section (worse compilation performance)
+   - Requires debug info consumers to do unnecessary work (worse debugging performance)
+   - Also only allows skipping forward
+
+DW_LNS_jmp would allow an incremental compilation strategy that supported adding 
+and growing functions by putting them at the end, and patching up the DW_LNS_jmp 
+offset with a fixed-size ILEB128, while still maintaining the advantage of functions 
+line info being relative to the previous function from the source file, making 
+incremental compilation of a single function O(1) edits to the .debug_line section. 
+
+Without this proposal, the functions above must be sorted according to source order, 
+however with this proposal, they may be in any order that causes the least amount of
+file system operations when performing an incremental compilation.
+
+Proposal
+========
+The motivation seems to be incremental compilation. Proposal asks for a new
+opcode in line number table that can be used to jump forward and back in the
+line number program. The submission is not clear of what problem this will solve.
+
+Also reading the submission and the github issue, I get the feeling that it is
+based on misunderstanding of dwarf. For example, many times it mentions line
+number being relative to previous function. The things he is trying to achieve
+may already be do-able with the current dwarf. I contacted the submitter for
+clarification but did not get any response.
+
+As this proposal asks for adding a bit of control flow in the line table program
+without explaining any clear benefit, I think it should be rejected.
+
+The issue also discusses about the padding at the end of the function. I think
+that issue has already been handled in 180426.2.
+
+--
+2021-07-12: Added Proposal.
+2022-01-24: Rejected.  See issue 180426.2 to insert NOPs in line table.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

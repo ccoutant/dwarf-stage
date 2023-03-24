@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Support C++0x Variadic templates</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 090107.2: Support C++0x Variadic templates</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Kendrick Wong</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Kendrick Wong</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2009-01-07</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Rejected</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>4</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Background
+----------
+For detail description of the feature, please refer to:
+http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n2087.pdf
+http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n2080.pdf 
+
+Overview
+--------
+
+C++0x will allow function and class templates to take an arbitrary 
+number of arguments. The motivation behind this language extension 
+is to allow TR1 facilities such as tuple to accept variable number 
+of parameters.
+
+template&amp;lt;typename... Elements&amp;gt; class tuple;
+tuple&amp;lt;int, long&amp;gt; tuple_int_long;  // Elements is a template type parameter pack 
+                                  // containing 2 arguments, int and long type
+tuple&amp;lt;float&amp;gt; tuple_float;         // Elements is a template type parameter pack
+                                     containing 1 argument: float type
+ 
+template&amp;lt;typename T, unsigned PrimaryDimension, unsigned... Dimensions&amp;gt; class array;
+array&amp;lt;double, 3, 3&amp;gt; t1;           // Dimensions is a template value parameter pack
+                                  // containing a single argument: unsigned int 3.
+array&amp;lt;double, 3, 3, 4, 5&amp;gt; t2;     // Dimensions is a template value parameter pack
+                                  // containing three arguments: unsigned int 3, 4 and 5.
+
+template&amp;lt;typename... Args&amp;gt; void eat(Args... args);
+// The eat() function is a variadic template with template parameter pack Args.
+// The ellipsis to the left of the identifier args indicates that args is a 
+//   function parameter pack.
+
+ 
+Proposed change to DWARF
+
+Purpose
+-------
+
+    * DWARF does not represent the generic template definition, but does 
+      represent each template instantiation.
+    * Template type parameter pack contains only template type parameters
+    * Template value parameter pack contains only template value parameters
+    * Debug information should show where the template parameter pack is
+      used within the template definition.
+    * If possible, debug information should also show the arguments within 
+      the template parameter pack.
+
+
+New DWARF tag
+
+DW_TAG_template_parameter_pack  0x43  template parameters pack
+
+Allowable attributes:
+
+    * DECL
+    * DW_AT_name
+    * DW_AT_type
+    * DW_AT_sibling
+
+DW_TAG_formal_parameter_pack  0x44  function parameters pack
+
+Allowable attributes:
+
+    * DECL
+    * DW_AT_name
+    * DW_AT_sibling 
+
+3.3.7: Function Template Instantiations
+
+4. Each template parameter pack declaration appearing in the template 
+   definition is represented by a debugging information entry with the tag 
+   DW_TAG_template_parameter_pack. Each such entry may have a DW_AT_name 
+   attribute, whose value is a null-terminated string containing the name 
+   of the template parameter pack as it appears in the source program.
+
+5. Each argument within the template parameter pack is represented by a 
+   debugging information entry with the tag DW_TAG_template_type_parameter. 
+   These entries follow immediately after the debugging information entry 
+   with the tag DW_TAG_template_parameter_pack, and are owned by the same 
+   parent entry. Each such entry does not have a DW_AT_name attribute. Each 
+   such entry has a DW_AT_type attribute describing the actual type by which 
+   the formal is replaced for this instantiation.
+
+6. Each function parameter pack declaration appearing in the template 
+   definition is represented by a debugging information entry with the tag 
+   DW_TAG_formal_parameter_pack. Each such entry may have a DW_AT_name 
+   attribute, whose value is a null-terminated string containing the name 
+   of the template parameter pack as it appears in the source program.
+
+7. Each argument within the function parameter pack is represented by a 
+   debugging information entry with the tag DW_TAG_formal_parameter. These 
+   entries follow immediately after the debugging information entry with 
+   the tag DW_TAG_formal_parameter_pack, and are owned by the same parent 
+   entry. Each such entry does not have a DW_AT_name attribute. Each such 
+   entry has a DW_AT_type attribute describing the actual type by which the 
+   formal is replaced for this instantiation. 
+
+5.6.8: Class Template Instantiations
+
+Each template parameter pack declaration appearing in the template 
+definition is represented by a debugging information entry with 
+the tag DW_TAG_template_parameter_pack. Each such entry may have a 
+DW_AT_name attribute, whose value is a null-terminated string 
+containing the name of the template parameter pack as it appears 
+in the source program.
+
+If the template parameter pack entry represent a template value
+parameter pack, it may contain a DW_AT_type attribute to denote 
+the type of the arguments within the template value parameter pack.
+
+Each argument within the template parameter pack can have one of the tags 
+DW_TAG_template_type_parameter or DW_TAG_template_value_parameter, and will 
+have same form as other template parameter entries. These entries follow 
+immediately after the debugging information entry with the tag 
+DW_TAG_template_parameter_pack, and are owned by the same parent entry. 
+Each such entry does not have a DW_AT_name attribute. Each such entry has 
+a DW_AT_type attribute describing the actual type by which the formal is 
+replaced for this instantiation. 
+
+
+APPENDIX
+
+D.8 Variadic Templates Examples
+D.8.1 Function Template Instantiations
+
+/* Base case for printf */
+void printf(const char* s) {
+  while (*s) {
+    std::cout &amp;lt;&amp;lt; *s++;
+  }
+}
+template&amp;lt;typename T, typename... PackTypes&amp;gt;
+void printf(const char* s, T value, PackTypes... args) {
+  while (*s) {
+    if (*s == &#x27;%&#x27; &amp;&amp; *++s != &#x27;%&#x27;) {
+      std::cout &amp;lt;&amp;lt; value;
+      return printf (++s, args...);
+    }
+    std::cout &amp;lt;&amp;lt; *s++;
+  }
+}
+ 
+int x;
+printf&amp;lt;int, char, int&amp;gt; (&quot;%c %d&quot;, x, &#x27;x&#x27;, 3);
+
+The base case for printf is not a template instantiation:
+
+printf (const char* s);
+
+1$:   DW_TAG_subprogram
+          DW_AT_name(&quot;printf&quot;)
+2$:       DW_TAG_formal_parameter
+              DW_AT_name(&quot;s&quot;)
+              DW_AT_type(reference to type &quot;const char*&quot;)
+
+Compiler may instantiate these 3 functions:
+
+# printf&amp;lt;int,char,int&amp;gt; (const char* s, int value, char, int);  // args =&amp;gt; char, int
+# printf&amp;lt;char,int&amp;gt;     (const char* s, char value, int);       // args =&amp;gt; int
+# printf&amp;lt;int&amp;gt;          (const char* s, int value);             // args =&amp;gt; (empty)
+
+1) printf&amp;lt;int,char,int&amp;gt; (const char* s, int value, char, int);  // args =&amp;gt; char, int
+
+10$:  DW_TAG_subprogram
+          DW_AT_name(&quot;printf&quot;)
+11$:      DW_TAG_template_type_parameter
+              DW_AT_name(&quot;T&quot;)
+              DW_AT_type(reference to base type &quot;int&quot;)
+12$:      DW_TAG_template_parameter_pack
+              DW_AT_name(&quot;PackTypes&quot;)
+13$:      DW_TAG_template_type_parameter
+              ! no DW_AT_name attribute
+              DW_AT_type(reference to base type &quot;char&quot;)
+14$:      DW_TAG_template_type_parameter
+              ! no DW_AT_name attribute
+              DW_AT_type(reference to base type &quot;int&quot;)
+15$:      DW_TAG_formal_parameter
+              DW_AT_name(&quot;s&quot;)
+              DW_AT_type(reference to type &quot;const char*&quot;)
+16$:      DW_TAG_formal_parameter
+              DW_AT_name(&quot;value&quot;)
+              DW_AT_type(reference to 11$)
+17$:      DW_TAG_formal_parameter_pack
+              DW_AT_name(&quot;args&quot;)
+18$:      DW_TAG_formal_parameter
+              ! no DW_AT_name attribute
+              DW_AT_type(reference to 13$)
+19$:      DW_TAG_formal_parameter
+              ! no DW_AT_name attribute
+              DW_AT_type(reference to 14$)
+
+2) printf&amp;lt;char,int&amp;gt;     (const char* s, char value, int);       // args =&amp;gt; int
+
+20$:      DW_TAG_subprogram
+              DW_AT_name(&quot;printf&quot;)
+21$:      DW_TAG_template_type_parameter
+              DW_AT_name(&quot;T&quot;)
+              DW_AT_type(reference to base type &quot;int&quot;)
+22$:      DW_TAG_template_parameter_pack
+              DW_AT_name(&quot;PackTypes&quot;)
+23$:      DW_TAG_template_type_parameter
+              ! no DW_AT_name attribute
+              DW_AT_type(reference to base type &quot;int&quot;)
+24$:      DW_TAG_formal_parameter
+              DW_AT_name(&quot;s&quot;)
+              DW_AT_type(reference to type &quot;const char*&quot;)
+25$:      DW_TAG_formal_parameter
+              DW_AT_name(&quot;value&quot;)
+              DW_AT_type(reference to 21$)
+26$:      DW_TAG_formal_parameter_pack
+              DW_AT_name(&quot;args&quot;)
+27$:      DW_TAG_formal_parameter
+              ! no DW_AT_name attribute
+              DW_AT_type(reference to 23$)
+
+3) printf&amp;lt;int&amp;gt;          (const char* s, int value);             // args =&amp;gt; (empty)
+
+30$:      DW_TAG_subprogram
+              DW_AT_name(&quot;printf&quot;)
+31$:      DW_TAG_template_type_parameter
+              DW_AT_name(&quot;T&quot;)
+              DW_AT_type(reference to base type &quot;int&quot;)
+32$:      DW_TAG_template_parameter_pack
+              DW_AT_name(&quot;PackTypes&quot;)
+33$:      DW_TAG_formal_parameter
+              DW_AT_name(&quot;s&quot;)
+              DW_AT_type(reference to type &quot;const char*&quot;)
+34$:      DW_TAG_formal_parameter
+              DW_AT_name(&quot;value&quot;)
+              DW_AT_type(reference to 31$)
+35$:      DW_TAG_formal_parameter_pack
+              DW_AT_name(&quot;args&quot;)
+
+D.8.2 Class Template Instantiations
+
+/* Template definition for counting number of template type arguments */
+template&amp;lt;typename... PackTypes&amp;gt; struct count;
+ 
+/* Full specialization for zero argument */
+template &amp;lt;&amp;gt;
+struct count&amp;lt;&amp;gt; {
+  static const int value = 0;
+};
+
+/* Partial specialization for peeling off the first argument */
+template&amp;lt;typename T, typename... PackTypes&amp;gt;
+struct count&amp;lt;T, PackTypes...&amp;gt; {
+  static const int value = 1 + count&amp;lt;PackTypes...&amp;gt;::value;
+};
+
+ 
+
+/* Template instantiation */
+count&amp;lt;char, short, int&amp;gt; a;
+
+The base case template:
+
+1$:   DW_TAG_structure_type
+          DW_AT_name(&quot;count&quot;)
+2$:       DW_TAG_member
+              DW_AT_name(&quot;value&quot;)
+              DW_AT_declaration(yes)
+              DW_AT_type(reference to type &quot;const int&quot;)
+3$:   DW_TAG_variable
+          DW_AT_specification(reference to 2$)
+          DW_AT_location(...)
+
+Compiler may instantiate these 3 types:
+
+1) count&amp;lt;char, short, int&amp;gt;      // PackTypes =&amp;gt; short, int
+
+11$:  DW_TAG_structure_type
+          DW_AT_name(&quot;count&quot;)
+12$:      DW_TAG_template_type_parameter
+              DW_AT_name(&quot;T&quot;)
+              DW_AT_type(reference to base type &quot;char&quot;)
+13$:      DW_TAG_template_parameter_pack
+              DW_AT_name(&quot;PackTypes&quot;)
+14$:          DW_TAG_template_type_parameter
+                  DW_AT_type(reference to base type &quot;short&quot;)
+15$:          DW_TAG_template_type_parameter
+                  DW_AT_type(reference to base type &quot;int&quot;)
+16$:      DW_TAG_member
+              DW_AT_name(&quot;value&quot;)
+              DW_AT_declaration(yes)
+              DW_AT_type(reference to type &quot;const int&quot;)
+17$:  DW_TAG_variable
+          DW_AT_specification(reference to 16$)
+          DW_AT_location(...)
+
+2) count&amp;lt;short, int&amp;gt;            // PackTypes =&amp;gt; int
+
+21$:  DW_TAG_structure_type
+          DW_AT_name(&quot;count&quot;)
+22$:      DW_TAG_template_type_parameter
+              DW_AT_name(&quot;T&quot;)
+              DW_AT_type(reference to base type &quot;short&quot;)
+23$:      DW_TAG_template_parameter_pack
+              DW_AT_name(&quot;PackTypes&quot;)
+24$:          DW_TAG_template_type_parameter
+                  DW_AT_type(reference to base type &quot;int&quot;)
+25$:      DW_TAG_member
+              DW_AT_name(&quot;value&quot;)
+              DW_AT_declaration(yes)
+              DW_AT_type(reference to type &quot;const int&quot;)
+26$:  DW_TAG_variable
+          DW_AT_specification(reference to 25$)
+          DW_AT_location(...)
+
+3) count&amp;lt;int&amp;gt;                   // PackTypes =&amp;gt; (empty)
+
+31$:  DW_TAG_structure_type
+          DW_AT_name(&quot;count&quot;)
+32$:      DW_TAG_template_type_parameter
+              DW_AT_name(&quot;T&quot;)
+              DW_AT_type(reference to base type &quot;int&quot;)
+33$:      DW_TAG_template_parameter_pack
+              DW_AT_name(&quot;PackTypes&quot;)
+34$:      DW_TAG_member
+              DW_AT_name(&quot;value&quot;)
+              DW_AT_declaration(yes)
+              DW_AT_type(reference to type &quot;const int&quot;)
+35$:  DW_TAG_variable
+          DW_AT_specification(reference to 34$)
+          DW_AT_location(...)
+
+ 
+Change History
+
+March 17, 2009.
+
+    * Define template parameter pack and function parameter pack.
+    * Add DW_AT_parameter_pack to indicate that a parameter is a 
+      part of template parameter pack.
+    * Add naming convention for parameters which are part of 
+      template parameter pack.
+
+April 13, 2009.
+
+    * Place Example section in Appendix D
+    * Re-format DWARF description in Example section to match 
+      current documentation.
+    * Remove DW_AT_parameter_pack attribute
+    * Add example of class template instantiation with template 
+      parameter pack.
+
+May 5, 2009.
+
+    * Add DW_TAG_formal_parameter_pack to indicate the name of the 
+      function parameter pack.
+    * DW_TAG_template_type_parameter are not longer children of 
+      DW_TAG_template_parameter_pack. This is made so that consumer 
+      don&#x27;t need to understand the new TAG, and still be able to 
+      process the other information.
+    * Add debug information representation for variable &#x27;a&#x27; in D.8.2. 
+
+
+-----------
+
+Rejected:  Recommend that this be re-submitted when there is
+a working implementation using vendor extensions.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

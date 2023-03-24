@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: DW_AT_export_symbols</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 141212.1: DW_AT_export_symbols</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Michael Eager</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Michael Eager</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2014-12-12</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>5</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Proposal 
+========
+
+Add DW_AT_export_symbols attribute to indicate that the symbols
+defined within the current scope are to be exported into the enclosing
+scope.
+
+This proposal is an alternate to 141020.1.  
+
+Background
+==========
+
+C++11 adds a new use for the keword &quot;inline&quot; as a modifier for
+namespace, which exports the symbols defined within the namespace
+into the enclosing scope.  From the proposed extension
+Section 7.3.1:
+http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2011/n3242.pdf
+
+  &quot;Members of an inline namespace can be used in most respects as
+  though they were members of the enclosing namespace.&quot;
+
+This is similar to the use of anonymous structs in C/C++, where symbols 
+within the interior struct are referenced as if they were defined 
+in the enclosing structure.  
+
+
+Example -- C++ inline namespace
+
+namespace A {
+  inline namespace B {   // (1) inline namespace
+    int a;
+  }
+}
+
+void foo (void)
+{
+  using A::B::a;
+  a = 1;
+}
+
+void bar (void)
+{
+  using A::a;
+  a = 2;
+}
+
+
+&lt;1&gt; DW_TAG_namespace
+      DW_AT_name        : A        
+  &lt;2&gt; DW_TAG_namespace
+        DW_AT_name        : B        
+        DW_AT_export_symbols     
+    &lt;3&gt; DW_TAG_variable)
+          DW_AT_name        : a        
+
+
+In this example, &#x27;a&#x27; may be referenced either as a member of 
+the fully qualified namespace A::B, or as if it were defined
+in the enclosing namespace, A.
+
+
+Example -- C/C++ anonymous structs
+
+struct foo {
+  int a;
+  struct {
+    int b;
+  };
+} x;
+
+void bar(void)
+{
+  struct foo t;
+  t.a = 1;
+  t.b = 2;
+}
+
+
+&lt;1&gt; DW_TAG_structure_type  
+      DW_AT_name (foo)
+  &lt;2&gt; DW_TAG_member
+        DW_AT_name (a)
+  &lt;3&gt; DW_TAG_structure_type
+        DW_AT_export_symbols
+    &lt;4&gt; DW_TAG_member
+          DW_AT_name (b)
+                
+In this example, &#x27;b&#x27; is referenced as if it were defined in the 
+enclosing struct &#x27;foo&#x27;. 
+          
+          
+Note:  GCC currently generates the following DWARF, with the nested
+anonymous struct described as being at top-level, rather than within
+struct foo, and with an unnamed member within struct foo with the
+type of the anonymous struct.
+
+&lt;1&gt; DW_TAG_structure_type
+  &lt;2&gt; DW_TAG_member
+        DW_AT_name (b)
+&lt;3&gt; DW_TAG_structure_type
+      DW_AT_name (foo)
+  &lt;4&gt; DW_TAG_member
+        DW_AT_name (a)
+  &lt;5&gt; DW_TAG_member
+        DW_AT_type &lt;1&gt;   
+
+
+Document changes
+================
+
+Add to Table 2.2 (Attribute names)
+
+  DW_AT_export_symbols  Namespace Entries
+            Structure, Union and Class Type Entries
+
+Add to end of 3.2.2 (Namespace Entries)
+
+  A namespace may have a DW_AT_export_symbols attribute which indicates
+  that all member names defined within the namespace may be referenced 
+  as if they were defined within the containing namespace. 
+  *This may be used to describe inline namespaces in C++.*
+
+
+Add to end of 5.7.1 (Structure, Union and Class Type Entries)
+
+  A structure, union, or class type may have a DW_AT_export_symbols
+  attribute which indicates that all member names defined within 
+  the structure, union, or class may be referenced as if they were
+  defined within the containing structure, union, or class. 
+  *This may be used to describe anonymous structs, etc., in C or C++.*
+
+Add to Table 7.5 (Attribute encodings)
+
+  DW_AT_export_symbols  0x89  flag
+
+Modify Table A.1
+  DW_TAG_class_type     -- Add DW_AT_export_symbols
+  DW_TAG_namespace      -- Add DW_AT_export_symbols
+  DW_TAG_structure_type -- Add DW_AT_export_symbols
+  DW_TAG_union_type     -- Add DW_AT_export_symbols
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

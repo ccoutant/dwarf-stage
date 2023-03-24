@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Change default encoding of string literals to UTF8</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 130211.1: Change default encoding of string literals to UTF8</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Kendrick Wong</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Kendrick Wong</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2013-02-11</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Rejected</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>5</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Affected sections in DWARF spec: all sections where &#x27;names&#x27; are used.
+
+Overview:
+
+Prior to DWARF 5, the default encoding of all string literals within DWARF sections are ASCII 
+(ISO8859-1).  A compilation unit DIE may have an optional attribute, DW_AT_utf8, which indicates
+that the encoding of all string literals is UTF8.
+
+This proposal is to change the default encoding of all string literals to UTF8. (Thereby, deprecating 
+DW_AT_utf8 in DWARF 5)
+
+Proposal:
+
+In DWARF 5, the default encoding of all string literals within DWARF is UTF8.  This affects all string 
+literals within DWARF sections.  For example:
+ - string literals in .debug_info
+ - string literals in .debug_type
+ - file, directory names in .debug_line
+ - string literals in .debug_pubnames
+ - string literals in .debug_pubtypes
+ - string literals in .debug_str
+ - etc..
+
+While all the base ASCII characters share the same codepoints in UTF8, this is nevertheless an incompatible
+change.  This is because existing producer may encode string literals using multibyte encodings, and these
+literals will not be interpreted correctly under UTF8.
+
+Once the default encoding is changed, the attribute DW_AT_utf8 is no longer needed, and can be deprecated.
+
+---
+Rejected 3/19/2013 -- Committee decided to retain existing default encoding.  
+Producers are encouraged to use UTF-8 and to specify DW_AT_utf8 in the CU.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: DW_AT_ranges and address size</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 030318.1: DW_AT_ranges and address size</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>David Anderson</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Dave Anderson</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2003-03-18</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Clarification</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted with modification</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>3</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Fred Riss
+|I was reading Dwarf3 draft 8 and came across what seems to be an
+|inconsistency in the .debug_ranges section contents description. In
+|section 7.24 I read that all entities of the .debug_ranges section are
+|sized like an addressing unit (= the address size defined by the
+|compilation unit header). Now in section 2.16.3, the &#x27;base address
+|selection&#x27; entry is defined to begin with 0xFFFFFFFF in DWARF 32bits and
+|0xFFFFFFFFFFFFFFFF in DWARF 64bits... and what if the address size of a
+|target is 16 bits ? 
+|I think the standard wants the base selection entry to be 0xFFFF
+|followed by the base address, am I wrong ?
+|
+|It could be that the text in section 2.16.3 doesn&#x27;t refer to the Dwarf
+|format (Dwarf3 32/64 bits described in section 7.4), but to Dwarf files
+|using 32/64 bits addresses ; the statement would then be right, but if
+|that&#x27;s the right interpretation, I find the reference to Dwarf 32/64bits
+|format very confusing for the reader.
+
+
+David Anderson
+2.16.3 does mix up the notions of address and offset.
+The description of &#x27;base address&#x27; uses offset terminology and 
+values.
+
+While for most architectures a value of &#x27;all bits on&#x27; would
+be a suitible special-value to describe a &#x27;base address selection entry&#x27;,
+that is not universally true.
+
+Proposal by David Anderson
+PROPOSAL:
+
+The description of a base address selection entry (the 1. part)
+be changed to
+
+1.  A special distinguished value (not a value that would
+    be used as a data or code address).
+    
+    For most architectures, a value of 0xffffffff for 32 bit pointer
+    addresses (0xffffffffffffffff for 64 bit pointer addresses)
+    will work and is the value defined by this document.
+
+    For architectures for which these values are inappropriate,
+    the ABI committee or compiler author 
+    may define a distinguished value. If a
+    distinguished value is not defined a compiler must not emit
+    Non-Contiguous Address Ranges.  
+
+
+
+In the intro paragraph of 2.16.3, add
+
+Not every architecture can necessarily support range lists.
+See the definition of a &#x27;base address selection entry&#x27;
+(which is described below).
+
+----------------------------------------------------------
+
+Proposed wording:
+Here is the wording I suggest in 2.16.3, page 32:
+
+    A range list entry consists of:
+
+      1. A beginning address offset. This address offset has the
+         size of an address and is relative to the applicable
+     base address of the compilation unit referencing this
+     range list. It marks the beginning of an address range.
+
+      2. An ending address offset. This address offset again has
+         the size of an address and is relative to the applicable
+     base address of the compilation unit referencing this
+     range list. It marks the first address past the end of
+     the address range.The ending address must be greater than
+     the beginning address.
+
+    ...
+
+    A base address selection entry consists of: 
+
+      1. The value of the largest representable address offset
+         (for example, 0xffffffff when the size of an address is
+     32 bits).
+
+      2. An address, which defines the appropriate base address
+         for use in interpreting the beginning and ending address
+     offsets of subsequent entries of the location list.
+
+
+Nearly identical changed wording is also used back in Section 2.5.4,
+pages 24-25, regarding location lists (not shown here).
+
+
+Accepted as modified.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

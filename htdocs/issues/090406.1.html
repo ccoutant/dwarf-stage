@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Template types</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 090406.1: Template types</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Todd Allen</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Todd Allen</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2009-04-06</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Clarification</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>4</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+BACKGROUND:
+
+In C++ templates, a template type parameter may be referenced within the body of
+the template.  In an instance of the template, those references are replaced
+with the actual types specified in the instantiation.  However, there still is
+value in having the type references in the DWARF refer to the
+DW_TAG_template_type_parameters, so that it&#x27;s clear that they did so in the
+original template.  And there is no loss of descriptiveness since each
+DW_TAG_template_type_parameter has a DW_AT_type that references the actual type.
+
+My original thoughts on this centered on whether or not a
+DW_TAG_template_type_parameter actually qualified as a type.  I conclude that
+it does.  To reiterate on this:
+
+   The C++ standard makes pretty clear that a typename (or class) in a template
+   declaration is considered a type-name within the template itself.  This is
+   analogous to normal type-names for normal type declarations.  And the DWARF
+   standard is clear that a DW_TAG_template_type_parameter represents a &quot;formal
+   parameterized type declaration&quot; (i.e. typename or class).  So to my mind this
+   means the DWARF standard already implies that a
+   DW_TAG_template_type_parameter is a type.  Of course, this clarity only comes
+   if you&#x27;re wearing a language lawyer hat, so I think we could stand to add a
+   line to really make the point.  But given that it&#x27;s just a clarification
+   perhaps it can just be italicized text.
+
+
+But Cary Coutant pointed out that the DWARF standard actually is very precise
+about the form of a template instantiation.  It says that, with 3 or 4 very
+explicit exceptions, it should look exactly like it would look if the
+replacement happened manually and there was no template involved at all.
+
+So, if we want type references within the template instance to refer to
+DW_TAG_template_type_parameters, we need to make that another explicit
+exception.  This occurs in two places: 3.3.7 for function template instances,
+and 5.6.8 for class template instances.
+
+PROPOSAL:
+
+3.3.7:
+
+   In the second paragraph, change &quot;With three exceptions...&quot; to &quot;With four
+   exceptions...&quot;
+
+   Insert numbered item into the list:
+
+      2. The subprogram entry and each of its child entries should reference a
+         template type parameter entry in any circumstance where the template
+         definition referenced a formal parameterized type.
+
+5.6.8:
+
+   In the second paragraph, change &quot;With four exceptions...&quot; to &quot;With five
+   exceptions...&quot;
+
+   Insert numbered item into the list:
+
+      3. The class type entry and each of its child entries should reference a
+         template type parameter entry in any circumstance where the template
+         definition referenced a formal parameterized type.  Similarly, the
+         class type entry and each of its child entries should reference a
+         template value parameter entry in any circumstance where the template
+         definition referenced a formal parameterized value.
+
+--
+
+Revised May 5, 2009:  Convert non-normative text to normative changes.  
+
+Accepted July 7, 2009
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

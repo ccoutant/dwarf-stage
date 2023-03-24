@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Line table "comment" opcode</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 180426.2: Line table "comment" opcode</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Paul T Robinson</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Tom Russell</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2018-04-26</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted with modifications</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>6</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section 6.2.5.3, pg 165
+
+There are times when it is useful to be able to introduce
+padding or a no-op into a line-number program.  One example
+is a producer that wants to leave room for expansion of a
+function, in an incremental-linking scenario.  Another is
+when a linker removes an unused function from a compilation
+unit, and wants to &quot;erase&quot; the corresponding portion of the
+line-number program without rewriting the entire .debug_line
+section.
+
+There are syntactically legal ways to do this in DWARF,
+for example by using a series of DW_LNS_set_basic_block
+opcodes.  However, a consumer would still have to parse
+and execute these opcodes, which is less efficient than
+we might like.  Or, if the area to be filled is preceded
+by a DW_LNE_end_sequence opcode, the ULEB length of that 
+opcode could be artificially padded with 0x80 bytes, in 
+the hope that a consumer would be willing to parse an 
+arbitrarily long ULEB number.  This is placing an unusual
+expectation on consumers, however, who might reasonably
+place an upper bound on the number of ULEB bytes they
+are willing to parse without complaint.
+
+To solve this, I propose a new DW_LNE_padding opcode.
+It takes one operand, which can be zero length, and has
+no effect on the line number program.  This opcode allows
+efficiently skipping 3 or more bytes of the line number
+program.  (Any extended opcode occupies a minimum of 3
+bytes.)
+
+In a related thread on dwarf-discuss, Cary pointed out
+that given how DWARF works, any undefined extended opcode
+could be used for this purpose.  The risk is that someday
+we might actually define that opcode!  By reserving an
+opcode for this purpose, we eliminate the risk; and,
+existing producers can use the new opcode regardless of
+the DWARF version, because consumers already know how to
+skip an unrecognized extended opcode.
+
+
+Ron has pointed out that certain padding lengths might
+not be achievable with a single opcode due to how LEB128
+is encoded.  I&#x27;ve decided not to add a non-normative text
+for the following reasons:
+it is not a concern for consumers, producers will already
+be aware of (or quickly realize) the limitation, and the
+solution (use multiple padding opcodes) is obvious.
+
+Proposed text:
+
+6.2.5.3 Extended Opcodes
+
+Add a new numbered entry:
+
+  DW_LNE_padding
+  The DW_LNE_padding opcode is followed by a single
+  operand which consists of a sequence of arbitrary bytes,
+  which may be zero length.  The size of the operand is
+  implicitly given by the unsigned LEB128 integer that
+  precedes the opcode.  The opcode and operand have no
+  effect on the line number program.
+
+  *This permits a producer to pad or overwrite arbitrary
+  parts of a line number program, with a minimum of the
+  three bytes needed to encode any extended opcode.*
+
+7.22 Line Number Information
+
+Add DW_LNE_padding to table 7.26 with the next available
+opcode number.
+
+--
+2021-05-20:  Revised:  Name changed from &#x27;DW_LNE_comment&#x27; to &#x27;DW_LNE_padding&#x27;.
+  Refer to operand as &#x27;sequence of arbitrary bytes&#x27; rather than &#x27;string&#x27;.
+2021-06-14:  Accepted with modification. 
+  Replace definition with 
+     The DW_LNE_padding opcode is followed by a sequence of
+     zero or more arbitrary bytes up to the length specified
+     by the unsigned LEB128 integer that precedes all extended
+     opcodes. The opcode has no effect on the line number program.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

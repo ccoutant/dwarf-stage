@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Allow Non-Uniform Record Formats in the File Name Table</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 211108.2: Allow Non-Uniform Record Formats in the File Name Table</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Cary Coutant</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Cary Coutant</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2021-11-08</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted with modifications</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>6</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section 6.2.4, pg 156
+Proposal to Allow Non-Uniform Record Formats in the File Name Table
+
+
+Background
+----------
+
+In Issue 180201.1 (&quot;DWARF and source text embedding&quot;), a mechanism was
+proposed for embedding source text in the line table, and for making the
+MD5 component optional, so that a line table may have a mixture of file
+name entries with and without MD5 checksums. The committee decided to
+split the second part of that proposal into a separate issue, noting
+that the use of a separate boolean field (DW_LNCT_is_MD5) was perhaps
+not the best approach to the problem.
+
+Alternatives suggested were:
+
+(1) Reserve the value 0 for an absent checksum, so that no separate flag
+is required. The odds of a file having a 0 checksum are no greater than
+that of a file&#x27;s checksum colliding with that of another. We could
+simply designate that a file whose checksum is 0 would be written with a
+checksum of 1.
+
+(2) Generalize the problem so that each file name entry in the line
+number program header could have a custom format rather than impose a
+uniform format on all file name entries.
+
+This proposal describes the second alternative.
+
+
+New Directory and File Name Entry Format
+----------------------------------------
+
+The line number program header contains two format tables, which
+describe the record formats used by the directory and file name tables.
+
+Each format table contains one or more format descriptors. The number of
+format descriptors in each table is given by a separate field in the
+program header.
+
+Each format descriptor consists of a sequence of pairs, each consisting
+of a content type code and a form, both represented as unsigned LEB128
+values, terminated by a (0,0) pair.
+
+Each directory and file name entry begins with a format code, which is
+the index of a format descriptor in the corresponding format table. The
+format code is followed by a sequence of fields as described by the
+indicated format descriptor.
+
+The content type codes, and the form codes that may be paired with each
+content type code, are as given in Section 6.2.4.1 (&quot;Standard Content
+Descriptions&quot;).
+
+
+Proposed Changes to the DWARF Specification
+-------------------------------------------
+
+The line number program header contains the following fields, which
+replace items 13 through 20 in Section 6.2.4 of the DWARF 5
+specification:
+
+13. directory_format_count (ubyte)
+
+    A 1-byte unsigned integer containing the number of format
+    descriptors in the directory format table.
+
+14. directory_format_table (sequence of record format descriptors)
+
+    A sequence of record format descriptors. Each descriptor consists
+    of the following:
+
+    * A sequence of field descriptors. Each field descriptor consists
+      of a pair of unsigned LEB128 values: (a) a content type code (see
+      Sections 6.2.4.1 and 6.2.4.2), and (b) a form code (using the
+      attribute form codes).
+    * A pair of zero bytes to terminate the declaration.
+
+    The line number program numbers the record format descriptors
+    sequentially, beginning with 0.
+
+    The format declarations describe the layout of the entries
+    in the directories table, below.
+
+15. directories_count (ULEB128)
+
+    A count of the number of directory entries in the directory table.
+
+16. directories (sequence of directory entries)
+
+    A sequence of directory entries. Each entry consists of:
+
+    * A format code (ubyte), which selects a record format descriptor
+      from the directory format table, above, by its index.
+    * A sequence of fields as described by the selected record format
+      descriptor.
+
+    Each directory entry describes a path that was searched for included
+    source files in this compilation, including the compilation
+    directory of the compilation. (The paths include those directories
+    specified by the user for the compiler to search and those the
+    compiler searches without explicit direction.)
+
+    The first directory entry is the current directory of the
+    compilation. Each additional path entry is either a full path name
+    or is relative to the current directory of the compilation.
+
+    The line number program assigns a number (index) to each of the
+    directory entries in order, beginning with 0.
+
+    [Keep the non-normative text from the DWARF 5 document.]
+
+17. file_name_format_count (ubyte)
+
+    A 1-byte unsigned integer containing the number of format
+    descriptors in the file name format table.
+
+18. file_name_format_table (sequence of record format descriptors)
+
+    A sequence of record format descriptors. Each descriptor consists
+    of the following:
+
+    * A sequence of field descriptors. Each field descriptor consists
+      of a pair of unsigned LEB128 values: (a) a content type code (see
+      Sections 6.2.4.1 and 6.2.4.2), and (b) a form code (using the
+      attribute form codes).
+    * A pair of zero bytes to terminate the declaration.
+
+    The line number program numbers the record format descriptors
+    sequentially, beginning with 0.
+
+    The format declarations describe the layout of the entries
+    in the file names table, below.
+
+19. file_names_count (ULEB128)
+
+    A count of the number of file name entries in the file name table.
+
+20. file_names (sequence of file name entries)
+
+    A sequence of file name entries. Each entry consists of:
+
+    * A format code (ubyte), which selects a record format descriptor
+      from the file name format table, above, by its index.
+    * A sequence of fields as described by the selected record format
+      descriptor.
+
+    Each file name entry describes a source file that contributes to the
+    line number information for this compilation unit, or is used in
+    other contexts, such as in a declaration coordinate or a macro file
+    inclusion.
+
+    The first file name entry is the primary source file, whose file
+    name exactly matches that given in the DW_AT_name attribute in the
+    compilation unit debugging information entry.
+
+    The line number program references file names in this sequence
+    beginning with 0, and uses those numbers instead of file names in
+    the line number program that follows.
+
+    [Keep the non-normative text from the DWARF 5 document.]
+
+*If the directory format table or the file name format table contains
+exactly one item, and all the field descriptors use form codes with a
+fixed-length representation, a consumer may be able to optimize its
+access to the directory table or file name table, respectively, by
+computing the entry offset from the entry index.*
+
+--
+
+In Section 7.22, on page 236, change &quot;The version number in the line
+number program header is 5&quot; to &quot;... 6&quot;.
+
+In Appendix G, Table G.1, on page 416, enter &quot;6&quot; for &quot;.debug_line&quot;, in
+the new column for DWARF V6.
+
+--
+2022-07-05:  Revised: Previous version: http://dwarfstd.org/issues/211108.2-1.html
+2022-07-25:  Accepted with modifications:
+    Change ubyte to ULEB in 13, 16, 17, and 20.
+    Remove non-normative paragraph after 20.  
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

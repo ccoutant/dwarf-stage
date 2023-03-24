@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: DW_FORM_implicit_const and DW_FORM_indirect</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 221114.1: DW_FORM_implicit_const and DW_FORM_indirect</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>David Anderson</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>David Anderson</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2022-11-14</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Error</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Open</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>6</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<p>DWARF5 Section 7.5.3, pg 207</p>
+<h2>BACKGROUND</h2>
+<p><code>DW_FORM_indirect</code> and <code>DW_FORM_implicit_const</code>
+are not described fully and this can lead to
+the forms being unreasonable or unimplementable.</p>
+<p>A simple clarification/generalization
+resolves all the issues while keeping compatibility
+with DWARF5 wording.</p>
+<p>From the index:</p>
+<blockquote>
+<p><code>DW_FORM_implicit_const</code>, pages 9,209,214,221<br />
+<code>DW_FORM_indirect</code>, pages 207,220,288.</p>
+</blockquote>
+<p>the descriptions are in section 7.5.3 page 207:</p>
+<blockquote>
+<p>(DWARF 5 page 207 starting at line 6:)<br />
+The attribute form <code>DW_FORM_indirect</code> is a special case. For
+attributes with this form, the attribute value itself in
+the <code>.debug_info</code> section begins with an unsigned LEB128
+number that represents its form. This allows producers to
+choose forms for particular attributes dynamically, without
+having to add a new entry to the abbreviations table.</p>
+<p>The attribute form <code>DW_FORM_implicit_const</code> is another
+special case. For attributes with this form, the attribute
+specification contains a third part, which is a signed
+LEB128 number. The value of this number is used as the
+value of the attribute, and no value is stored in the
+<code>.debug_info</code> section.</p>
+</blockquote>
+<p>Add to the first paragraph:</p>
+<blockquote>
+<p>A sequence of form DW_FORM_indirect in .debug_info
+is allowed.</p>
+</blockquote>
+<p>Revise the second paragraph to read:</p>
+<blockquote>
+<p>The attribute form <code>DW_FORM_implicit_const</code> is another
+special case. For attributes with this form, the attribute
+specification contains a third part which
+follows the <code>DW_FORM_implicit_const</code> unsigned
+LEB128 and is a signed
+LEB128 number. The value of this number is used as the
+value of the attribute.</p>
+</blockquote>
+<hr />
+<p>2022-11-21: Revised<br />
+  Previous version: http://dwarfstd.org/issues/221114.1-1.html</p>
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

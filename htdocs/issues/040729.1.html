@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Outermost Frame Identification</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 040729.1: Outermost Frame Identification</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>David Anderson</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Todd Allen</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2004-07-29</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Extension</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted revised proposal</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>3</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Andrew Cagney asked:
+&gt; When unwinding, is there a way to detect that the outer-most-frame has
+&gt; been reached (for a typical program that is _start)?
+
+&gt; Using this as an example, is there an abi independant way of identifying
+&gt; the outermost (or oldest) stack frame, namely __thread_boot?  (The
+&gt; question of which of these frames should be displayed when the user does 
+&gt; a backtrace is important but orthogonal.)
+&gt; 
+&gt; As I noted: If nothing else, having the CFI return-address &quot;undefined&quot;
+&gt; (and also the CFA) would make the intent very clear :-)
+And, speaking of special cases:
+&gt;In both cases the markup could be &quot;unknown&quot; CFA/RA.
+
+ Chris Quenelle  added:
+&gt;A compiler flag is still the only way that I can think of
+&gt;to mark these functions.  The compiler can&#x27;t tell by itself
+&gt;which ones need to be marked.
+
+James Cownie  wrote:
+
+&gt;Having the run time libraries describe what they&#x27;re doing to the
+&gt;debugger avoids an unnecessary tight compatiblity linkage between the
+&gt;two components, and that is _good_.
+
+Andrew Cagney wrote :-
+&gt; (1) It can&#x27;t be zero as that creates a catch-22 for the debugger - can&#x27;t
+&gt; differentiate between a backtrace through a NULL pointer call, and a
+&gt; bottom of stack.
+
+James Cownie added:
+
+Note also that on machines with a signed address space (some of which
+may be gdb targets) zero is a valid address in the middle of the address
+space. (The Inmos &quot;transputer&quot; was like this, and though they don&#x27;t exist
+as separate chips anymore they&#x27;re still used as an embedded core; if you
+have a set-top box you may well own one ;-)
+
+David Anderson:
+
+Adding an attribute to a function DIE would be a suitable marking,
+but would not help if .debug_info was missing but .debug_frame
+was present.
+
+One could imagine adding a new FDE field, a flag,
+after &#x27;address_range&#x27; field and before &#x27;instructions&#x27; field of the FDE
+(requiring a version change of .debug_frame).
+
+A new call frame instruction, such as
+DW_CFA_no_unwind
+could signal that no unwind is appropriate.
+
+
+PROPOSAL:
+
+Add a new Call Frame Instruction to 6.4.2:
+    DW_CFA_no_unwind
+which would usually be the only CFI for the function (normally
+not mixed in with other Call Frame Instructions for a frame).
+
+24: DW_CFA_no_unwind
+The DW_CFA_no_unwind instruction takes no operands. It indicates
+that this frame should not be unwound, there is no calling frame.
+Normally this would be the only instruction for this FDE.
+
+In italics:
+Which functions cannot-be-unwound from, such as thread-start
+routine code or process-start code, is known to the
+builders of that special code and would be communicated to a compiler/assembler
+via compiler flags or pragmas.
+
+
+=========================================
+
+Revised proposal:
+Append to 6.4.4 Call Frame Calling Address:
+
+   If a Return Address register is defined in the virtual unwind table, and
+   its rule is undefined (e.g. via DW_CFA_undefined), then typically there is
+   no return address and no call address, and the virtual unwind of the stack
+   activiations is complete.
+
+Accepted, removing word &quot;typically&quot;.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

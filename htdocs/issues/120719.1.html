@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: DW_AT_entry_pc encoded as a constant offset from DW_AT_ranges</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 120719.1: DW_AT_entry_pc encoded as a constant offset from DW_AT_ranges</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Mark Wielaard</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Cary Coutant</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2012-07-19</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>5</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section 2.18 Entry Address, pg 40
+Background:
+
+Currently, an DIE with a DW_AT_entry_pc and a DW_AT_ranges will create
+multiple relocatable addresses for both the DW_AT_entry_pc and the
+DW_AT_ranges. For example:
+
+In .debug_info
+
+DW_TAG_subroutine
+  DW_AT_entry_pc (addr) 0x403a9e &lt;func+0x1e&gt;
+  DW_AT_ranges (sec_offset) range list [    50]
+
+In .debug_ranges
+
+[50] 0x403a9e &lt;some_func+0x1e&gt;..0x403aa4 &lt;some_func+0x24&gt;
+     0x403abb &lt;some_func+0x3b&gt;..0x403abf &lt;some_func+0x3f&gt;
+
+Often, as in this example, the entry_pc is equal to the first range
+address.
+
+Proposal:
+
+Since DW_AT_entry_pc is often the same, or an offset from, the
+first range list address, it can be encoded as a constant offset
+from the DW_AT_low_pc address or the first DW_AT_ranges address.
+
+Wording changes:
+
+2.18 Entry Address
+
+Remove the &#x27;.&#x27; the end of the sentence &quot;The value of the
+DW_AT_entry_pc attribute is a relocated address&quot; and add &quot;if the
+value of DW_AT_entry_pc is of class address; or if it is of class
+constant, the value is an unsigned integer offset which, when
+added to the base address of the function, gives the entry
+address. The base address of the function is given by either the
+DW_AT_low_pc attribute, or the first range entry in the list of
+ranges given by the DW_AT_ranges attribute.&quot;
+
+Figure 20. Attribute encodings, begins here.
+
+Change the entry for DW_AT_entry_pc to read:
+
+DW_AT_entry_pc   0x52   address, constant
+
+
+---
+Revised: 7/21/2013
+Accepted: 7/23/2013
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

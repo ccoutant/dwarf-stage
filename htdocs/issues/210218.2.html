@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Generalize complex number support</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 210218.2: Generalize complex number support</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Tom Tromey</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Zoran Zaric</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2021-02-18</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>6</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+PROBLEM DESCRIPTION
+
+GCC can handle complex integers as well as complex floating-point types.
+A complex type can be defined using type qualifier &#x27;_Complex&#x27; with any
+floating point or integral type:
+
+    _Complex int x;
+
+This extension is GNU specific and not part of ISO C99.
+
+However, DWARF has no way to represent these types, as there is only
+DW_ATE_complex_float and DW_ATE_imaginary_float (Section 5.1.1.4 page 106).
+
+Another example of a language that uses integer based complex types is Rust
+through the type trait mechanism.
+
+In both cases, the complex type data can be represented with either
+floating-point, signed integral or unsigned integral numbers.
+
+PROPOSED RESOLUTION
+
+In section 5.1.1.2, &quot;Encoding attribute values&quot;, p 105, table 5.1,
+&quot;Base type encoding values&quot;, add new encoding group at the end of the
+table:
+
+    Name                     | Meaning
+-----------------------------------------------------------
+ Complex integral encodings
+                             |
+ DW_ATE_complex_signed       | complex binary integral number
+ DW_ATE_imaginary_signed     | imaginary binary integral number
+ DW_ATE_complex_unsigned     | complex unsigned binary integral number
+ DW_ATE_imaginary_unsigned   | imaginary unsigned binary integral number
+
+In section 5.1.1, &quot;Base Type Encodings&quot;, p 108, line 11, add a new
+section with text:
+
+  &quot;5.1.1.6 Complex Integral Encodings
+
+   Complex types with binary integral encodings (DW_ATE_complex_signed,
+   DW_ATE_imaginary_signed, DW_ATE_complex_unsigned and
+   DW_ATE_imaginary_unsigned) are supported in some programming
+   languages (GNU C and Rust) and are not discussed further.&quot;
+
+In section 7.8, &quot;Base Type Attribute Encodings&quot;, p 227, table 7.11,
+&quot;Base type encoding values&quot;, add new encoding values at the end of the
+table:
+
+  -------------------------------------------------------
+    Base type encoding name    |  Value
+  -------------------------------------------------------
+    DW_ATE_complex_signed      |  0x0e
+    DW_ATE_imaginary_signed    |  0x0f
+    DW_ATE_complex_unsigned    |  0x10
+    DW_ATE_imaginary_unsigned  |  0x11
+
+-- 
+2022-03-03: Revised.
+2022-07-18: Revised, defining additional base type encodings.
+            Previous version: http://dwarfstd.org/issues/210218.2-1.html
+2023-01-23: Accepted.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

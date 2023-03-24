@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Mark defaulted member functions</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 141215.3: Mark defaulted member functions</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Cary Coutant</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Cary Coutant</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2014-12-15</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Open</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>5</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+In order to represent defaulted member functions, we should add a
+DW_AT_defaulted attribute.
+
+Proposed Changes to the Spec
+----------------------------
+
+Add the following row to Table 2.2 (&quot;Attribute names&quot;):
+
+    Attribute        Identifies or Specifies
+    ---------        -----------------------
+    DW_AT_defaulted  Whether a member function has been
+                     declared as default
+
+Add the following paragraph to Section 5.7.7 (&quot;Member Function
+Entries&quot;):
+
+    &lt;non-normative&gt;
+    In C++, a special member function may be declared as
+    defaulted, which explicitly declares a default
+    compiler-generated implementation of the function. The
+    declaration may have different effects on the calling
+    convention used for objects of its class, depending on
+    whether the default declaration is made inside or outside the
+    class.
+    &lt;/non-normative&gt;
+
+    A member function may have a DW_AT_defaulted attribute
+    whose integer constant value indicates whether, and if so,
+    how, that member is defaulted. The possible values and
+    their meanings are shown in Figure xx following.
+
+        Table xx. Defaulted Attribute Values
+        Name                        Meaning
+        ----                        -------
+        DW_DEFAULTED_no             Not defaulted
+        DW_DEFAULTED_in_class       Defaulted within the class
+        DW_DEFAULTED_out_of_class   Defaulted outside of the class
+
+    The absence of a DW_AT_DEFAULTED attribute is equivalent to
+    the presence of a DW_AT_DEFAULTED attribute whose value is
+    DW_DEFAULTED_no.
+
+    &lt;non-normative&gt;
+    An artificial member function (i.e., a compiler-generated
+    copy that does not appear in the source) does not have a
+    DW_AT_defaulted attribute.
+    &lt;/non-normative&gt;
+
+Add the following rows to Table 7.5 (&quot;Attribute encodings&quot;):
+
+    Attribute name          Value   Classes
+    --------------          -----   -------
+    DW_AT_defaulted         xxx     const
+
+Add the following sections to Chapter 7 (&quot;Data Representation&quot;):
+
+    7.X Defaulted Member Codes
+
+    The encodings of the constants used in the DW_AT_defaulted
+    attribute are given in Table 7.XX.
+
+        Table 7.XX Defaulted member encodings
+
+        Defaulted code name         Value
+        -------------------         -----
+        DW_DEFAULTED_no             0x00
+        DW_DEFAULTED_in_class       0x01
+        DW_DEFAULTED_out_of_class   0x02
+
+In Appendix A, Table A.1 (&quot;Attributes by tag value&quot;), add
+DW_AT_defaulted to DW_TAG_subprogram.
+
+--
+2014/12/15 -- Replacement for 141003.1
+2015/01/23 -- Accepted with modificaitons
+2015/02/20 -- Updated.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

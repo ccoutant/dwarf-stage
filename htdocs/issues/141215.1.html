@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Identify whether a type should be passed by value or implicit reference</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 141215.1: Identify whether a type should be passed by value or implicit reference</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Cary Coutant</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Cary Coutant</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2014-12-15</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>5</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Background
+==========
+
+Compare these two ways of declaring a destructor:
+
+struct S {
+   ~S() {}
+};
+
+struct T {
+   ~T() = default;
+};
+
+DWARF currently provides no way to distinguish these, but in the
+Itanium C++ ABI, there is a difference, and the debugger needs to
+know. In the first case, with a user-defined destructor, S is not
+trivially copyable, and the calling convention for a function
+that returns S requires the caller to pass the address of a
+buffer for the return value as an implicit first parameter
+(&quot;return by invisible reference&quot;). In the second case, with a
+default destructor, T is trivially copyable, and the calling
+convention allows it to return the value on the stack.
+
+The rules in the C++ ABI for determining whether a class must be
+passed or returned by invisible reference can depend on more
+details of the class than a consumer can gather from the DWARF
+information, and may vary from one version of the standard and
+ABI to the next. In order to give the consumer an explicit
+indication of how to pass an object of the class, we can allow a
+type to have a DW_AT_calling_convention attribute, with one of
+the following values:
+
+    DW_CC_normal
+    DW_CC_pass_by_value
+    DW_CC_pass_by_reference
+
+If the attribute is DW_CC_normal, the consumer may attempt to
+deduce the convention based on the knowledge it has of the class
+structure and of the target ABI.
+
+To allow the producer to represent this attributes as compactly
+as possible, this attribute may use the new FORM code
+DW_FORM_implicit_const, which encodes a constant value directly
+in the abbreviation declaration. (See separate issue 141003.1c.)
+
+Proposed Changes to the Spec
+----------------------------
+
+In Section 3.3.1 (&quot;General Subroutine and Entry Point
+Information&quot;), in the paragraph beginning &quot;A subroutine entry may
+contain a DW_AT_calling_convention attribute&quot;, change &quot;The set of
+calling convention codes...&quot; to &quot;The set of calling convention
+codes for subroutines...&quot;, and make the same change to the
+caption for Table 3.3.
+
+Add the following non-normative paragraph to Section 5.7
+(&quot;Structure, Union, Class and Interface Type Entries&quot;):
+
+    C++ has the notion of a &quot;trivial&quot; class, whose objects can be
+    bitwise copied. Trivial classes may have different rules for
+    passing objects of that type as parameters or return values.
+
+Add the following paragraph to Section 5.7.1 (&quot;Structure, Union
+and Class Type Entries&quot;):
+
+    A structure type, union type or class type entry may have a
+    DW_AT_calling_convention attribute, whose value indicates
+    whether should be passed by reference or by value. The set of
+    calling convention codes for use with types is given in Table
+    3.X.
+
+        Table 3.X Calling Convention Codes for Types
+
+        -----------------------
+        DW_CC_normal
+        DW_CC_pass_by_value
+        DW_CC_pass_by_reference
+        -----------------------
+
+    If this attribute is not present, or its value is
+    DW_CC_normal, the convention to be used for object of the
+    given type is assumed to be unspecified.
+
+    *If unspecified, a consumer may be able to deduce the calling
+    convention based on its knowledge of the type and the ABI.*
+
+In Section 7.15 (&quot;Calling Convention Encodings&quot;), add the following rows
+to Table 7.19:
+
+        Calling convention name    Value
+        ----------------           -----
+        DW_CC_call_by_reference    0x04
+        DW_CC_call_by_value        0x05
+
+In Appendix A, Table A.1 (&quot;Attributes by tag value&quot;), add
+DW_AT_calling_convention to DW_TAG_class_type,
+DW_TAG_struct_type, and DW_TAG_union_type.
+
+--
+2014/12/15 -- Replacement for 141003.1
+2015/01/23 -- Accepted
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

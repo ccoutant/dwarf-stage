@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: DW_AT_default_value without default value?</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 140903.1: DW_AT_default_value without default value?</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Paul Robinson</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Paul Robinson</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2014-09-03</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Error</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Rejected</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>5</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section 4.1, pg 70
+In DWARF 4, section 4.1 item 9 describes DW_AT_default_value in an odd way.  The third
+and fourth sentences, plus the following non-normative text, say:
+  
+  If the attribute form is of class reference, the default value of the parameter is
+  the value of the referenced variable (which may be constant) or the value returned
+  by the referenced subroutine; a reference value of 0 means that no default value
+  has been specified.  If the value is of class constant, that constant is interpreted
+  as a default value of the type of the formal parameter.
+
+  *For a constant form there is no way to express the absence of a default value.*
+
+Seems to me, we should express the absence of a default value by omitting the attribute,
+and not with this nonsense about &quot;a reference value of 0&quot; or this cautionary note about
+how a constant form cannot express the absence of a default value. Omitting the attribute
+would be the absolutely normal way to express that something isn&#x27;t there, so it isn&#x27;t
+worth any special mention.
+
+I&#x27;m also not clear about &quot;the value returned by the referenced subroutine&quot; given that
+DW_AT_default_value really can&#x27;t provide enough context to allow calling an arbitrary
+source-program subroutine. Perhaps this was intended to refer to a DWARF procedure?
+The &quot;subroutine&quot; usage goes back to DWARF 2, so I don&#x27;t have any idea about that.
+
+Proposed replacement text, keeping the subroutine bit intact for now (and not modifying
+the first two sentences of item 9):
+
+  If the attribute form is of class reference, the default value of the parameter is
+  the value of the referenced variable, or the value returned by the referenced 
+  subroutine.  If the value is of class constant, that constant is interpreted
+  as a default value of the type of the formal parameter.
+
+--
+10/21/2014 -- Rejected.  See replacement issue 140917.1.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

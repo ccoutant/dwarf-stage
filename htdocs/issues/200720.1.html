@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: SIMD location expressions</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 200720.1: SIMD location expressions</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Markus Metzger</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Markus Metzger</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2020-07-20</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Withdrawn</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>6</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section 2.6, pg 38
+
+Implicitly vectorized code executes multiple instances of a source code loop or
+of a source code kernel function simultaneously in a single sequence of
+instructions operating on a vector of data elements (cf. SIMD: Single
+Instruction Multiple Data).
+
+The size of this vector is typically referred to as SIMD width or SIMD size.
+Individual elements and their control flow are typically referred to as SIMD
+lanes or SIMD channels.
+
+The user has written the source code from the point of view of a single SIMD
+lane.  The code was later vectorized by the compiler to execute multiple SIMD
+lanes simultaneously.
+
+Although SIMD code typically works on large vectors or matrices, the compiler is
+free to temporarily reorganize the data, e.g. by registerizing some vector
+elements, while leaving the rest of the vector in memory or by gathering a
+particular structure field of a vector of structures in a register.
+
+Further, the assignment of loop iterations or work items to SIMD lanes may be
+done dynamically.
+
+We thus cannot infer the relative location of data objects in SIMD code.
+
+To be able to describe this, we propose the following DWARF extension to
+describe the location of a variable as function of the SIMD lane.
+
+===
+
+Section 2.2, pg. 17-22.
+
+Add the following entry to Table 2.2:
+
+  ----------------    ---------------------------
+  DW_AT_simd_width    SIMD width of subroutine or
+                      lexical block
+  ----------------    ---------------------------
+
+
+Section 3.3.5, pg. 79-80.
+
+Add
+
+    A subprogram or inlined subroutine may have a `DW_AT_simd_width` attribute
+    whose value is the SIMD width of the code it contains.  A value of zero
+    means that the subroutine does not contain SIMD code.
+
+    If the attribute is not present, the SIMD width is inherited from the parent
+    DIE.
+
+    The SIMD width may be overwritten for nested subroutines or for lexical
+    blocks contained within that subroutine.
+
+
+Section 3.5, pg. 92.
+
+Add
+
+    A lexical block that contains SIMD code may have a `DW_AT_simd_width`
+    attribute whose value is the SIMD width of the code it contains.  A value of
+    zero means that the lexical block does not contain SIMD code.  This can be
+    used to mark non-SIMD blocks inside a SIMD subroutine.
+
+    If the attribute is not present, the SIMD width is inherited from the parent
+    DIE.
+
+    The SIMD width may be overwritten for lexical blocks nested within that
+    block.
+
+
+Section 2.5.1.3, pg. 29-33.
+
+Add
+
+    16. DW_OP_push_simd_lane
+
+        The DW_OP_push_simd_lane operation pushes the SIMD lane for which the
+        expression shall be evaluated.
+
+        The operation is only valid in the context of a lexical block for which
+        the SIMD width is known (see DW_AT_simd_width).
+
+        The SIMD lane must be between zero and the lexical block&#x27;s SIMD width.
+
+
+Section 2.6.1.2, pg. 42.
+
+Add
+
+    3. DW_OP_piece_stack
+
+       The DW_OP_piece_stack operation works similar to DW_OP_piece except that
+       it takes its argument from the DWARF stack.
+
+
+    4. DW_OP_bit_piece_stack
+
+       The DW_OP_bit_piece_stack operation works similar to DW_OP_bit_piece
+       except that it takes its arguments from the DWARF stack.
+
+       The first argument, the size in bits of the piece, is taken from the top
+       of the stack.  The second argument, the offset in bits from the location
+       defined by the preceding DWARF location description, is taken from the
+       second stack location.
+
+       Both arguments are popped from the DWARF stack.
+
+--
+2021-12-06:  Withdrawn.  See http://dwarfstd.org/issues/211206.1.html
+                         and http://dwarfstd.org/issues/211206.2.html
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

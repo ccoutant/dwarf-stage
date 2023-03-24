@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: DWARF object files (Split DWARF, part 4/5)</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 130313.4: DWARF object files (Split DWARF, part 4/5)</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Cary Coutant</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Cary Coutant</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2013-03-13</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted with modifications</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>5</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section , pg 
+Introduction
+------------
+
+With the current DWARF format, the debug information is designed
+with the expectation that it will be processed by the linker to
+produce an output binary with complete debug information, and
+with fully-resolved references to locations within the
+application. For very large applications, however, this approach
+can result in excessively large link times and excessively large
+output files. Several vendors have independently developed
+proprietary approaches that allow the debug information to remain
+in the relocatable object files, so that the linker does not have
+to process the debug information or copy it to the output file.
+These approaches have all required that additional information be
+made available to the debug information consumer, and that the
+consumer perform some minimal amount of relocation in order to
+interpret the debug info correctly. The additional information
+required, in the form of load maps or symbol tables, and the
+details of the relocation are not covered by the DWARF
+specification, and vary with each vendor&#x27;s implementation.
+
+For more background information, see the GCC wiki page at:
+
+    http://gcc.gnu.org/wiki/DebugFission
+
+This is the fourth in a series of proposals to extend the DWARF
+specification to support the use of unlinked and unrelocated
+debug information.
+
+  * The first proposal introduces a mechanism for referring to
+    strings indirectly, collecting the string offsets into a new
+    section, and introducing a new form code for this purpose.
+
+  * The second proposal introduces a similar indirect mechanism
+    for referring to relocatable addresses in the loadable
+    segments of the program, collecting all such addresses in a
+    single section.
+
+  * The third proposal introduces a mechanism for referring to
+    range table entries in the .debug_ranges section with a
+    single relocation per compilation unit rather than one for
+    each reference.
+
+  * This fourth proposal introduces a mechanism for splitting the
+    DWARF debugging information into two sets of sections. One
+    set remains in the relocatable object (.o) files, and is
+    linked into the final executable; the other set is written to
+    a non-relocatable DWARF object (.dwo) file, and remains in
+    the build tree as an independent file where the debugger can
+    reference it as needed.
+
+  * The fifth proposal introduces a package file format for
+    collecting the DWARF object (.dwo) files so that the
+    debugging information can be easily saved and transported for
+    debugging applications outside of the build tree.
+
+
+Overview
+--------
+
+This proposal introduces an optional set of debugging sections
+that allow the compiler to partition the debugging information
+into a set of (small) sections that require link-time relocation
+and a set of (large) sections that do not. The sections that
+require relocation are written to the relocatable object file as
+usual, and will be linked into the final executable. The sections
+that do not require relocation, however, can be written to the
+relocatable object (.o) file but ignored by the linker, or they
+can be written to a separate DWARF object (.dwo) file.
+
+The optional set of debugging sections includes the following:
+
+  * .debug_info.dwo - Contains the DW_TAG_compile_unit DIE and
+    its descendants. This is the bulk of the debugging
+    information for the compilation unit that is normally found
+    in .debug_info.
+
+  * .debug_types.dwo - Contains the DW_TAG_type_unit DIEs and
+    their descendants. This is the bulk of the debugging
+    information for the type units that is normally found in
+    .debug_types.
+
+  * .debug_abbrev.dwo - Contains the abbreviations tables used by
+    the .debug_info.dwo and .debug_types.dwo sections.
+
+  * .debug_loc.dwo - Contains the location lists referenced by
+    the debugging information entries in .debug_info.dwo. This
+    contains the location lists normally found in .debug_loc,
+    with a slightly modified format to eliminate the need for
+    relocations.
+
+  * .debug_str.dwo - Contains the string table for all indirect
+    strings referenced by the debugging information in the
+    .debug_info.dwo and .debug_types.dwo sections.
+
+  * .debug_str_offsets.dwo - Contains the string offsets table
+    for the strings in .debug_str.dwo. (See the first proposal in
+    this series.)
+
+  * .debug_macinfo.dwo - Contains macro definition information,
+    normally found in .debug_macinfo.
+
+  * .debug_line.dwo - Contains skeleton line tables for the type
+    units in the .debug_types.dwo section. These line tables
+    contain only the directory and files lists needed to
+    interpret DW_AT_decl_file attributes in the debugging
+    information entries. Actual line number tables remain in the
+    .debug_line section, and remain in the relocatable object
+    (.o) files.
+
+[There is a current proposal to replace .debug_macinfo with a new
+.debug_macro section. The format proposed there for the new
+section will need some minor adjustments in order to eliminate
+the need for relocations in that section, which will allow the
+compiler to move the macro information to a non-relocatable
+.debug_macinfo.dwo section.]
+
+In order for the consumer to locate and process the debug
+information, the compiler must produce a small amount of debug
+information that will pass through the linker into the output
+binary. A skeleton .debug_info section for each compilation unit
+will contain a reference to the corresponding &quot;.o&quot; or &quot;.dwo&quot;
+file, and the .debug_line section (which is typically small
+compared to the .debug_info and .debug_types sections) will be
+linked into the output binary, as will the new .debug_addr
+section.
+
+The debug sections that will continue to be linked into the
+output binary include the following:
+
+  * .debug_abbrev - Contains the abbreviation codes used by the
+    skeleton .debug_info section.
+
+  * .debug_info - Contains a skeleton DW_TAG_compile_unit DIE,
+    but no children.
+
+  * .debug_str - Contains any strings referenced by the skeleton
+    .debug_info sections (via DW_FORM_strp or DW_FORM_strx).
+
+  * .debug_str_offsets - Contains the string offsets table for
+    the strings in .debug_str. (See the first proposal in this
+    series.)
+
+  * .debug_addr - Contains references to loadable sections,
+    indexed by attributes of form DW_FORM_addr_index or location
+    expression DW_OP_addr_index opcodes. (See the second proposal
+    in this series.)
+
+  * .debug_line - Contains the line number tables, unaffected by
+    this proposal. (These could be moved to the .dwo file, but in
+    order to do so, each DW_LNE_set_address opcode would need to
+    be replaced by a new opcode that referenced an entry in the
+    .debug_addr section. Furthermore, leaving this section in the
+    .o file allows many debug info consumers to remain unaware of
+    .dwo files.)
+
+  * .debug_frame - Contains the frame tables, unaffected by this
+    proposal.
+
+  * .debug_ranges - Contains the range lists, unaffected by this
+    proposal.
+
+  * .debug_pubnames - Contains the public names for use in
+    building an index section. This section will have the same
+    format and use as always. The section header refers to a
+    compilation unit offset, which will be the offset of the
+    skeleton compilation unit in .debug_info.
+
+  * .debug_pubtypes - Contains the public types for use in
+    building an index section. This section will have the same
+    format and use as always. The section header refers to a
+    compilation unit offset, which will be the offset of the
+    skeleton compilation unit in .debug_info.
+
+  * .debug_aranges - Contains the accelerated range lookup table
+    for the compilation unit, unaffected by this proposal.
+
+The skeleton DW_TAG_compile_unit DIE has the following attributes:
+
+  * DW_AT_comp_dir
+  * DW_AT_dwo_name (new)
+  * DW_AT_dwo_id (new)
+  * DW_AT_stmt_list
+  * DW_AT_low_pc (see note)
+  * DW_AT_high_pc (see note)
+  * DW_AT_ranges (see note)
+  * DW_AT_ranges_base
+  * DW_AT_addr_base
+
+(If DW_AT_ranges is present, DW_AT_low_pc and DW_AT_high_pc are
+not used, and vice versa.)
+
+All other attributes of the compilation unit DIE can be moved to
+the full DIE in the .debug_info.dwo section.
+
+With the first two proposals in this series, most of the
+relocations that would normally be found in the .debug_info.dwo
+and .debug_types.dwo sections can be moved to the .debug_addr and
+.debug_str_offsets.dwo sections. Those in the
+.debug_str_offsets.dwo sections can simply be omitted because the
+DWARF information in those sections will not be combined at link
+time, so no relocation is necessary. With the third proposal,
+many of the remaining relocations referring to range lists can be
+eliminated. The relocations that remain fall into the following
+categories:
+
+  * References from compilation unit and type unit headers to the
+    .debug_abbrev.dwo section. Because the new sections are not
+    combined at link time, these references need no relocations.
+
+  * References from DW_TAG_compile_unit DIEs to the
+    .debug_line.dwo section, via DW_AT_stmt_list. This attribute
+    will remain in the skeleton .debug_info section, so no
+    relocation in the .debug_info.dwo section is necessary.
+
+  * References from DW_TAG_type_unit DIEs to the skeleton
+    .debug_line.dwo section, via DW_AT_stmt_list. Because the new
+    sections are not combined at link time, these references need
+    no relocations.
+
+  * References from DW_TAG_compile_unit and DW_TAG_type_unit DIEs
+    to the .debug_str_offsets.dwo section, via
+    DW_AT_str_offsets_base. Because the new sections are not
+    combined at link time, the DW_AT_str_offsets_base attribute
+    is not required in a .debug_info.dwo or .debug_types.dwo
+    section.
+
+  * References from DW_TAG_compile_unit DIEs to the .debug_addr
+    section, via DW_AT_addr_base. This attribute will remain in
+    the skeleton .debug_info section, so no relocation in the
+    .debug_info.dwo section is necessary.
+
+  * References from DW_TAG_compile_unit DIEs to the .debug_ranges
+    section, via DW_AT_ranges_base. This attribute will remain in
+    the skeleton .debug_info section, so no relocation in the
+    .debug_info.dwo section is necessary.
+
+  * References from the .debug_loc.dwo section to machine addresses
+    via a location list entry or a base address selection entry.
+    With a minor change to the location list entry format,
+    described below, these relocations can also be eliminated.
+
+Each location list entry contains beginning and ending address
+offsets, which normally may be relocated addresses. In the
+.debug_loc.dwo section, these offsets are replaced by indices
+into the .debug_addr section. Each location list entry will begin
+with a single byte identifying the entry type:
+DW_LLE_end_of_list_entry (0) indicates an end-of-list entry,
+DW_LLE_base_address_selection_entry (1) indicates a base address
+selection entry, DW_LLE_start_end_entry (2) indicates a normal
+location list entry providing start and end addresses,
+DW_LLE_start_length_entry (3) indicates a normal location list
+entry providing a start address and a length, and
+DW_LLE_offset_pair_entry (4) indicates a normal location list
+entry providing start and end offsets relative to the base
+address. An end-of-list entry has no further data. A base address
+selection entry contains a single unsigned LEB128 number
+following the entry type byte, which is an index into the
+.debug_addr section that selects the new base address for
+subsequent location list entries. A start/end entry contains two
+unsigned LEB128 numbers following the entry type byte, which are
+indices into the .debug_addr section that select the beginning
+and ending addresses. A start/length entry contains one unsigned
+LEB128 number and a 4-byte unsigned value (as would be
+represented by the form code DW_FORM_const4u). The first number
+is an index into the .debug_addr section that selects the
+beginning offset, and the second number is the length of the
+range. Addresses fetched from the .debug_addr section are not
+relative to the base address. An offset pair entry contains two
+4-byte unsigned values (as would be represented by the form code
+DW_FORM_const4u), treated as the beginning and ending offsets,
+respectively, relative to the base address. As in the .debug_loc
+section, the base address is obtained either from the nearest
+preceding base address selection entry, or, if there is no such
+entry, from the compilation unit base address (as defined in
+Section 3.1.1). For the latter three types (start/end,
+start/length, and offset pair), the two operand values are
+followed by a location description as in a normal location list
+entry in the .debug_loc section.
+
+This proposal depends on having an index of debugging information
+available to the consumer. For name lookups, the consumer can use
+the .debug_pubnames and .debug_pubtypes sections (or an index
+built at link time based on the information in those sections),
+which will lead to a skeleton compilation unit. The
+DW_AT_comp_dir and DW_AT_dwo_name attributes in the skeleton
+compilation unit can then be used to locate the corresponding
+DWARF object file for the compilation unit. Similarly, for an
+address lookup, the consumer can use the .debug_aranges table,
+which will also lead to a skeleton compilation unit. For a file
+and line number lookup, the skeleton compilation units can be
+used to locate the line number tables.
+
+[For lookups by type signature, we are currently emitting
+skeleton type units in the .o files, which lead to the
+corresponding DWARF object files. These will be obviated by a new
+proposal for improved accelerator tables, so we are not including
+skeleton type units in this proposal.]
+
+
+Changes to the DWARF Specification
+----------------------------------
+
+Section 2.1 (&quot;The Debugging Information Entry (DIE)&quot;)
+
+Add the following paragraph at the end of the section:
+
+    Optionally, debugging information may be partitioned such
+    that the majority of the debugging information can remain in
+    individual object files without being processed by the
+    linker. These debugging information entries are contained in
+    the .debug_info.dwo and .debug_types.dwo sections. These
+    sections may be placed in the object file but marked so that
+    the linker ignores them, or they may be placed in a separate
+    DWARF object file that resides alongside the normal object
+    file. See Section 7.x (&quot;Split DWARF Objects&quot;) for more
+    information.
+
+Section 2.2 (&quot;Attribute Types&quot;)
+
+In Figure 2, add the following rows:
+
+    Attribute name            Identifies or Specifies
+    --------------            -----------------------
+    DW_AT_dwo_name            Name of DWARF object file
+    DW_AT_dwo_id              Unique signature for compilation
+                              unit
+
+Section 2.6.2 (&quot;Location Lists&quot;)
+
+Add the following paragraphs to the end of the sections:
+
+    In a split DWARF object (see Section 7.x), location lists
+    are contained in the .debug_loc.dwo section, and have a
+    slightly different format. Each entry in the location list
+    begins with a type code, which is a single byte that
+    identifies the type of entry. There are five types of entries:
+
+    DW_LLE_end_of_list_entry
+        This entry indicates the end of a location list, and
+        contains no further data.
+
+    DW_LLE_base_address_selection_entry
+        This entry contains an unsigned LEB128 value immediately
+        following the type code. This value is the index of an
+        address in the .debug_addr section, which is then used as
+        the base address when interpreting offsets in subsequent
+        location list entries of type DW_LLE_offset_pair_entry.
+
+    DW_LLE_start_end_entry
+        This entry contains two unsigned LEB128 values
+        immediately following the type code. These values are the
+        indexes of two addresses in the .debug_addr section.
+        These indicate the starting and ending addresses,
+        respectively, that define the address range for which
+        this location is valid. The starting and ending addresses
+        given by this type of entry are not relative to the
+        compilation unit base address.
+
+    DW_LLE_start_length_entry
+        This entry contains one LEB128 value and a 4-byte
+        unsigned value immediately following the type code. The
+        first value is the index of an address in the .debug_addr
+        section, which marks the beginning of the address range
+        over which the location is valid. The second value is the
+        length of the range. The starting address given by this
+        type of entry is not relative to the compilation unit
+        base address.
+
+    DW_LLE_offset_pair_entry
+        This entry contains two 4-byte unsigned values
+        immediately following the type code. These values are the
+        starting and ending offsets, respectively, relative to
+        the applicable base address, that define the address
+        range for which this location is valid.
+
+    For the last three types of entries, a single location
+    description follows the fields that define the address range.
+
+Section 3.1 (&quot;Unit Entries&quot;)
+
+Add a new section after Section 3.1.1 (&quot;Normal and Partial
+Compilation Unit Entries&quot;):
+
+    3.1.x Skeleton Compilation Unit Entries
+
+    When generating a split DWARF object (see Section 7.x), the
+    compilation unit in the .debug_info section is a &quot;skeleton&quot;
+    compilation unit, which contains only a subset of the
+    attributes of the full compilation unit (in general, it
+    contains those attributes that are necessary for the consumer
+    to locate the DWARF object where the full compilation unit
+    can be found, and for the consumer to interpret references to
+    addresses in the program). A skeleton compilation unit has no
+    children, and may have the following attributes:
+
+    1.  Either a DW_AT_low_pc and DW_AT_high_pc pair of attributes
+        or a DW_AT_ranges attribute (same as for regular
+        compilation unit entries).
+
+    2.  A DW_AT_stmt_list attribute (same as for regular
+        compilation unit entries).
+
+    3.  A DW_AT_comp_dir attribute (same as for regular
+        compilation unit entries).
+
+    4.  A DW_AT_dwo_name attribute whose value is a
+        null-terminated string containing the full or relative
+        path name of the DWARF object file that contains the full
+        compilation unit.
+
+    5.  A DW_AT_dwo_id attribute whose value is an 8-byte
+        unsigned hash of the full compilation unit.  This hash
+        value is computed by the method described in Section 7.27
+        (&quot;Type Signature Computation&quot;).
+
+    6.  A DW_AT_ranges_base attribute (same as for regular
+        compilation unit entries).
+
+    7.  A DW_AT_addr_base attribute (same as for regular
+        compilation unit entries).
+
+    All other attributes of a compilation unit entry (described
+    in Section 7.1.1) should be placed in the full compilation
+    unit entry in the .debug_info.dwo section of the split DWARF
+    object. The attributes provided by the skeleton compilation
+    unit entry do not need to be repeated in the full compilation
+    unit entry, except for DW_AT_dwo_id, which should appear in
+    both entries so that the consumer can verify that it has
+    found the correct DWARF object.
+
+Section 3.1.3 (&quot;Separate Type Unit Entries&quot;)
+
+Add the following paragraph before the fourth paragraph
+(beginning &quot;A type unit entry for a given type T...&quot;):
+
+    A type unit entry may have a DW_AT_stmt_list attribute, whose
+    value is a section offset to a line number table for this
+    type unit. Because type units do not describe any code, they
+    do not actually need a line number table, but the line number
+    tables also contain a list of directories and file names that
+    may be referenced by the DW_AT_decl_file attribute. In a
+    normal object file with a regular compilation unit entry, the
+    type unit entries can simply refer to the line number table
+    used by the compilation unit. In a split DWARF object, where
+    the type units are located in a separate DWARF object file,
+    the DW_AT_stmt_list attribute should refer to a &quot;skeleton&quot;
+    line number table in the .debug_line.dwo section, which
+    contains only the list of directories and file names. All
+    type unit entries in a split DWARF object may (but are not
+    required to) refer to the same skeleton line number table.
+
+Chapter 7 (&quot;Data Representation&quot;)
+
+Add a new section after Section 7.3 (&quot;Executable Objects and
+Shared Objects&quot;):
+
+    7.x Split DWARF Objects
+
+    A DWARF producer may partition the debugging
+    information such that the majority of the debugging
+    information can remain in individual object files without
+    being processed by the linker. The first partition contains
+    debugging information that must still be processed by the linker,
+    and includes the following:
+
+      * The line number tables, range tables, frame tables, and
+        accelerated access tables, in the usual sections:
+        .debug_line, .debug_ranges, .debug_frame,
+        .debug_pubnames, .debug_pubtypes, and .debug_aranges,
+        respectively.
+
+      * An address table, in the .debug_addr section. This table
+        contains all addresses and constants that require
+        link-time relocation, and items in the table can be
+        referenced indirectly from the debugging information via
+        the DW_FORM_addrx form, and by the DW_OP_addrx and
+        DW_OP_constx operators.
+
+      * A skeleton compilation unit, as described in Section
+        3.1.x, in the .debug_info section.
+
+      * An abbreviations table for the skeleton compilation unit,
+        in the .debug_abbrev section.
+
+      * A string table, in the .debug_str section. The string
+        table is necessary only if the skeleton compilation unit
+        uses either indirect string form, DW_FORM_strp or
+        DW_FORM_strx.
+
+      * A string offsets table, in the .debug_str_offsets
+        section. The string offsets table is necessary only if
+        the skeleton compilation unit uses the DW_FORM_strx form.
+
+    The second partition contains the debugging information that
+    does not need to be processed by the linker. These sections
+    may be left in the object files and ignored by the linker
+    (i.e., not combined and copied to the executable object), or
+    they may be placed by the producer in a separate DWARF object
+    file. The attributes contained in the skeleton compilation
+    unit can be used by a DWARF consumer to find the object file
+    or DWARF object file. This partition includes the following:
+
+      * The full compilation unit, in the .debug_info.dwo section.
+        Attributes in debugging information entries may refer to
+        machine addresses indirectly using the DW_FORM_addrx form,
+        and location expressions may do so using the DW_OP_addrx and
+        DW_OP_constx forms. Attributes may refer to range table
+        entries with an offset relative to a base offset in the
+        range table for the compilation unit.
+
+      * Separate type units, in the .debug_types.dwo section.
+
+      * Abbreviations table(s) for the compilation unit and type
+        units, in the .debug_abbrev.dwo section.
+
+      * Location lists, in the .debug_loc.dwo section.
+
+      * A skeleton line table (for the type units), in the
+        .debug_lines.dwo section (see Section 3.1.3).
+
+      * Macro information, in the .debug_macinfo.dwo section.
+
+      * A string table, in the .debug_str.dwo section.
+
+      * A string offsets table, in the .debug_str_offsets.dwo
+        section.
+
+    Except where noted otherwise, all references in this document
+    to a debugging information section (e.g., .debug_info),
+    applies also to the corresponding split DWARF section (e.g.,
+    .debug_info.dwo).
+
+Section 7.5.4 (&quot;Attribute Encodings&quot;)
+
+In Figure 20, add the following row to the table:
+
+    Attribute name            Value    Classes
+    --------------            -----    -------
+    DW_AT_dwo_name            [TBA]    string
+    DW_AT_dwo_id              [TBA]    constant
+
+In Chapter 7, add a new section after Section 7.24:
+
+7.xx Location List Table
+
+    Each set of entries in the address table contained in the
+    .debug_loc or .debug_loc.dwo section begins with a header
+    containing:
+
+        1.  unit_length (initial length)
+            A 4-byte or 12-byte length containing the length of
+            the set of entries for this compilation unit, not
+            including the length field itself. In the 32-bit
+            DWARF format, this is a 4-byte unsigned integer
+            (which must be less than 0xfffffff0); in the 64-bit
+            DWARF format, this consists of the 4-byte value
+            0xffffffff followed by an 8-byte unsigned integer
+            that gives the actual length (see Section 7.4).
+
+        2.  version (uhalf)
+            A 2-byte version identifier containing the value 1
+            (see Appendix F).
+
+        3.  address_size (ubyte)
+            A 1-byte unsigned integer containing the size in
+            bytes of an address (or the offset portion of an
+            address for segmented addressing) on the target
+            system.
+
+        4.  segment_size (ubyte)
+            A 1-byte unsigned integer containing the size in
+            bytes of a segment selector on the target system.
+
+    This header is followed by a series of range list entries as
+    described in Section 2.6.2. The segment size is given by the
+    segment_size field of the header, and the address size is
+    given by the address_size field of the header. If the
+    segment_size field in the header is zero, the segment
+    selector is omitted from the location list entries.
+
+    The entries are referenced by a byte offset relative to the
+    first location list entry following this header.
+
+Appendix A (&quot;Attributes by Tag Value&quot;)
+
+In Figure 42, in the table entries for DW_TAG_compile_unit, add
+DW_AT_dwo_name and DW_AT_dwo_id.
+
+Appendix D (&quot;Examples&quot;)
+
+Add the following section to the end of the appendix:
+
+    D.13 Split DWARF Example
+
+    [TBD]
+
+Appendix F (&quot;DWARF Section Version Numbers&quot;)
+
+In Figure 97, replace the row for .debug_loc with the following:
+
+    Section Name      V2    V3    V4    V5
+    ------------      --    --    --    --
+    .debug_loc         x     x     x     5
+
+
+---
+
+Revised March 25. 2013
+Revised May 26, 2013:  Changed version number to 5.
+Accepted May 28, 2013, with modifications: possible editorial changes.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Forbid DW_OP_call_ref/DW_FORM_ref_addr in a .dwo section</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 181003.1: Forbid DW_OP_call_ref/DW_FORM_ref_addr in a .dwo section</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Paul T Robinson</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Jeremy Morse</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2018-10-03</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Error</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>6</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section 7.3.2.2, pg 189
+
+Background
+==========
+
+DW_OP_call_ref (and DW_FORM_ref_addr) require relocations, and
+so should be forbidden in a .dwo section, as a .dwo cannot have
+relocations.
+
+To discourage producers from generating .dwo sections that could
+potentially make use of such references, make an assumption (that
+.dwo files only contain a single compilation unit) into an explicit
+limitation.
+
+To avoid invasive changes to the text, I suggest we should only
+add qualifiers to the paragraphs about split-DWARF, rather than to
+the definitions of DW_OP_call_ref and DW_FORM_ref_addr.
+
+Changes
+=======
+
+Section 7.3.2.2 p189 line 6
+---------------------------
+
+[current]
+Split DWARF object files do not get linked with any other files, therefore
+references between sections must not make use of normal object file relocation
+information. As a result, symbolic references within or between sections are not
+possible.
+
+[replace]
+&quot;symbolic references within or between sections are not possible.&quot;
+[with]
+&quot;symbolic references such as DW_FORM_ref_addr and DW_OP_call_ref
+within or between sections are not possible. Split DWARF object files
+should contain at most one compilation unit.&quot;
+
+Figure B.2 note &quot;(fo)&quot; p280 line 6
+----------------------------------
+
+Delete: this whole note. DW_OP_call_ref will not be permitted in
+.debug_info.dwo, and this item does not appear in figure B.2 anyway.
+
+--
+2022-07-29:  Updated.
+2022-08-08:  Accepted.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

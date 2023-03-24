@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF 5 Standard</title>
+  <link rel="stylesheet" href="../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+<h1>DWARF 5 Standard</h1>
+<p>The <strong>DWARF Version 5 Debugging Format Standard</strong>
+is based on the <a href="dwarf4std.html"><strong>DWARF Version 4 Standard</strong></a>.
+It is an upward compatible extension to the previous version of the standard.</p>
+<p>The major enhancements in DWARF Version 5 are:</p>
+<ul>
+<li>
+<p>Description of the objectives and rationale for the design and
+  evolution of the DWARF Standard.</p>
+</li>
+<li>
+<p>Merge <code>.debug_types</code> into <code>.debug_info</code> section.</p>
+</li>
+<li>
+<p>Support collecting common debug information into a single
+  supplementary object file.</p>
+</li>
+<li>
+<p>Replace the line number program header allowing better data
+  compression and source validation.</p>
+</li>
+<li>
+<p>Support split object file and package representations to allow DWARF
+  info to be kept separate from executable files.</p>
+</li>
+<li>
+<p>Replace <code>.debug_macinfo</code> with <code>.debug_macro</code> representation allowing
+  much more compact representation of C/C++ macros.</p>
+</li>
+<li>
+<p>Replace <code>.debug_pubnames</code> and <code>.debug_pubtypes</code> with much more
+  functional <code>.debug_names</code> section.</p>
+</li>
+<li>
+<p>Replace location list (<code>.debug_loc</code>) and range list (<code>.debug_ranges</code>)
+  sections with new sections (<code>.debug_loclists</code> and <code>.debug_rnglists</code>)
+  allowing more compact representation and eliminating relocations.</p>
+</li>
+<li>
+<p>Add new TAG to describe call site information, including tail call and
+  tail recursion.</p>
+</li>
+<li>
+<p>Improve support for FORTRAN assumend rank arrays, dynamic rank arrays,
+  and co-arrays.</p>
+</li>
+<li>
+<p>Add new operators which support a DWARF expression stack containing
+  typed values.</p>
+</li>
+<li>
+<p>Add support for C++ auto return type, deleted member functions, and
+  defaulted constructors and destructors.</p>
+</li>
+<li>
+<p>Add new attribute to identify a subprogram which does not return to its caller.</p>
+</li>
+<li>
+<p>Add language codes for C 2011, C++ 2003, C++ 2011, C++ 2014, Dylan,
+  Fortran 2003, Fortran 2008, Go, Haskell, Julia, Modula 3, Ocaml, OpenCL,
+  Rust, Swift, and BLISS.</p>
+</li>
+<li>
+<p>Numerous minor additions to improve functionality and performance.</p>
+</li>
+</ul>
+<p>The DWARF Version 5 Standard is compatible with DWARF Version 4 except as follows:</p>
+<ul>
+<li>
+<p>The compilation unit header (in the <code>.debug_info</code> section) has a new <code>unit_type</code> field.</p>
+</li>
+<li>
+<p>New operand forms for attribute values are defined (<code>DW_FORM_addrx*</code>,
+  <code>DW_FORM_data16</code>, <code>DW_FORM_implicit_const</code>, <code>DW_FORM_line_strp</code>,
+  <code>DW_FORM_loclistx</code>, <code>DW_FORM_rnglistx</code>, <code>DW_FORM_ref_sup*</code>,
+  <code>DW_FORM_strp_sup</code> and <code>DW_FORM_strx*</code>).</p>
+</li>
+<li>
+<p>The line number table header is substantially revised.</p>
+</li>
+<li>
+<p>A location list entry with the address range (0, maximum-address) is defined
+  as the new default location list entry.</p>
+</li>
+<li>
+<p>In a string type, the <code>DW_AT_byte_size</code> attribute is re-defined to always
+  describe the size of the string type. (Previously it described the size of the
+  optional string length data field if the <code>DW_AT_string_length</code> attribute was
+  also present.)</p>
+</li>
+<li>
+<p>New representations for macro definitions, symbol lookup, location lists and range lists.</p>
+</li>
+</ul>
+<p>Read the <a href="dwarf5-press-release.html">press release</a></p>
+<p><a href="doc/DWARF5.pdf">Download DWARF Version 5 Standard (PDF)</a></p>
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../htdocs/download.html">Download</a></li>
+		<li><a href="../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../htdocs/members.html">Members</a></li>
+		<li><a href="../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

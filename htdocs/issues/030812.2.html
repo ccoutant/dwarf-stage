@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: CFA Calculation</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 030812.2: CFA Calculation</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>David Anderson</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Todd Allen</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2003-08-12</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Extension</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted with modifications</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>3</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+By David Anderson. Any mistaken attributions or omissions
+are mine, not the original contributors).
+
+Starting on Aug 12, 2003 Andrew Cagney, Todd Allen, Ron Brender,
+Chris Quenelle, Daniel Jacobowitz
+and others pointed out issues in the CFI and solutions/workarounds
+they have employed.
+
+One of those issues is, as rephrased by David Anderson:
+   If CFA is SP+offset and there is no &#x27;frame pointer&#x27;
+   stored on the stack, 
+   then how do we recover the SP when unwinding?
+
+   Daniel Jacobowitz suggested new &#x27;register rules&#x27; of 
+   val_expression(E) or val_cfa_offset(N) which would
+   describe an actual value, not the address of a location
+   where the value was stored. No specific means to create
+   and recognize such rules was proposed.
+   
+   One possibility: a new call-frame-instruction changing
+   the interpretation to a value (effectively a flag).
+   Or new flag byte in the FDE flagging that offset
+   and expression compute a value, not address-of-value. 
+   Or a new call-frame-instruction changing interpretation
+   of a given table-column to value (not
+   reg+offset-as-address-of-value). 
+
+
+
+Chris Quenelle:
+&gt;val_expression(E) or val_cfa_offset(N) which would
+This seems like the right approach
+
+&gt;    One possibility: a new call-frame-instruction changing
+&gt;    the interpretation to a value (effectively a flag).
+
+This approach seems more obfuscated.
+
+
+PROPOSAL:
+
+Sec 6.4.1.
+Add a paragraphs giving new register rules, immediately
+following the expression(E) rule description.
+
+val_expression(E2) The previous value of this register is
+                  the value produced by executing the DWARF
+        expression E2.
+
+val_offset(N)   The previous value of this register is the
+        value CFA+N where CFA is the current CFA
+        value and N is a signed offset.
+
+------------------------------------------------------
+
+Revised proposal:
+
+But we need to expand the proposal into subsequent sections, so here are my
+proposed additions and modification for that:
+
+6.4.2 Call Frame Instructions
+
+   ...
+
+   20. DW_CFA_expression
+
+      The DW_CFA_val_expression instruction takes two operands: an unsigned
+      LEB128 value representing a register number, and a DW_FORM_block value
+      representing a DWARF expression. The required action is to
+      &lt;changed text&gt;
+      change the rule for the register indicated by the register
+      number to be an expression(E) rule where E is the DWARF
+      expression.  That is, the DWARF expression computes the address
+      in which the given register contents are found.
+      &lt;/changed text&gt;
+      The value of the CFA is pushed on the DWARF evaluation stack
+      prior to execution of the DWARF expression.
+
+      ...
+
+   ...
+
+   24. DW_CFA_val_offset
+
+      The DW_CFA_val_offset instruction takes two unsigned LEB128 operands
+      representing a register number and a factored offset.  The required
+      action is to change the rule for the register indicated by the register
+      number to be a val_offset(N) rule with a value of (N = factored offset
+      * data_alignment_factor).
+
+   25. DW_CFA_val_offset_sf
+
+      The DW_CFA_val_offset_sf instruction takes two operands: an unsigned
+      LEB128 value representing a register number and a signed LEB128
+      factored offset.  This instruction is identical to DW_CFA_val_offset
+      except that the second operand is signed.
+
+   26. DW_CFA_val_expression
+
+      The DW_CFA_val_expression instruction takes two operands: an unsigned
+      LEB128 value representing a register number, and a DW_FORM_block value
+      representing a DWARF expression.  The required action is to change the
+      rule for the register indicated by the register number to be a
+      val_expression(E) rule where E is the DWARF expression.  That is, the
+      DWARF expression computes the value of the given register.
+
+      The value of the CFA is pushed on the DWARF evaluation stack prior to
+      execution of the DWARF expression.
+
+      The DW_OP_call2, DW_OP_call4, DW_OP_call_ref and
+      DW_OP_push_object_address DWARF operators (see Section 2.4.1) cannot be
+      used in such a DWARF expression.
+
+[I&#x27;m proposing that the following text, which current is between points 20
+and 21, be pushed to the end of section 6.4.2, since the instructions to
+which it applies no longer are defined contiguously.]
+
+   *DW_OP_call2, DW_OP_call4 and DW_OP_call_ref operators are not meaningful
+   in a DW_CFA_def_cfa_expression, DW_CFA_expression, or
+   DW_CFA_val_expression operand because there is no mapping from call frame
+   information to any corresponding debugging compilation unit information,
+   thus there is no way to interpret the call offset.
+
+   DW_OP_push_object_address is also not meaningful in a
+   DW_CFA_def_cfa_expression, DW_CFA_expression, or DW_CFA_val_expression
+   operand because there is no object context to provide a value to push.*
+
+7.23 Call Frame Information, Figure 36. Call frame instruction encodings
+
+                            High 2  Low 6
+   Instruction              Bits    Bits    Operand 1  Operand 2
+   -----------------------  ------  ------  ---------  ---------
+   DW_CFA_val_offset +      0       0x14    ULEB128    ULEB128
+   DW_CFA_val_offset_sf +   0       0x15    ULEB128    SLEB128
+   DW_CFA_val_expression +  0       0x16    ULEB128    BLOCK
+
+   (+ means the double dagger that means New in DWARF V3)
+
+Points of interest:
+
+   1) Is there really any value to DW_CFA_val_offset_sf?  I couldn&#x27;t think of
+      any practical use, but I included it for completeness.
+   2) The val_offset instructions all take factored offsets.  So, if the
+      factor was -4, for instance, you would be unable to say that a register
+      value was anything other than a multiple of 4 offset from the current
+      CFA.  Does everyone think that&#x27;s reasonable?  If not, the instructions
+      can be redefined to use non-factored offsets (like DW_CFA_def_cfa
+      already does).
+   3) I proposed changing the text for DW_CFA_expression to clarify which
+      rule it was using, because now there will be two rules that involve
+      expressions, and to make its text similar to the text for other
+      instructions which talk about specific rules from the list in 6.4.1.
+   4) Do we wish to revisit issue 020902.1, since these new instructions
+      would provide a general way of describe the stack pointer instead of
+      relying on an architectural rule?  D.5 could be made to use these
+      instructions, or it could be left as is, or we could simply briefly
+      mention these instructions there.
+
+-----------------------------------------------------
+
+Modifications:
+Paragraphs 21i &amp; 25:  Should indicate &quot;signed and factored&quot;.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

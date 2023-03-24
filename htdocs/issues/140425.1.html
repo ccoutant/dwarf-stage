@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Typed DWARF stack</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 140425.1: Typed DWARF stack</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Jakub Jelinek</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Jakub Jelinek</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2014-04-25</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>5</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section 2.5, pg 
+Typed DWARF stack
+=================
+
+Overview
+--------
+
+The addition of DW_OP_stack_value operation in DWARF4 allowed the debugging
+information to describe even values of variables partially or completely
+optimized away, either in some ranges or everywhere.  But the values are
+still computed on the DWARF stack which has only integral types with the
+size of the target machine&#x27;s address, so it is still very hard to represent
+non-integral variables or variables with integral types larger than the size
+of address.  Consider target with 32-bit addresses and 64-bit long long:
+
+void
+foo (unsigned long long x, unsigned long long y, double z, volatile int *p)
+{
+  unsigned long long a = x + y;
+  double b = z * 2.5;
+  (*p)++;
+}
+
+On 64-bit architecture e.g. a could be described as (x86_64)
+DW_OP_breg5 0 DW_OP_breg4 0 DW_OP_plus DW_OP_stack_value
+because the addresses are 64-bit, but when they are 32-bit, one would
+have to resort to something like (i?86 little endian):
+DW_OP_fbreg 0 DW_OP_deref DW_OP_fbreg 8 DW_OP_deref DW_OP_plus \
+DW_OP_stack_value DW_OP_piece 4 \
+DW_OP_fbreg 4 DW_OP_deref DW_OP_fbreg 12 DW_OP_deref DW_OP_plus \
+DW_OP_fbreg 0 DW_OP_deref DW_OP_plus_uconst 0x80000000 DW_OP_dup \
+DW_OP_fbreg 8 DW_OP_deref DW_OP_plus DW_OP_gt DW_OP_plus \
+DW_OP_stack_value DW_OP_piece 4
+(i.e. low 32 bits are (unsigned) x + (unsigned) y, the high 32 bits
+are (unsigned) (x &gt;&gt; 32) + (unsigned (y &gt;&gt; 32) + ((unsigned) x &gt; (unsigned) x + (unsigned) y)
+), but for double address size multiplication this already would be much
+larger, and for IEEE double, while in theory implementable, would basically
+require writing a software IEEE floating point emulation library in DWARF
+expressions that one would use with DW_OP_call*.  With the following
+proposal, a can use:
+DW_OP_fbreg 0 DW_OP_deref_type 8 &lt;unsigned long long&gt; \
+DW_OP_fbreg 8 DW_OP_deref_type 8 &lt;unsigned long long&gt; \
+DW_OP_plus DW_OP_stack_value
+and for b:
+DW_OP_fbreg 16 DW_OP_deref_type 8 &lt;double&gt; \
+DW_OP_const_type &lt;double&gt; 8 &lt;0x4004000000000000ULL&gt; \
+DW_OP_mul DW_OP_stack_value
+
+The extension (with DW_OP_GNU_ rather than DW_OP_ and without
+DW_OP_xderef_type) has been implemented for 3 years now in GCC/GDB.
+
+The DWARF stack is enhanced, so that instead of a stack element being
+just an address sized integer, the stack element is a pair of a type
+identifier and union which contains the address sized integer, various other
+integral and floating point (perhaps _Decimal/fixed point etc.) types.
+
+So, something along the lines of:
+
+struct DWARF_stack_element { 
+  int type_id; 
+  union { 
+    intptr_t address; 
+    long long llong; 
+    unsigned long long ullong; 
+    __int128_t i128t; 
+    __uint128_t u128t; 
+    float flt; 
+    double dbl; 
+    long double ldbl;
+    ... 
+  } 
+};
+
+For compatibility reasons and also because most of the operations performed
+on the DWARF stack are still integral values with address sizes, plus in
+order to give more freedom to debug information consumers, the way this
+extension is proposed is that most operations (other than the newly added
+ones) if they don&#x27;t pop anything from the stack and just push a new value
+push values with a special address type, DW_OP_{convert,reinterpret} refer
+to this as type with offset 0, while operations that consume stack elements
+as operands typically are overloaded on that type, if it has more than
+one operand require that all operands have the same type and usually push
+the same type of result value.
+
+Debug info consumers must handle as minimum (as before) at least the special
+address type, plus whatever other base types they choose to support.
+When they see any of the new
+DW_OP_{{regval,{,x}deref,const}_type,convert,reinterpret} operations
+refering to a base type that they don&#x27;t support, they should just give up
+on trying to evaluate the whole expression and suggest to the user that
+the value is optimized away/can&#x27;t be computed.  So, debug info consumers
+can as well choose not to support any of the typed DWARF stack at all,
+as long as they are able to just parse the 6 new operations, anything above
+that is a QoI issue.
+
+Proposed changes to DWARF
+-------------------------
+
+2.5.1
+
+Change:
+
+Each element of the stack is the size of an address on the target machine.
+
+to:
+
+Each element of the stack has a type and a value, and can represent
+a value of any supported base type of the target machine.  Instead of
+a base type, elements can have a special address type, which is an integral
+type that has the size of an address on the target machine and unspecified
+signedness.
+
+Add after the paragraph:
+
+*While the abstract definition of the stack calls for variable-size entries
+able to hold any supported base type, in practice it is expected that each
+element of the stack can be represented as a fixed-size element large enough
+to hold a value of any type supported by the DWARF consumer for that target,
+plus a small identifier sufficient to encode the type of that element.
+Support for base types other than what is required to do address arithmetic
+is intended only for debugging of optimized code, and the completeness of the
+DWARF consumer&#x27;s support for the full set of base types is a
+quality-of-implementation issue. If a consumer encounters a DWARF expression
+that uses a type it does not support, it should ignore the entire expression
+and report its inability to provide the requested information.
+
+It should also be noted that floating-point arithmetic is highly dependent
+on the computational environment. It is not the intention of this expression
+evaluation facility to produce identical results to those produced by the
+program being debugged while executing on the target machine. Floating-point
+computations in this stack machine will be done with precision control and
+rounding modes as defined by the implementation.*
+
+2.5.1.1
+
+Change:
+
+If the value of a constant in one of these operations is larger than can be stored in a
+single stack element, the value is truncated to the element size and the low-order bits
+are pushed on the stack.
+
+to:
+
+Operations other than DW_OP_const_type push a value with the special address
+type, and if the value of a constant in one of these operations is larger than can be stored
+in a single stack element of the special address type, the value is truncated to the
+element size and the low-order bits are pushed on the stack.
+
+Add at the end of section:
+
+9. DW_OP_const_type
+
+The DW_OP_const_type operation takes three operands. The first operand is an
+unsigned LEB128 integer that represents the offset of a debugging
+information entry in the current compilation unit, which must be a
+DW_TAG_base_type entry that provides the type of the constant provided. The
+second operand is 1-byte unsigned integer that represents the size n of the
+constant, which may not be larger than the size of the largest supported
+base type of the target machine. The third operand is a block of n bytes to
+be interpreted as a value of the referenced type.
+
+*While the size of the constant could be inferred from the base type
+definition, it is encoded explicitly into the expression so that the
+expression can be parsed easily without reference to the .debug_info
+section.*
+
+2.5.1.2
+
+Change subsection title to:
+
+Register Values
+
+Change first sentence to:
+
+The following operations push a value onto the stack that is either the
+contents of a register or the result of adding the contents of a register
+to a given signed offset.  DW_OP_regval_type pushes just the content
+of the register, with the given base type, while the other operations
+push a value of the register with the special address type plus given
+signed offset.
+
+Add as a new operation at the end of the list:
+
+4. DW_OP_regval_type
+
+The DW_OP_regval_type operation takes two parameters. The first parameter is
+an unsigned LEB128 number, which identifies a register whose contents is to
+be pushed onto the stack. The second parameter is an unsigned LEB128 number
+that represents the offset of a debugging information entry in the current
+compilation unit, which must be a DW_TAG_base_type entry that provides the
+type of the value contained in the specified register.
+
+2.5.1.3
+
+Add after the first two sentences:
+
+The DW_OP_dup, DW_OP_drop, DW_OP_pick, DW_OP_over, DW_OP_swap
+and DW_OP_rot operations manipulate the elements of the stack as full pairs
+of type identifier and corresponding value.  The DW_OP_deref,
+DW_OP_deref_size, DW_OP_xderef, DW_OP_xderef_size and DW_OP_form_tls_address
+operations require the popped values to have integral type, either special
+address type or some integral base type, and push a value with the special
+address type.  DW_OP_deref_type and DW_OP_xderef_type operations have the
+same requirement on the popped values, but push a value with the requested type.
+All other operations push a value with the special address type.
+
+After DW_OP_deref_size description add new operation (and renumber all the
+following operations):
+
+9. DW_OP_deref_type
+
+The DW_OP_deref_type operation behaves like the DW_OP_deref_size operation:
+it pops the top stack entry and treats it as an address. The value retrieved
+from that address is pushed. In the DW_OP_deref_type operation, the size in
+bytes of the data retrieved from the dereferenced address is specified by
+the first operand. This operand is a 1-byte unsigned integral constant whose
+value may not be larger than the size of the largest supported base type on
+the target machine. The second operand is an unsigned LEB128 integer that
+represents the offset of a debugging information entry in the current
+compilation unit, which must be a DW_TAG_base_type entry that provides the
+type of the data retrieved.
+
+After DW_OP_xderef_size description add new operation (and again renumber
+all the following operations):
+
+12. DW_OP_xderef_type
+
+The DW_OP_xderef_type operation behaves like the DW_OP_xderef_size
+operation: it pops the top two stack entries, treats them as an address and
+an address space identifier, and pushes the value retrieved. In the
+DW_OP_xderef_type operation, the size in bytes of the data retrieved from
+the dereferenced address is specified by the first operand. This operand is
+a 1-byte unsigned integral constant whose value may not be larger than the
+size of the largest supported base type on the target machine. The second
+operand is an unsigned LEB128 integer that represents the offset of a
+debugging information entry in the current compilation unit, which must be a
+DW_TAG_base_type entry that provides the type of the data retrieved.
+
+2.5.1.4
+
+Rewrite first paragraph to:
+
+The following provide arithmetic and logical operations.  If an operation
+pops two values from the stack, both values should have the same type,
+either the same base type or both should have the special address type.
+The result of the operation which is pushed back should have the same type
+as the type of the operands.  If the type of the operands is the special
+address type, except as otherwise specified, the arithmetic operations
+perform addressing arithmetic, that is, unsigned arithmetic that is performed
+modulo one plus the largest representable address (for example, 0x100000000
+when the size of an address is 32 bits).  Operations other than DW_OP_abs,
+DW_OP_div, DW_OP_minus, DW_OP_mul, DW_OP_neg and DW_OP_plus require integral
+types of the operand (either integral base type or the special address
+type).  Operations do not cause an exception on overflow.
+
+2.5.1.5
+
+Change:
+
+pop the top two stack values,
+
+to:
+
+pop the top two stack values, which should both have the same type,
+either same base type or both the special address type.
+
+After:
+
+push the constant value 1 onto the stack if the result of the operation is
+true or the constant value 0 if the result of the operation is false.
+
+add:
+
+The pushed constant value has the special address type.
+
+Change:
+
+Comparisons are performed as signed operations.
+
+to:
+
+If the operands have the special address type, the comparisons are performed
+as signed operations.
+
+2.5.1.6
+
+Renumber to 2.5.1.7, insert before that:
+
+2.5.1.6  Type Conversions
+
+The following operation provides for explicit type conversion.
+
+1. DW_OP_convert
+
+The DW_OP_convert operation pops the top stack entry, converts it to a
+different type, then pushes the result. It takes one operand, which is an
+unsigned LEB128 integer that represents the offset of a debugging
+information entry in the current compilation unit, or value 0 which
+represents the special address type. If the operand is non-zero, the
+referenced entry must be a DW_TAG_base_type entry that provides the type
+to which the value is converted.
+
+2. DW_OP_reinterpret
+
+The DW_OP_reinterpret operation pops the top stack entry, reinterprets
+the bits in its value as a value of a different type, then pushes the
+result. It takes one operand, which is an unsigned LEB128 integer that
+represents the offset of a debugging information entry in the current
+compilation unit, or value 0 which represents the special address type.
+If the operand is non-zero, the referenced entry must be a
+DW_TAG_base_type entry that provides the type to which the value is converted.
+The type of the operand and result type should have the same size in bits.
+
+*The semantics of the reinterpretation of a value is as if in C or C++
+there are two variables, one with the type of the operand, into which
+the popped value is stored, then copied using memcpy into the other variable
+with the type of the result and the pushed result value is the value of the
+other variable after memcpy.*
+
+
+--
+2014-07-15:  Accepted.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

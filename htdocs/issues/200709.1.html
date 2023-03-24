@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: DW_AT_rnglists_base in DW_TAG_skeleton_unit</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 200709.1: DW_AT_rnglists_base in DW_TAG_skeleton_unit</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Simon Marchi</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Simon Marchi</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2020-07-09</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Error</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>6</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section 3.1.2, pg 66-67
+
+Background
+----------
+
+When using split DWARF (DW_TAG_skeleton_unit + .dwo), the intent is to
+have DW_AT_rnglists_base in the skeleton unit and inherited by the split
+full compulation unit.  In section 3.1.3, it is mentioned (in
+non-normative text) that DW_AT_rnglists_base is inherited by the split
+full compilation unit from the corresponding skeleton compilation unit.
+However, section 3.1.2 doesn&#x27;t mention DW_AT_rnglists_base in the list
+of attributes a skeleton compilation unit can have.  The list of
+acceptable attributes by tag (Appendix A) does mention
+DW_AT_rnglists_base for DW_TAG_skeleton_unit though.
+
+I believe this is just an oversight, where the list in section 3.1.2 is
+missing DW_AT_rnglists_base.
+
+Note that there is also issue 210310.1 (&quot;Clarify DW_AT_rnglists_base and
+DW_FORM_rnglistx in Split DWARF&quot;) [1] that is related to
+DW_AT_rnglists_base in split-DWARF context, but I believe they don&#x27;t
+conflict.  If accepted, that issue would make it so the skeleton doesn&#x27;t
+inherit the DW_AT_rnglists_base value from the skeleton.  Instead, it
+would refer to the .debug_rnglists.dwo section in the split file, hence
+not need a DW_AT_rnglists_base value at all.  But the
+DW_TAG_skeleton_unit in the main file may still need a
+DW_AT_rnglists_base for its own use, which is what the present issue is
+about.
+
+[1] https://dwarfstd.org/issues/210310.1.html
+
+Proposed changes
+----------------
+
+Section 3.1.2, page 67:
+
+ - Add &quot;8. A DW_AT_rnglists_base attribute.&quot; to the list of attributes a
+   skeleton unit may have.
+
+--
+2021-10-18:  Updated.
+2021-11-01:  Accepted (add to errata)
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

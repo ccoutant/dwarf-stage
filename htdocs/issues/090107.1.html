@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Support C++0x generalized constant expression - user-defined literal</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 090107.1: Support C++0x generalized constant expression - user-defined literal</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Kendrick Wong</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Kendrick Wong</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2009-01-07</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>4</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Background
+----------
+
+C++0x generalizes the notion of constant expressions to include
+constant expression functions and user-defined literals.
+For detail description of the feature, please refer to:
+http://www.research.att.com/~bs/C++0xFAQ.html#constexpr
+http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2235.pdf
+
+Overview
+--------
+
+The new keyword *constexpr* allows the user to guarantee 
+that a data, function or object constructor is a compile-time 
+constant.  Standard allows floating-point constant expression 
+as well. The *constexpr* is a new declaration specifier 
+(not a new type) and it does not affect overloading rules.  A 
+variable or datamember declared with *constexpr* behaves 
+as if it was declared with *const*. Constant expression 
+function must be defined before it is used, thus disallowing 
+recursive function calls. Function parameter cannot be declared
+*constexpr*. A constant-expression function may be called
+with non-constant expressions, in that case there is no 
+requirement that the resulting value be evaluated at compile-time. 
+A function or a constructor declared with *constexpr* is
+implicitly inline. A constant-expression constructor may be invoked 
+with non-constant expression arguments, the resulting initialization
+may then be dynamic.
+
+  constexpr int Five = 5;               // constant-expression data
+  constexpr int GetFive() {return 5;}   // constant-expression function
+  struct integer {
+    constexpr integer (int a) : v(a) { }
+    constexpr int val() { return v; }
+  private:
+    int v;
+  };
+  constexpr integer numFive(5);         // constant-expression constructor
+                                        // or user-defined literal
+
+  //create an array of 15 integers.
+  int some_value[Five+GetFive()+numFive.val()];
+
+Proposed Changes to the DWARF Specification
+-------------------------------------------
+
+Purpose:
+* To identify if a variable, function or object constructor can be 
+  evaluated as compile-time constants.
+* (Optional) To capture the value of the constant-expression.
+
+New DWARF attribute:
+|DW_AT_const_expr | 0x69 | flag | A compile-time constant expression |
+
+3.3.8.1: Abstract Instances
+
+*In C++, a function or a constructor declared with constexpr is 
+implicitly inline. This abstract inline instance is represented by 
+a debugging information entry with the tag DW_TAG_subprogram. Such 
+entry has a DW_AT_inline attribute whose value is DW_INL_inlined.*
+
+3.3.8.2: Concrete Inlined Instances
+
+Each inline subroutine entry may contain a DW_AT_const_expr attribute 
+whose value is a flag which indicates that the subroutine can be 
+evaluated as a compile-time constant. Such entries may have a 
+DW_AT_const_value attribute, whose value may be a string or any of 
+the constant data or data block forms, as appropriate for the 
+representation of the subroutine&#x27;s return value. The value of this 
+attribute is the actual return value of the subroutine, represented
+as it would be on the target architecture.
+
+*In C++, if a function or a constructor declared with constexpr 
+is called with constant-expressions, then this concrete inlined 
+instance has a DW_AT_const_expr attribute, as well as a DW_AT_const_value 
+attribute, whose value represent the actual return value of the 
+concrete inline instance. Such entry also have DW_AT_call_file, 
+DW_AT_call_line and DW_AT_call_col, indicating where the subroutine 
+is called.*
+
+
+4.1: Data Object Entries
+
+An entry describing a variable may have a DW_AT_const_expr attribute,
+ whose value is a flag which indicate that the variable can be evaluated 
+as a compile-time constant.
+
+*In C++, a variable declared with constexpr is implicitly const. Such 
+variable has a DW_AT_type attribute, whose value is a reference to a 
+debugging information entry describing a const qualified type.*
+
+Example
+-------
+ 
+constexpr double mass = 9.8;
+
+&amp;lt;1&amp;gt;&amp;lt;  xxx&amp;gt;      DW_TAG_base_type
+                DW_AT_name                  double
+                DW_AT_encoding              DW_ATE_float
+&amp;lt;1&amp;gt;&amp;lt;  yyy&amp;gt;      DW_TAG_const_type
+                DW_AT_type                  &amp;lt;xxx&amp;gt;
+&amp;lt;1&amp;gt;&amp;lt;  yyy&amp;gt;      DW_TAG_variable
+                DW_AT_name                  mass
+                DW_AT_type                  &amp;lt;yyy&amp;gt;
+                DW_AT_const_expr            yes
+                DW_AT_const_value           9.8
+
+constexpr int square (int x) { return x * x; }
+
+float array[square(9)];           // square() called at line 3, column 12
+extern const in medium;
+const int high = square(medium);  // high is NOT a constant expression
+
+&amp;lt;1&amp;gt;&amp;lt;  xxx&amp;gt;      DW_TAG_base_type
+                DW_AT_name                  int
+                DW_AT_encoding              DW_ATE_signed
+
+! abstract instance
+&amp;lt;1&amp;gt;&amp;lt;  yyy&amp;gt;      DW_TAG_subprogram
+                DW_AT_name                  square
+                DW_AT_type                  &amp;lt;xxx&amp;gt;
+                DW_AT_inline                DW_INL_inlined
+&amp;lt;2&amp;gt;&amp;lt;  zzz&amp;gt;      DW_TAG_formal_parameter
+                DW_AT_name                  x
+                DW_AT_type                  &amp;lt;xxx&amp;gt;
+ 
+! concrete instance for square(9)
+&amp;lt;1&amp;gt;&amp;lt;  ...&amp;gt;      DW_TAG_inlined_subroutine
+                DW_AT_abstract_origin       &amp;lt;yyy&amp;gt;
+                DW_AT_const_expr            yes
+                DW_AT_const_value           81
+                DW_AT_call_file             1
+                DW_AT_call_line             3
+                DW_AT_call_column           12
+&amp;lt;2&amp;gt;&amp;lt;  ...&amp;gt;      DW_TAG_formal_parameter
+                DW_AT_abstract_origin       &amp;lt;zzz&amp;gt;
+                DW_AT_const_value           9
+
+! concrete instance for non constant-expression version of square()
+&amp;lt;1&amp;gt;&amp;lt;  ...&amp;gt;      DW_TAG_inlined_subroutine
+                DW_AT_abstract_origin       &amp;lt;yyy&amp;gt;
+                DW_AT_low_pc                ...
+                DW_AT_high_pc               ...
+&amp;lt;2&amp;gt;&amp;lt;  ...&amp;gt;      DW_TAG_formal_parameter
+                DW_AT_abstract_origin       &amp;lt;zzz&amp;gt;
+                DW_AT_location              ...
+
+--
+Revised March 17, 2009 -- Add non-normative text describing C++ usage.
+
+ 
+
+ 
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Use HEX not DEC in tables</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 040113.1: Use HEX not DEC in tables</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Jason Molenda</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Jim Blandy</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2004-01-13</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Editorial</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>3</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+If you&#x27;re working with the values in section 7 (&quot;Data
+Representation&quot;), the difference between hex values and decimal
+values seems a little inconsistent.  Most of the tables, e.g.
+Figure 16 &quot;Tag Encodings&quot; [7.5.4 &quot;Attribute Encodings], pp
+125-127 draft8, show their values in hex.  Other tables had
+only a few entries, with values between 0 and 9, so they used
+decimal as a shortcut, e.g. [7.9 &quot;Accessibility Codes&quot;] Figure
+24, &quot;Accessibility encodings&quot;, p. 141.
+
+However, I think several of these decimal tables have grown in
+DWARF3 so they&#x27;re using values greater than 9, but still in
+decimal.  Specifically [7.21 &quot;Line Number Information&quot;] Figures
+33 &amp; 34 (&quot;Line Number Standard Opcode Encodings&quot; &amp; &quot;Line Number
+Extended Opcode Encodings&quot;) pp 148-149 and [7.22 &quot;Macro
+Information&quot;] Figure 35 &quot;Macinfo Type Encodings&quot; p. 150.
+
+Also there are two tables where the hex values are shown with
+only one digit except for a couple of values where they require
+two -- [7.15 &quot;Calling Convention Encodings&quot;] Figure 29 p. 144
+and [7.8 &quot;Base Type Encodings&quot;] Figure 23 p. 141.  Given that
+all tables except the Language Encodings uses 8-bit hex values,
+this table stands out as peculiar.
+
+
+PROPOSAL:
+
+I propose that all of these values should be 2-digit hex
+values, with the exception of the 4-digit Language Encoding
+values and the &quot;High 2 bits&quot; column on the CFI table (Figure
+36), which should remain 1 digit.
+
+Even for the tables where they have values [0, 1, 2], for
+consistency it would be nice to have them formatted
+identically.
+
+
+
+It&#x27;s hardly earth-shatteringly important or anything, but it
+would be helpful if an implementor is transcribing these from
+the standard document.  I don&#x27;t know if these sorts of
+modifications are still being accepted to the standard at this
+point, of course..
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

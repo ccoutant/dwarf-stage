@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Extending loclists with common sublists</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 170427.3: Extending loclists with common sublists</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Alexandre Oliva</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Mark Wielaard</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2017-04-27</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Open</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>6</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<p>Section 2.6.2 Location Lists and Section 2.17.3 Non-Contiguous Address Ranges</p>
+<p>This proposal introduces a mechanism for loclists and rnglists to
+share location list or range list fragments among multiple location or
+range lists.</p>
+<p>In Section 2.6.2:</p>
+<ul>
+<li>List inclusion.  This kind of entry includes entries from another
+    loclist in the current location list.  It can be used to share
+    list entries among multiple location lists.</li>
+</ul>
+<p>In Section 2.17.13:</p>
+<ul>
+<li>Range inclusion.  This kind of entry includes entries from another
+    rnglist into the current range list.  It can be used to share
+    range entries among multiple range lists.</li>
+</ul>
+<p>In Section 2.6.2, page 44, add following 1. DW_LLE_end_of_list:</p>
+<pre><code>2. DW_LLE_include_loclistx
+
+   This is a form of list inclusion, that has one unsigned LEB128
+   operand.  The value is an index into the .debug_loclists section,
+   interpreted the same way as the operand of DW_FORM_loclistx to find
+   a target list of entries, which will be regarded as part of the
+   current loclist, up to the DW_LLE_end_of_list entry.
+</code></pre>
+<p>In Section 2.6.2, page 45, add after 8. DW_LLE_start_length:</p>
+<pre><code>9. DW_LLE_include_loclist
+
+   This is a form of list inclusion, that has one offset operand.  The
+   value is an offset into the .debug_loclists section, like the
+   operand of a DW_FORM_sec_offset loclist.  The offset identifies the
+   first entry of a loclist whose entries are to be regarded as part of
+   the current loclist, up to the DW_LLE_end_of_list_entry.
+</code></pre>
+<p>In Section 2.17.3, page 53, add following 1. DW_RLE_end_of_list:</p>
+<pre><code>2. DW_RLE_include_rnglistx
+
+   This is a form of range inclusion, that has one unsigned LEB128
+   operand.  The value is an index into the .debug_rnglists section,
+   interpreted the same way as the operand of DW_FORM_rnglistx to find
+   a target list of entries, which will be regarded as part of the
+   current rnglist, up to the DW_RLE_end_of_list entry.
+</code></pre>
+<p>In Section 2.17.3, page 54, add after 8. DW_RLE_start_length:</p>
+<pre><code>10. DW_RLE_include_rnglist
+
+    This is a form of range inclusion, that has one offset operand.  The
+    value is an offset into the .debug_rnglists section, like the
+    operand of a DW_FORM_sec_offset rnglist.  The offset identifies the
+    first entry of a rnglist whose entries are to be regarded as part of
+    the current rnglist, up to the DW_RLE_end_of_list_entry.
+</code></pre>
+<p>In Section 7.7.3, add to Table 7.10:</p>
+<pre><code>DW_LLE_include_loclist  | 0x??
+DW_LLE_include_loclistx | 0x??
+</code></pre>
+<p>In Section 7.25, add to Table 7.30:</p>
+<pre><code>DW_RLE_include_rnglist  | 0x??
+DW_RLE_include_rnglistx | 0x??
+</code></pre>
+<hr />
+<p>2021-04-15:  Revised from 170427.2.<br />
+   Previous version: http://dwarfstd.org/issues/170427.2-1.html<br />
+2021-07-12:  Revised.<br />
+   Previous version: http://dwarfstd.org/issues/170427.3-1.html<br />
+2023-01-23:  Revised.<br />
+2023-02-03:  Revised.<br />
+   Previous version: http://dwarfstd.org/issues/170427.3-2.html</p>
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

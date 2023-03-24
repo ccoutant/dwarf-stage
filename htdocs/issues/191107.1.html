@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: DW_OP_byte_swap</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 191107.1: DW_OP_byte_swap</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Chirag Patel</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Andrew Cagney</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2019-11-07</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Rejected</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>6</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section 2.5.1.7, pg 37
+
+
+DW_OP_byte_swap to Byte Swap the data on top of the dwarf stack.
+===============================================================================
+
+Overview
+------------
+
+For debugging binary with bi-endian marked dwarf DIEs and the some calculation 
+depending at runtime, the data needs to be loaded at runtime and needs to be 
+byte swapped. the depended variable DIE here is marked as big-endian and the
+host is little-endian. The DW_OP_byte_swap will byte swap the raw data stored
+in top dwarf stack entry.
+
+
+0x00000057:   DW_TAG_variable
+                DW_AT_name      (&quot;__gbloffset__&quot;)
+                DW_AT_type      (0x000001e5 &quot;int&quot;)
+                DW_AT_external  (true)
+                DW_AT_decl_file (&quot;…&quot;)
+                DW_AT_decl_line (8)
+                DW_AT_location  (DW_OP_addr 0) // pre linkage
+                DW_AT_linkage_name      (&quot;_gblsection__&quot;)
+                DW_AT_endianity (DW_END_big)
+
+0x00000170:   DW_TAG_variable
+                DW_AT_name      (&quot;VAR1&quot;)
+                DW_AT_type      (0x0000010b &quot;fixed.dec.display.72&quot;)
+                DW_AT_decl_file (&quot;…&quot;)
+                DW_AT_decl_line (10)
+                DW_AT_location  (DW_OP_addr 0x0, DW_OP_call4 0x57, DW_OP_deref_size,
+                 4, DW_OP_dup, DW_OP_constu 0xff, DW_OP_lit0, DW_OP_shl,
+                 DW_OP_and, DW_OP_lit24, DW_OP_shl, DW_OP_swap,
+                 DW_OP_dup, DW_OP_constu 0xff, DW_OP_lit8, DW_OP_shl,
+                 DW_OP_and, DW_OP_lit8, DW_OP_shl, DW_OP_swap,
+                 DW_OP_dup, DW_OP_constu 0xff, DW_OP_lit16, DW_OP_shl,
+                 DW_OP_and, DW_OP_lit8, DW_OP_shr, DW_OP_swap,
+                 DW_OP_constu 0xff, DW_OP_lit24, DW_OP_shl, DW_OP_and,
+                 DW_OP_lit24, DW_OP_shr, DW_OP_swap, DW_OP_or, DW_OP_or,
+                 DW_OP_or, DW_OP_plus)
+                DW_AT_linkage_name      (&quot;VAR1&quot;)
+
+In above case DW_OP_byte_swap will replace 
+                 DW_OP_dup, DW_OP_constu 0xff, DW_OP_lit0, DW_OP_shl,
+                 DW_OP_and, DW_OP_lit24, DW_OP_shl, DW_OP_swap,
+                 DW_OP_dup, DW_OP_constu 0xff, DW_OP_lit8, DW_OP_shl,
+                 DW_OP_and, DW_OP_lit8, DW_OP_shl, DW_OP_swap,
+                 DW_OP_dup, DW_OP_constu 0xff, DW_OP_lit16, DW_OP_shl,
+                 DW_OP_and, DW_OP_lit8, DW_OP_shr, DW_OP_swap,
+                 DW_OP_constu 0xff, DW_OP_lit24, DW_OP_shl, DW_OP_and,
+                 DW_OP_lit24, DW_OP_shr, DW_OP_swap, DW_OP_or, DW_OP_or, DW_OP_or
+operations.
+
+Proposed changes to DWARF
+
+2.5.1.7 Special Operation
+
+Add
+
+&lt;n&gt; DW_OP_byte_swap
+
+    The DW_OP_byte_swap operation pops the top stack entry, byte swaps the value
+    and pushes back the swapped value on dwarf stack.
+
+    e.g. so 0x12345678 will become 0x78563412, useful to change endianity of raw
+    data.
+
+--
+2021-11-01:  Rejected - use existing DWARF Version 5 expression:
+
+With DWARF 5, byte swapping of a value so that it can be used in
+arithmetic operations can be performed using DW_OP_deref_type (or
+DW_OP_convert_type).  For instance
+
+Assuming this base type definition:
+
+  BIGENDIAN: DW_TAG_base_type
+              DW_AT_byte_size  8
+              DW_AT_encoding   DW_ATE_unsigned
+              DW_AT_endianity  DW_END_big
+
+Then this expression:
+
+  DW_OP_addr __gbloffset__   // push address of __gbloffset__ pointer
+  DW_OP_deref_type BIGENDIAN,   // loads __gbloffset__, BIGENDIAN type
+  DW_OP_convert_type 0,   // convert BIGENDIAN value on stack to a generic type
+
+Will load the contents of __gbloffset__ and convert it to host byte order.
+
+Ref: 2.5.1.4  Arithmetic and Logical Operations: &quot;... Operands of an
+operation with two operands must have the same type, either the same
+base type or the generic type.&quot;
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

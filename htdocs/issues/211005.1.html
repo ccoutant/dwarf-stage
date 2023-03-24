@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Interaction of DW_OP_piece (and similar) and DW_OP_call2 (and similar)</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 211005.1: Interaction of DW_OP_piece (and similar) and DW_OP_call2 (and similar)</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Allen Webster</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Adrian Prantl</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2021-10-05</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Clarification</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Open</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>6</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<p>Section 2.6, pg various</p>
+<p>The specification does not say much about how the concept of pieces interact 
+with the ability of a DWARF expression to encode "calls".</p>
+<p>The only thing it does say that seems possibly definitive is in 2.6.1:
+"Each simple location description that is a DWARF expression is evaluated 
+independently of any others."</p>
+<p>Which would suggest that the intended meaning of a "piece" op is to mark 
+the boundaries between completely separate expressions that do not share 
+a stack at all. Under this interpretation implementations would be able 
+to decode the opcode stream once to mark the ranges of each simple location 
+within the composite location and then handle them independently. Further 
+under this interpretation a "piece" op in a "call" would be illegal, as 
+that would imply that a call from a DWARF expression calls into a compound 
+location, and the spec claims that a "call" op is transferring control at 
+the level of DWARF expressions.</p>
+<p>(2.5.1.5 "These operations transfer control of DWARF expression evaluation ...")</p>
+<p>This would be great, but the problem is that in practice this doesn't seem 
+to be how it's being used.</p>
+<p>Looking just at GDB:</p>
+<pre><code>case DW_OP_piece:
+  {
+    ULONGEST size;
+    /* Record the piece.  */
+    op_ptr = read_uleb128 (op_ptr, op_end, &amp;size);
+    add_piece (ctx, 8 * size, 0);
+    /* Pop off the address/regnum, and reset the location type.  */
+    if (ctx-&gt;location != DWARF_VALUE_LITERAL
+        &amp;&amp; ctx-&gt;location != DWARF_VALUE_OPTIMIZED_OUT)
+      dwarf_expr_pop (ctx);
+    ctx-&gt;location = DWARF_VALUE_MEMORY;
+  }
+  goto no_push;
+</code></pre>
+<p>Here the interpretation of the "piece" op is just to pop one value from the 
+stack, not to fully reset the stack. Under this interpretation a composite 
+location has been treated as the same thing as a DWARF expression. Callees 
+can emit pieces into the same composite location as callers, and the "simple 
+location" after the first "piece" op is not necessarily isolated from the 
+work that was done in first "simple location".</p>
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

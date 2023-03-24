@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Wide Registers in Location Description Expressions</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 201007.1: Wide Registers in Location Description Expressions</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Markus Metzger</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Markus Metzger</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2020-10-07</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted with modification</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>6</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section 2.5.1.3, pg 29
+
+Some architectures support registers that are wider than the DWARF stack.
+Compilers may choose to store a vector of values in those registers that
+are relevant for describing the location of objects, such as addresses or
+offsets from a common base address.
+
+To support extracting those values from such wide registers and using them
+in DWARF expressions, we propose a family of operators.
+
+===
+
+Section 2.5.1.3, pg. 29.
+
+Rephrase
+
+    DW_OP_regval_type pushes the contents of the register together with
+    the given base type, while the other operations push the result of
+    adding the contents of a register to a given signed offset together
+    with the generic type.
+
+into
+
+    DW_OP_regval_type pushes the contents of the register together with
+    the given base type.  DW_OP_regval_bits pushes the partial contents of
+    the register together with the generic type.  The other operations
+    push the result of adding the contents of a register to a given signed
+    offset together with the generic type.
+
+Add
+
+    5. DW_OP_regval_bits
+
+       The DW_OP_regval_bits operation takes a single 1-byte unsigned
+       integer operand, which gives the number of bits to read, which must
+       be smaller or equal to the bit size of the generic type.  It pops
+       the top two stack elements and interprets the top element as an
+       unsigned bit offset from the least significant bit end and the
+       other as a register number identifying the register from which to
+       extract the value.  If the extracted value is smaller than the size
+       of the generic type, it is zero extended.
+ 
+Section 7.7.1, p223ff
+
+Add
+    DW_OP_regval_bits | 0xaa | 1 | 1-byte bit size
+to Table 7.9.
+
+--
+2022-01-25: Revised.  Previous version: http://dwarfstd.org/issues/201007.1-1.html
+2022-03-17:  Revised.  Removed DW_OP_regval_bits_stack_offset and DW_OP_regval_bits_stack.
+   Previous version: http://dwarfstd.org/issues/201007.1-2.html
+2022-03-21:  Accepted with modification:  Change ubyte operand to ULEB128.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

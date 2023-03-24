@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Allow DW_AT_bit_size like DW_AT_byte_size</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 081211.1: Allow DW_AT_bit_size like DW_AT_byte_size</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Ron Brender</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Ron Brender</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2008-12-11</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>4</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Revised Dec 21, 2008.
+
+PROBLEM
+-------
+
+In general, the size of an object or type is described as a given
+number of bytes or a given number of bits. A byte size is preferred
+when the size is a integral number of whole bytes. A bit size is
+required when the size is not a integral number of bytes.
+
+DWARF DIEs for types allow use of the DW_AT_byte_size attribute for
+specifing a size in integral bytes. But not all also allow use of the
+DW_AT_bit_size as an alternative size specification.
+
+This proposal corrects this lack of parallel and consistent treatment.
+
+
+PROPOSAL
+--------
+
+This proposal has several parts.
+
+Part 1: In Figure 2, change the description of DW_AT_bit_size from
+
+    &quot;Base type bit size&quot; &amp; &quot;Data member bit size&quot;
+to
+
+    &quot;Data type size in bits&quot;
+
+Also change the description of DW_AT_byte_size from
+
+    &quot;Data object and data type size&quot;
+to
+
+    &quot;Data type size in bytes&quot;
+
+Note: DW_AT_byte_size (and DW_AT_bit_size) occur only as attributes
+of types, not objects.
+
+
+Part 2: Add new Section 2.21 as follows:
+
+|   &quot;Section 2.21 Bit and Byte Sizes
+|
+|   &quot;Many debugging information entities allow either a DW_AT_byte_size
+|   attribute or a DW_AT_bit_size attribute, whose integer constant
+|   value (see Section 2.19) speficies an amount of storage. The value
+|   of the DW_AT_byte_size attribute is interpreted in bytes and the
+|   value of the DW_AT_bit_size attribute is interpreted in bits.&quot;
+
+
+Part 3: In Section 5.5 regarding array types, replace paragraph 5 on
+page 76 which reads
+
+    &quot;The array type entry may have a DW_AT_byte_size attribute, whose
+    value (see Section 2.19) is the total size in bytes of an instance
+    of the array type.&quot;
+
+with
+
+    &quot;The array type entry may have either a DW_AT_byte_size or a
+    DW_AT_bit_size attribute (see Section 2.21), whose value is the
+    amount of storage needed to hold an instance of the array type.&quot;
+
+
+Part 4: In Section 5.6.1 regarding structure, union or class types,
+replace paragraph 3 on page 77 which reads
+
+    &quot;If the size of an instance of the structure type, union type or
+    class type can be determined statically, the entry has a
+    DW_AT_byte_size attribute whose integer constant value is the
+    number of bytes required to hold an instance of the structure,
+    union, or class, including any padding bytes. Otherwise, the
+    entry may have a DW_AT_byte_size attribute whose value (see
+    Section 2.19) is the dynamic number of bytes required.&quot;
+
+with
+
+    &quot;A structure type, union type or class type entry may have
+    either a DW_AT_byte_size attribute or a DW_AT_bit_size attribute
+    (see Section 2.21), whose value is the amount of storage needed
+    to hold an instance of the structure, union or class type,
+    including any padding.&quot;
+
+
+Part 5: In Section 5.8 regarding enumeration types, replace the
+second sentence of the first paragraph on page 87 which reads
+
+    &quot;The entry also has a DW_AT_byte_size attribute whose integer
+    constant value is the number of bytes required to hold an
+    instance of the enumeration.
+
+with
+
+    &lt;new paragraph&gt;
+    &quot;An enumeration type entry has either a DW_AT_byte_size
+    attribute or a DW_AT_bit_size attribute (see Section 2.21), whose
+    value is the amount of storage needed to hold an instance of the
+    enumeration type.&quot;
+
+
+Part 6: In Section 5.10 regarding string types, replace the third
+and fourth paragraphs which read
+
+    &quot;The string type entry may have a DW_AT_string_length attribute
+    whose value is a location description where the length of the
+    string is stored in the program. The string type may also have a
+    DW_AT_byte_size attribute, whose value (see Section 2.19) is the
+    size in bytes of the data to be retrieved from the location
+    referenced by the string length attribute. If no byte size
+    attribute is present, the size of the data to be retrieved is the
+    same as the size of an address on the target machine.
+
+    &quot;If no string length attribute is present, the string type entry
+    may have a DW_AT_byte_size attribute, whose value (see Section 2.19)
+    is the length in bytes of the string.&quot;
+
+with
+
+    &quot;The string type entry may have a DW_AT_string_length attribute
+    whose value is a location description where the length of the
+    string is stored in the program. The string type may also have
+    either a DW_AT_byte_size attribute or a DW_AT_bit_size attribute
+    (see Section 2.21), whose value is the size of the data to be
+    retrieved from the location referenced by the string length
+    attribute. If no (byte or bit) size attribute is present, the
+    size of the data to be retrieved is the same as the size of an
+    address on the target machine.
+
+    &quot;If no string length attribute is present, the string type entry
+    may have either a DW_AT_byte_size attribute or a DW_AT_bit_size
+    attribute (see Section 2.21), whose value is the length of the
+    string.&quot;
+
+
+Part 7: In Section 5.11 regarding set types, replace the last paragraph
+of the section which reads
+
+    &quot;If the amount of storage allocated to hold each element of an
+    object of the given set type is different from the amount of
+    storage that is normally allocated to hold an individual object
+    of the indicated element type, then the set type has a
+    DW_AT_byte_size attribute whose value (see Section 2.19) is the
+    size in bytes of an instance of the set type.&quot;
+
+with
+
+    &quot;If the amount of storage allocated to hold each element of an
+    object of the given set type is different from the amount of
+    storage that is normally allocated to hold an individual object
+    of the indicated element type, then the set type has either a
+    DW_AT_byte_size attribute or a DW_AT_bit_size attribute (see
+    Section 2.21), whose value is the amount of storage needed to hold
+    an instance of the set type.&quot;
+
+
+Part 8: In section 5.12 regarding subrange types, replace the fourth paragraph (page 89) which reads
+
+    &quot;If the amount of storage allocated to hold each element of the
+    given subrange type is different from the amount of storage that
+    is normally allocated to hold an individual object of the
+    indicated element type, then the subrange has a DW_AT_byte_size
+    attribute, whose value (see Section 2.19) is the size in bytes
+    of each element of the subrange type.&quot;
+
+with
+
+    &quot;If the amount of storage allocated to hold each element of the
+    given subrange type is different from the amount of storage that
+    is normally allocated to hold an individual object of the
+    indicated element type, then the subrange has either a
+    DW_AT_byte attribute or a DW_AT_bit_size attribute (see Section
+    2.21), whose value is the amount of storage needed to hold an
+    instance of the subrange type.&quot;
+
+
+Part 9: In Section 5.14 regarding file types, replace the last
+paragraph which reads
+
+    &quot;The file type entry also has a DW_AT_byte_size attribute, whose
+    value (see Section 2.19) is the size in bytes of an instance of
+    this file type.&quot;
+
+with
+
+    &quot;The file type entry also has either a DW_AT_byte_size attribute
+    or a DW_AT_bit_size attribute (see Section 2.21), whose value
+    is the amount of storage needed to hold an instance of
+    the file type.&quot;
+
+
+Part 10: In Appendix A, Figure 42, add the DW_AT_bit_size attribute
+to the list of Applicable Attributes for each of the following:
+
+    DW_TAG_array_type
+    DW_TAG_class_type
+    DW_TAG_enumeration_type
+    DW_TAG_file_type
+    DW_TAG_set_type
+    DW_TAG_string_type
+    DW_TAG_structure_type
+    DW_TAG_subrange_type
+    DW_TAG_union_type
+
+
+DISCUSSION
+----------
+
+This proposal attempts to cover all uses of DW_AT_byte_size in the
+DWARF document. Places where changes are not proposed are the
+following:
+
+  5.1   Base Types              Covered by separate proposal
+  5.2   Unspecified Types       n/a
+  5.3   Modified types          n/a
+  5.4   Typedef                 n/a
+  5.6.6 Data Members            Covered by separate proposal
+  5.7   Condition               n/a
+  5.9   Subroutine              n/a
+  5.13  Pointer to member       n/a
+
+
+Changes to Draft of Dec 11, 2008:
+
+  . Add new Section 2.21 to factor the common business about byte
+    size is bytes and bit size is bits into a single place.
+  . Include string types and file types for completeness and
+    consistency
+  . Drop suggestion to change wording regarding padding in structures,
+    unions and classes.
+
+---
+Accepted Jan. 6, 2009
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

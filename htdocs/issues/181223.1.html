@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Add source URL (was Add Microsoft SourceLink support)</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 181223.1: Add source URL (was Add Microsoft SourceLink support)</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Jordan Frost</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Tony Tye</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2018-12-23</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted with modifications</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>6</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section , pg 
+
+Microsoft&#x27;s PDB format supports a feature, SourceLink. It allows embedding a 
+JSON blob inside the PDB file that their debuggers can use to find source.
+
+This feature is sorely missing from code compiled via GCC that has debug 
+information.
+
+The format does not have not be SourceLink at all, but just any kind of blob 
+sitting in the debug file.
+
+
+DISCUSSION
+
+It is unclear if the request is seeking a standard way to put arbitrary blobs
+into DWARF information, or a standard way to provide functionality similar 
+to SourceLink.
+
+If the former, existing code object formats already provide such ability. For
+example, ELF already provides the ability to add arbitrary sections or note
+records. It would then require agreement on the name, format, and meaning of
+such sections or note records so that producers and consumers could communicate.
+
+If the latter, then a first step is to look at the SourceLink definition 
+which can be found at:
+
+  https://github.com/dotnet/designs/blob/main/accepted/2020/diagnostics/source-link.md
+
+It is intended to provide a means to specify a URL that can be used to locate
+the source files from an online server. It uses a JSON textual representation. 
+The representation supports limited wildcards to allow a single entry to
+describe the location of many files.
+
+DWARF has a file table that provides information about the source files. So one
+approach is to extend it to allow the specification of a URL. This would provide
+a standard place that produces and consumers could use to communicate the URL
+that could be used to find the source online. A consumer could use this if the
+source is not locally available using the file path. The file table already has
+a means to add fields to each file entry, so an additional one could be defined.
+
+A compiler/linker producer could accept a SourceLink JSON file and use it while
+generating the DWARF file table. Standard linking would be able to preserve 
+the information as it is just part of the existing DWARF file table.
+
+The proposal below describes this alternative. It uses URL for the name of the
+field, but should it use URI to be more general?
+
+ALTERNATIVES
+
+The above approach does not benefit from the compaction offered by the
+SourceLink JSON use of wildcards. However, is this considered an issue
+in DWARF size?
+
+If it is then a more elaborate DWARF approach could be devised. For example,
+a per CU “url table” could be added with entries for a file root and a URL
+root (essentially what is in the JSON file). File entries could either
+reference entries in the url table, or the url table could simply be an
+independent table that a consumer could consult to determine the URL of a
+file using the same rules defined by SourceLink.
+
+Another approach to address this issue that does not involve any DWARF changes 
+is the use of debuginfo files
+(see https://fedoraproject.org/wiki/Releases/FeatureBuildId). An executable that 
+contains DWARF debug information can be split into a stripped ELF executable that 
+contains no debug information and a debuginfo file that is an ELF file that only 
+contains the DWARF debug information. The stripped executable has an ELF note record
+added that has a Build-ID 
+(see https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/developer_guide/compiling-build-id)
+which is a hash of the stable parts of the stripped executable that is also
+saved in the debuginfo file. The stripped executable is included in the distribute
+package. In addition a debug package can be made that includes the debuginfo file
+together with the sources. 
+
+The debugedit (http://manpages.ubuntu.com/manpages/bionic/man8/debugedit.8.html) 
+tool can be used to split an executable, compute and insert the Build-ID, and
+change the prefix of all the source file paths in the DWARF to use a fixed
+location as opposed to the one used by the build system.
+
+To debug the executable the debuginfo file and sources can then be installed using
+the debug packages (see dwarf-workgroup@lists.dwarfstd.org). The debuginfod server
+(https://developers.redhat.com/blog/2019/10/14/introducing-debuginfod-the-elfutils-debuginfo-server)
+can be used to retrieve the debuginfo files in an automated fashion using a URL.
+A debugger can use the Build-ID in the executable to request the debuginfo and 
+sources from the debuginfod server and cache them locally
+(see https://sourceware.org/gdb/onlinedocs/gdb/Separate-Debug-Files.html).
+
+PROPOSED RESOLUTION
+
+This augments DWARF Version 5 section 6.2.4.1.
+
+6.  DW_LNCT_URL
+ 
+    The component is a null-terminated UTF-8 URL text string. This content code
+    is paired with the same forms as DW_LNCT_path. It can be used for file
+    name entries.  If DW_LNCT_URL content kind is not present, or is present 
+    with an empty null-terminated string value, no URL is available.  Otherwise,
+    the null-terminated string value provides a URL for a location that can be
+    used to access the source text.
+
+    *When the URL is available, consumers can use it to obtain the source
+    text if the file path provided by the DW_LNCT_path field is
+    not accessible, or if the timestamp, size or hash of the contents of that
+    file does not match that provided by the DW_LNCT_timestamp, 
+    DW_LNCT_size or DW_LNCT_MD5 fields respectively.*
+
+This augments DWARF Version 5 section 7.22 and Table 7.27.
+
+The following table gives the encoding of the additional line number header
+entry format.
+
+  Table 7.27: Line number header entry format encodings
+
+  ====================================  ====================
+  Line number header entry format name  Value
+  ====================================  ====================
+  DW_LNCT_is_URL #                      0x6
+  ====================================  ====================
+
+--
+2021-08-06:  Revised: Added discussion, alternatives, proposal.
+2022-08-22:  Accepted with modifications: Remove discussion about empty URL string.
+             Remove non-normative text.  Revise title.  
+   
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Size attributes on DW_TAG_string_type</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 110110.1: Size attributes on DW_TAG_string_type</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Kendrick Wong</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Kendrick Wong</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2011-01-10</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Improvement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted with modifications</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>5</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section 5.9, pg 98
+Overview:
+- Adding DW_AT_string_length_byte_size to describe the size of the data to be retrieved
+from the location referenced by the DW_AT_string_length attribute.
+- New interpretation to DW_AT_byte_size (incompatible change), to always mean the total
+size allocated to hold the string data. (added non-normative text to describe both old and new behavior)
+
+Background:
+In the current spec, a string type (DW_TAG_string_type) may have a DW_AT_byte_size attribute.  
+However, this attribute carries a different meaning depending on the presence of 
+DW_AT_string_length attribute:
+- if DW_AT_string_length is present: size of data to be retrieved from DW_AT_string_length
+- if DW_AT_string_length is not present: amount of storage needed to hold a value of the string type.
+
+Here is the description in the spec:
+
+&quot;The string type entry may have a DW_AT_string_length attribute whose value is a location 
+description yielding the location where the length of the string is stored in the program. 
+The string type entry may also have a DW_AT_byte_size attribute or DW_AT_bit_size attribute,
+whose value (see Section 2.21) is the size of the data to be retrieved from the location 
+referenced by the string length attribute. If no (byte or bit) size attribute is present, 
+the size of the data to be retrieved is the same as the size of an address on the target machine.
+If no string length attribute is present, the string type entry may have a DW_AT_byte_size 
+attribute or DW_AT_bit_size attribute, whose value (see Section 2.21) is the amount of storage 
+needed to hold a value of the string type.&quot;
+
+Currently, there is no mechanism to have both information present on the same string type.
+
+Proposal:
+Introduce a new attribute DW_AT_string_length_byte_size to describe the size of the 
+data (in bytes) to be retrieved from the location referenced by the DW_AT_string_length 
+attribute.
+
+Change the existing attribute DW_AT_byte_size to always indicate the total size (in bytes)
+allocated to hold the string data. This is an incompatible change.
+
+This would modify the wording to 5.9 &quot;String Type Entries&quot;.
+
+The string type entry may have a DW_AT_byte_size attribute, whose value is the amount of 
+storage allocated (in bytes) to hold the string data.  The value of the attribute is 
+determined as described in section 2.19.
+
+&lt;non-normative-text&gt;
+Prior to DWARF 5, DW_AT_byte_size carry different meaning depending on the presence of 
+DW_AT_string_length attribute:
+  - if DW_AT_string_length is present: size of data to be retrieved from DW_AT_string_length
+  - if DW_AT_string_length is not present: amount of storage allocated for the string data.
+In DWARF 5, this DW_AT_byte_size will always be used to represent the amount of storage 
+allocated for the string data.
+&lt;/non-normative-text&gt;
+
+The string type entry may have a DW_AT_string_length attribute whose value is a location 
+description yielding the location where the actual byte length of the string is stored in 
+the program. If DW_AT_string_length attribute is not present, the actual byte length of 
+the string is assumed to be the same as the amount of storage allocated for the string 
+data (i.e. the value represented by DW_AT_byte_size).
+
+The string type entry may have a DW_AT_string_length_byte_size attribute, whose value is 
+the size of the data to be retrieved from the location referenced by the DW_AT_string_length 
+attribute. If DW_AT_string_length_byte_size attribute is not present, the size of the data 
+to be retrieved is the same as the size of an address on the target machine. 
+
+Use cases:
+
+1) plain string type with 10 bytes allocated for the string
+| .......... |
+|
+start of string content
+
+existing DWARF:
+DW_TAG_string_type
+  DW_AT_byte_size (10)
+  
+proposed DWARF:
+DW_TAG_string_type
+  DW_AT_byte_size (10)
+
+2) two byte prefix length string, with no pre-defined allocated maximum
+| xxxx | ... |
+  |      |
+  |      start of string content
+  2 byte length prefix
+
+existing DWARF:
+DW_TAG_string_type
+  DW_AT_string_length (DW_OP_push_object_address)
+  DW_AT_byte_size (2)
+  DW_AT_data_location (DW_OP_push_object_address DW_OP_plus_uconst 2)
+  
+proposed DWARF:
+DW_TAG_string_type
+  DW_AT_string_length (DW_OP_push_object_address)
+  DW_AT_string_length_byte_size (2)
+  DW_AT_data_location (DW_OP_push_object_address DW_OP_plus_uconst 2)
+  ! no DW_AT_byte_size since no pre-defined maximum allocation
+
+
+3) two byte prefix length string, with 10 bytes allocated for the string
+| xxxx | .......... |
+  |      |
+  |      start of string content (10 bytes max)
+  2 byte length prefix
+
+existing DWARF:
+DW_TAG_string_type
+  DW_AT_string_length (DW_OP_push_object_address)
+  DW_AT_byte_size (2)
+  DW_AT_data_location (DW_OP_push_object_address DW_OP_plus_uconst 2)
+  
+proposed DWARF:
+DW_TAG_string_type
+  DW_AT_string_length (DW_OP_push_object_address)
+  DW_AT_string_length_byte_size (2)
+  DW_AT_data_location (DW_OP_push_object_address DW_OP_plus_uconst 2)
+  DW_AT_byte_size (10)
+  
+4) String via dope vector  
+| xxxxxxxx | addr of string |
+             | 
+             -&gt; | .................... |
+                  |
+                  start of string content (allocated 20 bytes)
+
+existing DWARF:
+DW_TAG_string_type
+  DW_AT_string_length (DW_OP_push_object_address)
+  DW_AT_byte_size (4)
+  DW_AT_data_location (DW_OP_push_object_address DW_OP_plus_uconst 4 DW_OP_deref)
+  
+proposed DWARF:
+DW_TAG_string_type
+  DW_AT_string_length (DW_OP_push_object_address)
+  DW_AT_string_length_byte_size (4)
+  DW_AT_data_location (DW_OP_push_object_address DW_OP_plus_uconst 4 DW_OP_deref)
+  DW_AT_byte_size (20)
+
+
+===
+
+Revised 12/04/2012, 12/11/2012.
+Accepted 4/23/2013 as modified.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

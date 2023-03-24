@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Issues for DWARF Version 5</title>
+  <link rel="stylesheet" href="./static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="./images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="./images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+<h1>Issues for DWARF Version 5</h1>
+<table class="issueindex">
+<thead>
+  <tr>
+    <th>Issue #</th>
+    <th>Title</th>
+    <th>Author</th>
+    <th>Champion</th>
+    <th>Type</th>
+    <th>Status</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td><a href="./issues/090824.1.html">090824.1</a></td>
+    <td>Coshape of Coarrays in Fortran 2008</td>
+    <td>Tommy Hoffner</td>
+    <td>John Bishop</td>
+    <td>Enhancement</td>
+    <td>Accepted with modifications</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/100211.1.html">100211.1</a></td>
+    <td>Adding OpenCL language attribute</td>
+    <td>Kendrick Wong</td>
+    <td>Kendrick Wong</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/100430.1.html">100430.1</a></td>
+    <td>aranges does not have debug info length</td>
+    <td>Tom Tromey</td>
+    <td>Cary Coutant</td>
+    <td>Enhancement</td>
+    <td>Withdrawn</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/100430.2.html">100430.2</a></td>
+    <td>debug_aranges and address-less CUs</td>
+    <td>Tom Tromey</td>
+    <td>Cary Coutant</td>
+    <td>Improvement</td>
+    <td>Rejected</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/100504.1.html">100504.1</a></td>
+    <td>Extensions for D arrays, associative arrays, and delegates</td>
+    <td>Robert Clipsham</td>
+    <td>John Bishop</td>
+    <td>Enhancement</td>
+    <td>Rejected</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/100805.1.html">100805.1</a></td>
+    <td>dynamic properties of types: reference interpretation</td>
+    <td>David Gross</td>
+    <td>Michael Eager</td>
+    <td>Clarification</td>
+    <td>Accepted with modification</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/100816.1.html">100816.1</a></td>
+    <td>Ambiguity in DWARF4 of debug_info_offset in .debug_aranges</td>
+    <td>Keith Walker</td>
+    <td>Cary Coutant</td>
+    <td>Ambiguity</td>
+    <td>Accepted with modification</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/100831.1.html">100831.1</a></td>
+    <td>DW_OP_implicit_pointer</td>
+    <td>Roland McGrath</td>
+    <td>Jakub Jelinek</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/100909.1.html">100909.1</a></td>
+    <td>DW_OP_entry_value</td>
+    <td>Jakub Jelinek</td>
+    <td>Jakub Jelinek</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/100909.2.html">100909.2</a></td>
+    <td>DW_TAG_call_site</td>
+    <td>Jakub Jelinek</td>
+    <td>Jakub Jelinek</td>
+    <td>Enhancement</td>
+    <td>Accepted with modifications</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/100923.1.html">100923.1</a></td>
+    <td>Type Modifier Entries&#x27; has no section title</td>
+    <td>Jan Kratochvil</td>
+    <td>Ron Brender</td>
+    <td>Editorial</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/101014.1.html">101014.1</a></td>
+    <td>Adding Go language attribut</td>
+    <td>Ian Lance Taylor</td>
+    <td>Michael Eager</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/101015.1.html">101015.1</a></td>
+    <td>DW_FORM_sig8 use in example versus DW_FORM_ref_sig8</td>
+    <td>Mark Wielaard</td>
+    <td>Ron Brender</td>
+    <td>Editorial</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/101111.1.html">101111.1</a></td>
+    <td>New DW_LANG_ value for Modula-3</td>
+    <td>Rodney M. Bates</td>
+    <td>Michael Eager</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/110110.1.html">110110.1</a></td>
+    <td>Size attributes on DW_TAG_string_type</td>
+    <td>Kendrick Wong</td>
+    <td>Kendrick Wong</td>
+    <td>Improvement</td>
+    <td>Accepted with modifications</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/110120.1.html">110120.1</a></td>
+    <td>address computation overflow (seen in Location List Entries)</td>
+    <td>Joel Brobecker</td>
+    <td>Michael Eager</td>
+    <td>Clarification</td>
+    <td>Rejected</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/110404.1.html">110404.1</a></td>
+    <td>typo in Figure 55. Packed record example: DWARF description</td>
+    <td>Mark Wielaard</td>
+    <td>Ron Brender</td>
+    <td>Editorial</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/110722.1.html">110722.1</a></td>
+    <td>More compact macro information - .debug_macro section</td>
+    <td>Jakub Jelinek</td>
+    <td>Jakub Jelinek</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/110803.1.html">110803.1</a></td>
+    <td>DW_OP_form_tls_address semantics</td>
+    <td>David Gross</td>
+    <td>Brock Wyma</td>
+    <td>Clarification</td>
+    <td>Accepted with modification</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/110915.1.html">110915.1</a></td>
+    <td>new dwarf tokens for OpenCL and AMDIL</td>
+    <td>Yousef Shajrawi</td>
+    <td>Michael Eager</td>
+    <td>Enhancement</td>
+    <td>Rejected</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/110926.1.html">110926.1</a></td>
+    <td>.debug_frame DW_OP_call_ref allowance</td>
+    <td>Jan Kratochvil</td>
+    <td>Todd Allen</td>
+    <td>Clarification</td>
+    <td>Accepted with modification</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/120213.1.html">120213.1</a></td>
+    <td>Allow DW_AT_type with DW_TAG_string_type</td>
+    <td>Tobias Burnus</td>
+    <td>Kendrick Wong</td>
+    <td>Enhancement</td>
+    <td>Replaced</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/120218.1.html">120218.1</a></td>
+    <td>Adding Haskell to Source Languages list</td>
+    <td>Nathan Howell</td>
+    <td>Michael Eager</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/120514.1.html">120514.1</a></td>
+    <td>Fission: Split debug info into separate files</td>
+    <td>Cary Coutant</td>
+    <td>Cary Coutant</td>
+    <td>Enhancement</td>
+    <td>Withdrawn</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/120604.1.html">120604.1</a></td>
+    <td>Alternate debug sections</td>
+    <td>Jakub Jelinek</td>
+    <td>Jakub Jelinek</td>
+    <td>Enhancement</td>
+    <td>ACCEPTED with modifications</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/120628.1.html">120628.1</a></td>
+    <td>Add language code for C++ variants</td>
+    <td>Tom Tromey</td>
+    <td>Michael Eager</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/120719.1.html">120719.1</a></td>
+    <td>DW_AT_entry_pc encoded as a constant offset from DW_AT_ranges</td>
+    <td>Mark Wielaard</td>
+    <td>Cary Coutant</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/120727.1.html">120727.1</a></td>
+    <td>UTF-8 for all sections with strings</td>
+    <td>Paul Robinson</td>
+    <td>Paul Robinson</td>
+    <td>Clarification</td>
+    <td>Accepted with modifications</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/121112.1.html">121112.1</a></td>
+    <td>DW_TAG_refine_type add additional attributes to type</td>
+    <td>Kendrick Wong</td>
+    <td>Kendrick Wong</td>
+    <td>Enhancement</td>
+    <td>Withdrawn</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/121123.1.html">121123.1</a></td>
+    <td>Inconsistent length field for location description in .debug_loc</td>
+    <td>Kendrick Wong</td>
+    <td>Kendrick Wong</td>
+    <td>Editorial</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/121212.1.html">121212.1</a></td>
+    <td>Type Unit Header typos</td>
+    <td>Paul Robinson</td>
+    <td>Paul Robinson</td>
+    <td>Editorial</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/121221.1.html">121221.1</a></td>
+    <td>Allow DW_AT_type with DW_TAG_string_type</td>
+    <td>Kendrick Wong</td>
+    <td>Kendrick Wong</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/130121.1.html">130121.1</a></td>
+    <td>Default Location List Entry</td>
+    <td>Ron Brender</td>
+    <td>Ron Brender</td>
+    <td>Improvement</td>
+    <td>Accepted with modifications</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/130211.1.html">130211.1</a></td>
+    <td>Change default encoding of string literals to UTF8</td>
+    <td>Kendrick Wong</td>
+    <td>Kendrick Wong</td>
+    <td>Enhancement</td>
+    <td>Rejected</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/130313.1.html">130313.1</a></td>
+    <td>Indirect string table (Split DWARF, part 1/5)</td>
+    <td>Cary Coutant</td>
+    <td>Cary Coutant</td>
+    <td>Enhancement</td>
+    <td>Accepted with modifications</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/130313.2.html">130313.2</a></td>
+    <td>Indirect Address Table (Split DWARF, part 2/5)</td>
+    <td>Cary Coutant</td>
+    <td>Cary Coutant</td>
+    <td>Enhancement</td>
+    <td>Accepted with modifications</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/130313.3.html">130313.3</a></td>
+    <td>Range table base offset (Split DWARF, part 3/5)</td>
+    <td>Cary Coutant</td>
+    <td>Cary Coutant</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/130313.4.html">130313.4</a></td>
+    <td>DWARF object files (Split DWARF, part 4/5)</td>
+    <td>Cary Coutant</td>
+    <td>Cary Coutant</td>
+    <td>Enhancement</td>
+    <td>Accepted with modifications</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/130313.5.html">130313.5</a></td>
+    <td>Add support for Fortran assumed-rank arrays</td>
+    <td>Tobias Burnus</td>
+    <td>Adrian Prantl</td>
+    <td>Enhancement</td>
+    <td>Accepted with (pending) modifications</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/130318.1.html">130318.1</a></td>
+    <td>DW_TAG_descriptor_type to describe descriptors</td>
+    <td>Kendrick Wong</td>
+    <td>Kendrick Wong</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/130402.1.html">130402.1</a></td>
+    <td>Use DW_AT_default_value to indicate C++ default template arguments</td>
+    <td>Jason Merrill</td>
+    <td>Jason Merrill</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/130410.1.html">130410.1</a></td>
+    <td>Accelerated access</td>
+    <td>Eric Christopher</td>
+    <td>Eric Christopher</td>
+    <td>Enhancement</td>
+    <td>Withdrawn</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/130411.1.html">130411.1</a></td>
+    <td>Values for non-type template parameter</td>
+    <td>Paul Robinson</td>
+    <td>Paul Robinson</td>
+    <td>Clarification</td>
+    <td>Replaced</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/130412.1.html">130412.1</a></td>
+    <td>Non-integral non-type template parameters</td>
+    <td>Paul Robinson</td>
+    <td>Paul Robinson</td>
+    <td>Clarification</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/130526.1.html">130526.1</a></td>
+    <td>Type Unit Merge</td>
+    <td>Eric Christopher</td>
+    <td>Eric Christopher</td>
+    <td>Enhancement</td>
+    <td>Accepted with modifications</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/130530.1.html">130530.1</a></td>
+    <td>Type Hash editorial change</td>
+    <td>Eric Christopher</td>
+    <td>Eric Christopher</td>
+    <td>Editorial</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/130623.1.html">130623.1</a></td>
+    <td>DW_AT_string_length_bit_size</td>
+    <td>Ron Brender</td>
+    <td>Ron Brender</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/130701.1.html">130701.1</a></td>
+    <td>Add MD5 digest to debug-line file table</td>
+    <td>Paul Robinson</td>
+    <td>Paul Robinson</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/130722.1.html">130722.1</a></td>
+    <td>Add AT_artificial to TAG_member and TAG_variable in Appendix A</td>
+    <td>Paul Robinson</td>
+    <td>Paul Robinson</td>
+    <td>Editorial</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/130722.2.html">130722.2</a></td>
+    <td>List template parameters in declaration order</td>
+    <td>Paul Robinson</td>
+    <td>Paul Robinson</td>
+    <td>Improvement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/130723.1.html">130723.1</a></td>
+    <td>Wrong Figure Number - Pg 282</td>
+    <td>Hafiz Abid Qadeer</td>
+    <td>Brock Wyma</td>
+    <td>Error</td>
+    <td>Closed</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/130815.1.html">130815.1</a></td>
+    <td>Template parameter refactoring</td>
+    <td>Paul Robinson</td>
+    <td>Paul Robinson</td>
+    <td>Editorial</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/130819.1.html">130819.1</a></td>
+    <td>Language-dependent default array ordering not specified</td>
+    <td>Keith Walker</td>
+    <td>Keith Walker</td>
+    <td>Clarification</td>
+    <td>Withdrawn</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/131009.1.html">131009.1</a></td>
+    <td>Adding OCaml language attribute</td>
+    <td>Richard W.M. Jones</td>
+    <td>Michael Eager</td>
+    <td>Enhancement</td>
+    <td>Accepted with modification</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/131017.1.html">131017.1</a></td>
+    <td>DW_AT_entry_pc missing on some tags in Appendix A</td>
+    <td>Keith Walker</td>
+    <td>Keith Walker</td>
+    <td>Clarification</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/131105.1.html">131105.1</a></td>
+    <td>C++11 ref-qualifiers on non-static member functions</td>
+    <td>Adrian Prantl</td>
+    <td>Adrian Prantl</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/131106.1.html">131106.1</a></td>
+    <td>Replace DW_TAG_descriptor_type (130318.1) with DW_TAG_dynamic_type</td>
+    <td>Ron Brender</td>
+    <td>Ron Brender</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/131112.1.html">131112.1</a></td>
+    <td>Add DW_TAG_atomic_type for C11 _Atomic</td>
+    <td>Joseph Myers</td>
+    <td>Michael Eager</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/131113.1.html">131113.1</a></td>
+    <td>UTF-8 for new kinds of units</td>
+    <td>Paul Robinson</td>
+    <td>Paul Robinson</td>
+    <td>Improvement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/131113.2.html">131113.2</a></td>
+    <td>Type unit attributes</td>
+    <td>Paul Robinson</td>
+    <td>Paul Robinson</td>
+    <td>Ambiguity</td>
+    <td>Accepted with modification</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/131216.1.html">131216.1</a></td>
+    <td>Minor Non-Defining Declarations edit</td>
+    <td>Eric Christopher</td>
+    <td>Eric Christopher</td>
+    <td>Editorial</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/131217.1.html">131217.1</a></td>
+    <td>C++ &quot;auto&quot; return type</td>
+    <td>Paul Robinson</td>
+    <td>Paul Robinson</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/140129.1.html">140129.1</a></td>
+    <td>DW_LANG_Rust</td>
+    <td>Michael Woerister</td>
+    <td>Michael Eager</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/140203.1.html">140203.1</a></td>
+    <td>Adding DW_FORM_exprloc to type unit hashing</td>
+    <td>Eric Christopher</td>
+    <td>Eric Christopher</td>
+    <td>Editorial</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/140208.1.html">140208.1</a></td>
+    <td>New classes for DW_AT_str_offsets_base, etc</td>
+    <td>Ron Brender</td>
+    <td>Ron Brender</td>
+    <td>Error</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/140226.1.html">140226.1</a></td>
+    <td>Add hashes over source and header files to debug symbols</td>
+    <td>Martin Runge</td>
+    <td></td>
+    <td>Enhancement</td>
+    <td>Rejected.</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/140227.1.html">140227.1</a></td>
+    <td>References to entries within a type unit</td>
+    <td>Paul Robinson</td>
+    <td>Cary Coutant</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/140228.1.html">140228.1</a></td>
+    <td>Add a source language ID for Haskell</td>
+    <td>Johan Tibell</td>
+    <td>Michael Eager</td>
+    <td>Enhancement</td>
+    <td>Rejected</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/140323.1.html">140323.1</a></td>
+    <td>Debug_line file attributes</td>
+    <td>David Anderson</td>
+    <td>David Anderson</td>
+    <td>Enhancement</td>
+    <td>Rejected</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/140327.1.html">140327.1</a></td>
+    <td>Clarify DW_AT_byte_size usage with DW_TAG_enumeration</td>
+    <td>Mark Wielaard</td>
+    <td>Ron Brender</td>
+    <td>Clarification</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/140330.1.html">140330.1</a></td>
+    <td>Add language code DW_LANG_C11 for ISO/IEC 9899:2011</td>
+    <td>Mark Wielaard</td>
+    <td>Michael Eager</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/140331.1.html">140331.1</a></td>
+    <td>C11 _Noreturn function specifier attribute DW_AT_noreturn</td>
+    <td>Mark Wielaard</td>
+    <td>Adrian Prantl</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/140331.2.html">140331.2</a></td>
+    <td>Add file attributes to debug-line file table</td>
+    <td>Mark Wielaard</td>
+    <td>Dave Anderson</td>
+    <td>Enhancement</td>
+    <td>Rejected</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/140421.1.html">140421.1</a></td>
+    <td>DWARF package files (Split DWARF, part 5/5)</td>
+    <td>Cary Coutant</td>
+    <td>Cary Coutant</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/140425.1.html">140425.1</a></td>
+    <td>Typed DWARF stack</td>
+    <td>Jakub Jelinek</td>
+    <td>Jakub Jelinek</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/140506.1.html">140506.1</a></td>
+    <td>D.4 Member Function Example wrong return type</td>
+    <td>Mark Wielaard</td>
+    <td>Paul Robinson</td>
+    <td>Clarification</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/140528.1.html">140528.1</a></td>
+    <td>Add DW_TAG_aligned tag and DW_AT_alignment attribute</td>
+    <td>Mark Wielaard</td>
+    <td>Eric Christopher</td>
+    <td>Enhancement</td>
+    <td>Accepted with modifications</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/140602.1.html">140602.1</a></td>
+    <td>Language constant for the Swift programming language (DW_LANG_Swift)</td>
+    <td>Adrian Prantl</td>
+    <td>Adrian Prantl</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/140606.1.html">140606.1</a></td>
+    <td>Add Julia to Source Languages List</td>
+    <td>Keno Fischer</td>
+    <td>Michael Eager</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/140701.1.html">140701.1</a></td>
+    <td>Adding Dylan language attribute</td>
+    <td>Bruce Mitchener</td>
+    <td>Michael Eager</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/140724.1.html">140724.1</a></td>
+    <td>Line File Table</td>
+    <td>Ron Brender</td>
+    <td>Ron Brender</td>
+    <td>Enhancement</td>
+    <td>Accepted with modifications</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/140817.1.html">140817.1</a></td>
+    <td>Fast Name Lookup</td>
+    <td>Michael Eager</td>
+    <td>Michael Eager</td>
+    <td>Enhancement</td>
+    <td>Withdrawn</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/140903.1.html">140903.1</a></td>
+    <td>DW_AT_default_value without default value?</td>
+    <td>Paul Robinson</td>
+    <td>Paul Robinson</td>
+    <td>Error</td>
+    <td>Rejected</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/140917.1.html">140917.1</a></td>
+    <td>procedure/subroutine/subprogram terminology</td>
+    <td>Paul Robinson</td>
+    <td>Paul Robinson</td>
+    <td>Editorial</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/141001.1.html">141001.1</a></td>
+    <td>Proposal to reserve .debug_macro opcode 0xff</td>
+    <td>Petr Machata</td>
+    <td>Michael Eager</td>
+    <td>Improvement</td>
+    <td>Rejected</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/141003.1.html">141003.1</a></td>
+    <td>Need to mark ctors and dtors with =default</td>
+    <td>Cary Coutant</td>
+    <td>Cary Coutant</td>
+    <td>Enhancement</td>
+    <td>Withdrawn</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/141008.1.html">141008.1</a></td>
+    <td>c++14 DW_LANG constant</td>
+    <td>Mark Wielaard</td>
+    <td>Michael Eager</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/141020.1.html">141020.1</a></td>
+    <td>C++11 inline namespaces</td>
+    <td>Adrian Prantl</td>
+    <td>Adrian Prantl</td>
+    <td>Enhancement</td>
+    <td>Rejected</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/141121.1.html">141121.1</a></td>
+    <td>Fortran 03/08 DW_LANG constants</td>
+    <td>Jakub Jelinek</td>
+    <td>Jakub Jelinek</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/141212.1.html">141212.1</a></td>
+    <td>DW_AT_export_symbols</td>
+    <td>Michael Eager</td>
+    <td>Michael Eager</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/141215.1.html">141215.1</a></td>
+    <td>Identify whether a type should be passed by value or implicit reference</td>
+    <td>Cary Coutant</td>
+    <td>Cary Coutant</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/141215.2.html">141215.2</a></td>
+    <td>Mark deleted member functions</td>
+    <td>Cary Coutant</td>
+    <td>Cary Coutant</td>
+    <td>Enhancement</td>
+    <td>Accepted with modificaitons</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/141215.3.html">141215.3</a></td>
+    <td>Mark defaulted member functions</td>
+    <td>Cary Coutant</td>
+    <td>Cary Coutant</td>
+    <td>Enhancement</td>
+    <td>Open</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/141215.4.html">141215.4</a></td>
+    <td>Add DW_FORM_implicit_const form code</td>
+    <td>Cary Coutant</td>
+    <td>Cary Coutant</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/150108.1.html">150108.1</a></td>
+    <td>Accelerated Access</td>
+    <td>Cary Coutant</td>
+    <td>Cary Coutant</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/150331.1.html">150331.1</a></td>
+    <td>RenderScript DW_LANG constant</td>
+    <td>Colin Riley</td>
+    <td>Michael Eager</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/150607.1.html">150607.1</a></td>
+    <td>Add DW_FORM_base_offset to resolve split object file issues</td>
+    <td>Ron Brender</td>
+    <td>Ron Brender</td>
+    <td>Error</td>
+    <td>Withdrawn</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/150608.1.html">150608.1</a></td>
+    <td>Value of DW_AT_dwo_id attribute</td>
+    <td>Ron Brender</td>
+    <td>Ron Brender</td>
+    <td>Error</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/150623.1.html">150623.1</a></td>
+    <td>Clarify byte order of DW_FORM_ref_sig8</td>
+    <td>Cary Coutant</td>
+    <td>Cary Coutant</td>
+    <td>Clarification</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/150702.1.html">150702.1</a></td>
+    <td>Add more unit type codes (DW_UT_*)</td>
+    <td>Ron Brender</td>
+    <td>Ron Brender</td>
+    <td>Improvement</td>
+    <td>Withdrawn</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/150726.1.html">150726.1</a></td>
+    <td>Sign of special address type</td>
+    <td>Michael Eager</td>
+    <td>Michael Eager</td>
+    <td>Ambiguity</td>
+    <td>Withdrawn</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/150731.1.html">150731.1</a></td>
+    <td>Add new TAG for skeleton units</td>
+    <td>Ron Brender</td>
+    <td>Ron Brender</td>
+    <td>Improvement</td>
+    <td>Withdrawn</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/150824.1.html">150824.1</a></td>
+    <td>Version for arange section in Dwarf 4 is not changed but format was changed</td>
+    <td>Jiri Malak</td>
+    <td></td>
+    <td>Error</td>
+    <td>Rejected</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/150824.2.html">150824.2</a></td>
+    <td>Representation of line number program header&#x27;s include_directories unclear</td>
+    <td>Ben Gamari</td>
+    <td></td>
+    <td>Ambiguity</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/151004.1.html">151004.1</a></td>
+    <td>DWARF attributes for D type qualifiers</td>
+    <td>Andrei Alexandrescu</td>
+    <td>Michael Eager</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/160108.1.html">160108.1</a></td>
+    <td>Unify compilation unit and type unit headers</td>
+    <td>Ron Brender</td>
+    <td>Ron Brender</td>
+    <td>Improvement</td>
+    <td>Accepted with modifications</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/160123.1.html">160123.1</a></td>
+    <td>Unify Location Lists and Range Lists</td>
+    <td>Ron Brender</td>
+    <td>Ron Brender</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/160301.1.html">160301.1</a></td>
+    <td>Explicit import of C++ anonymous namespace</td>
+    <td>Paul Robinson</td>
+    <td>Paul Robinson</td>
+    <td>Improvement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/160602.1.html">160602.1</a></td>
+    <td>Minor error in example hex value</td>
+    <td>Paul Bowen-Huggett</td>
+    <td></td>
+    <td>Editorial</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/160610.1.html">160610.1</a></td>
+    <td>Change in permissible classes for DW_AT_high_pc not found in changes list</td>
+    <td>Phil Mason</td>
+    <td></td>
+    <td>Error</td>
+    <td>Rejected</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/160610.2.html">160610.2</a></td>
+    <td>Why is there a confusing gap in the list of attribute form encodings</td>
+    <td>Phil Mason</td>
+    <td></td>
+    <td>Clarification</td>
+    <td>Rejected</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/160620.1.html">160620.1</a></td>
+    <td>Define generic type for stack operations</td>
+    <td>Michael Eager</td>
+    <td>Michael Eager</td>
+    <td>Clarification</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/160621.1.html">160621.1</a></td>
+    <td>More register location description clarifications</td>
+    <td>Andrew Cagney</td>
+    <td></td>
+    <td>Editorial</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/160714.1.html">160714.1</a></td>
+    <td>Location List and Range List Sections Improvement/Enhancement</td>
+    <td>Ron Brender</td>
+    <td>Ron Brender</td>
+    <td>Improvement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/160808.1.html">160808.1</a></td>
+    <td>Add Language Code for BLISS</td>
+    <td>Rob Brender</td>
+    <td>Rob Brender</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/160811.1.html">160811.1</a></td>
+    <td>Allow reference class for DW_AT_string_length attribute</td>
+    <td>Jakub Jelinek</td>
+    <td>Jakub Jelinek</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/161027.1.html">161027.1</a></td>
+    <td>.debug_names vs. DW_ID_case_insensitive</td>
+    <td>Jan Kratochvil</td>
+    <td>Cary Coutant</td>
+    <td>Error</td>
+    <td>Accepted with modifications</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/161031.1.html">161031.1</a></td>
+    <td>Issues in Changes from Version 4 to Version 5</td>
+    <td>Jakub Jelinek</td>
+    <td>Jakub Jelinek</td>
+    <td>Editorial</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/161031.2.html">161031.2</a></td>
+    <td>Remove useless padding from unit headers</td>
+    <td>Jakub Jelinek</td>
+    <td>Jakub Jelinek</td>
+    <td>Improvement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/161031.3.html">161031.3</a></td>
+    <td>DW_LNCT_path allowed forms</td>
+    <td>Jakub Jelinek</td>
+    <td>Jakub Jelinek</td>
+    <td>Enhancement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/161031.4.html">161031.4</a></td>
+    <td>C++ static data members, C++17 inline variables</td>
+    <td>Jakub Jelinek</td>
+    <td>Jakub Jelinek</td>
+    <td>Editorial</td>
+    <td>Rejected</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/161102.1.html">161102.1</a></td>
+    <td>.debug_loclists expression length uint16_t could be uleb128</td>
+    <td>Jan Kratochvil</td>
+    <td></td>
+    <td>Improvement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/161113.1.html">161113.1</a></td>
+    <td>broken link for DW_AT_rnglists_base</td>
+    <td>Jan Kratochvil</td>
+    <td></td>
+    <td>Editorial</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/161114.1.html">161114.1</a></td>
+    <td>DW_FORM_ref_sup unspecified size</td>
+    <td>Paul Robinson</td>
+    <td>Paul Robinson</td>
+    <td>Error</td>
+    <td>Accepted with modification</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/161118.1.html">161118.1</a></td>
+    <td>DW_TAG for C++ static data members</td>
+    <td>Jason Merrill</td>
+    <td>Jason Merrill</td>
+    <td>Improvement</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/161120.1.html">161120.1</a></td>
+    <td>Indexing into location and range lists sections</td>
+    <td>Ron Brender</td>
+    <td>Ron Brender</td>
+    <td>Ambiguity</td>
+    <td>Rejected</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/161122.1.html">161122.1</a></td>
+    <td>Fixed-size variant of DW_FORM_strx</td>
+    <td>Paul Robinson</td>
+    <td>Paul Robinson</td>
+    <td>Improvement</td>
+    <td>Accepted with modification</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/161128.1.html">161128.1</a></td>
+    <td>Add an example for DW_OP_bit_piece to D.1.3 (DWARF Location Description Examples</td>
+    <td>Adrian Prantl</td>
+    <td>Adrian Prantl</td>
+    <td>Clarification</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td><a href="./issues/161130.1.html">161130.1</a></td>
+    <td>Some forms are missing from the opcode_operands_table allowed forms list</td>
+    <td>Mark Wielaard</td>
+    <td></td>
+    <td>Improvement</td>
+    <td>Accepted with modification</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/161130.2.html">161130.2</a></td>
+    <td>Add DW_AT_encoding to the attribute list for DW_TAG_enumeration_type</td>
+    <td>Mark Wielaard</td>
+    <td></td>
+    <td>Improvement</td>
+    <td>Rejected</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/161130.3.html">161130.3</a></td>
+    <td>DW_FORM_data16 should be block class, not constant value class.</td>
+    <td>Mark Wielaard</td>
+    <td></td>
+    <td>Improvement</td>
+    <td>Rejected</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/161130.4.html">161130.4</a></td>
+    <td>representation of DW_FORM_strp/DW_FORM_line_strp typo</td>
+    <td>Mark Wielaard</td>
+    <td></td>
+    <td>Editorial</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/161130.5.html">161130.5</a></td>
+    <td>Make Unit Headers use less space</td>
+    <td>Mark Wielaard</td>
+    <td></td>
+    <td>Improvement</td>
+    <td>Rejected</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/161130.6.html">161130.6</a></td>
+    <td>Remove DW_LANG_C_plus_plus_03</td>
+    <td>Mark Wielaard</td>
+    <td></td>
+    <td>Error</td>
+    <td>Rejected</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/161206.1.html">161206.1</a></td>
+    <td>Clarify placement of register pieces</td>
+    <td>Andreas Arnez</td>
+    <td></td>
+    <td>Clarification</td>
+    <td>Rejected</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/161206.3.html">161206.3</a></td>
+    <td>Clarify placement of implicit value pieces</td>
+    <td>Andreas Arnez</td>
+    <td></td>
+    <td>Clarification</td>
+    <td>Rejected</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/161215.1.html">161215.1</a></td>
+    <td>Missing DW_AT_producer in .debug_names</td>
+    <td>Jan Kratochvil</td>
+    <td></td>
+    <td>Improvement</td>
+    <td>Rejected</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/161215.2.html">161215.2</a></td>
+    <td>Missing DW_AT_producer in .debug_line</td>
+    <td>Jan Kratochvil</td>
+    <td></td>
+    <td>Improvement</td>
+    <td>Rejected</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/161215.3.html">161215.3</a></td>
+    <td>augmentation string compatibility in .debug_names</td>
+    <td>Jan Kratochvil</td>
+    <td></td>
+    <td>Clarification</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/161230.1.html">161230.1</a></td>
+    <td>Indexing into location and range lists sections (revisited)</td>
+    <td>Ron Brender</td>
+    <td>Ron Brender</td>
+    <td>Ambiguity</td>
+    <td>Accepted</td>
+  </tr>
+  <tr>
+    <td><a href="./issues/170105.1.html">170105.1</a></td>
+    <td>Fixed-size variants of DW_FORM_addrx</td>
+    <td>Paul Robinson</td>
+    <td>Paul Robinson</td>
+    <td>Enhancement</td>
+    <td>Accepted with modification</td>
+  </tr>
+</tbody>
+</table>
+
+
+<p>Status explanations:</p>
+<ul>
+<li><strong>Open:</strong>  The issue is open, and is being discussed or is pending evaluation.</li>
+<li><strong>Incomplete:</strong>  The issue is open, but is awaiting revision by its author or its champion.</li>
+<li><strong>Accepted:</strong>  The issue was evaluated and the proposal was accepted without change.</li>
+<li><strong>Accepted pending revision:</strong>  The issue was evaluated and the proposal provisionally accepted, pending submission of revised wording.</li>
+<li><strong>Accepted with modifications:</strong>  The issue was evaluated and the proposal was accepted with modifications or a substitute proposal was accepted.  </li>
+<li><strong>Closed:</strong>  The issue was closed without modification to the standard.</li>
+<li><strong>Duplicate:</strong>  The issue is a duplicate of another issue.</li>
+<li><strong>Deferred:</strong>  The issue will be reconsidered at a later time.</li>
+<li><strong>Rejected:</strong>  The issue was evaluated but the proposal was not accepted.</li>
+<li><strong>Withdrawn:</strong>  The issue was withdrawn by its author.</li>
+<li><strong>Lang code assigned:</strong>  The issue was a request for a new language code, which has been assigned. (See <a href="./languages.html">Current language codes</a>)</li>
+</ul>
+<p>A detailed description of the resolution of each issue is listed at the bottom of each resolved issue.</p>
+
+<p>See also:</p>
+<ul>
+<li><a href="issues-v3.html">Issues closed in DWARF Version 3</a></li>
+<li><a href="issues-v4.html">Issues closed in DWARF Version 4</a></li>
+<li><a href="issues-v5.html">Issues closed in DWARF Version 5</a></li>
+</ul>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="./download.html">Download</a></li>
+		<li><a href="./languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="./comment.html">Submit a Comment</a></li>
+		<li><a href="./submissions.html">Submission Guidelines</a></li>
+		<li><a href="./issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="./members.html">Members</a></li>
+		<li><a href="./bylaws.html">Bylaws</a></li>
+		<li><a href="./code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="./member-agreement.html">Membership Agreement</a></li>
+		<li><a href="./procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

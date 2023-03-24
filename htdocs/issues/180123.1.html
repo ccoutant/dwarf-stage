@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Layout of discriminant entries in variant parts</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 180123.1: Layout of discriminant entries in variant parts</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Pierre-Marie de Rodat</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Hafiz Abid Qadeer</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2018-01-23</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Improvement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Incomplete</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>6</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<p>Section 5.7.10, pg 123</p>
+<p>Hello,</p>
+<p>Starting at line 5, section 5.7.10 Variant Entries says:</p>
+<blockquote>
+<p>If the variant part has a discriminant, the discriminant is represented by a
+separate debugging information entry which is a child of the variant part entry.</p>
+</blockquote>
+<p>The constraint that the entry for the discriminant must be a variant part entry
+child looks overly restrictive, at least for Ada: there can be several variant
+parts which refer to a unique discriminant. For instance:</p>
+<pre><code> 1.  type Rec (I : Integer) is record
+ 2.     case I is
+ 3.        when Positive =&gt;
+ 4.           C : Character;
+ 5.           case I is
+ 6.              when 0 =&gt;
+ 7.                 null;
+ 8.              when others =&gt;
+ 9.                 N : Natural;
+10.           end case;
+11.        when others =&gt;
+12.           S : String (1 .. 10);
+13.     end case;
+14.  end record;
+</code></pre>
+<p>Here, the Rec structure has two nested variant parts: one lines 2-13 and one
+lines 5-10, and both have the same discriminant: the member I (line 1). Both
+variant parts must be described in DWARF as DW_TAG_variant_part entries, but
+following the above rule, one would have to materialize the I discriminant
+with two DW_TAG_member entries: one for each variant part, so that each is
+truly the <em>child</em> of each variant part entry.</p>
+<p>Having two homonym DW_TAG_member entries inside a single structure entry looks
+quite unfriendly for DWARF consumers, and also a waste of space. It would seem
+more natural, at least for Ada, to be able to put the DW_TAG_member entry for I
+directly under the DW_TAG_structure one that describes the Rec structure. In
+the Ada source, the declaration of I is indeed outside of all variant parts,
+and this would allow to have only one DW_AT_member entry referenced by the two
+variant part entries.</p>
+<p>Would it be possible to relax the above rule? For instance saying:</p>
+<blockquote>
+<p>If the variant part has a discriminant, the discriminant is represented by a
+separate debugging information entry which is a direct child, a sibling or a
+parent of the variant part entry.</p>
+</blockquote>
+<p>For the record, this issue was discussed on:</p>
+<ul>
+<li>
+<p>the dwarf-discuss@ mailing list in 2006
+  <a href="http://lists.dwarfstd.org/pipermail/dwarf-discuss-dwarfstd.org/2006-August/001710.html">http://lists.dwarfstd.org/pipermail/dwarf-discuss-dwarfstd.org/2006-August/001710.html</a></p>
+</li>
+<li>
+<p>a patch review for LLVM a week ago <a href="https://reviews.llvm.org/D42082">https://reviews.llvm.org/D42082</a></p>
+</li>
+<li>
+<p>GCC's bug tracker shortly after
+  <a href="https://gcc.gnu.org/bugzilla/show_bug.cgi?id=83935">https://gcc.gnu.org/bugzilla/show_bug.cgi?id=83935</a></p>
+</li>
+</ul>
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

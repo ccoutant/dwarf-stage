@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Missing comments for some links in figure B.2</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 200519.1: Missing comments for some links in figure B.2</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Igor Kudrin</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Ron Brender</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2020-05-19</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Editorial</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted with modification</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>6</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section B.2, pg 281
+
+The notes for links in figure B.2 &quot;Split DWARF Section Relationships&quot; after
+(k) are missing, in particular:
+* (lo): from &quot;.debug_str_offsets.dwo&quot; to &quot;.debug_str.dwo&quot;
+* (lmo): from &quot;.debug_line.dwo&quot; to &quot;.debug_str_offsets.dwo&quot;
+* (mo): from &quot;.debug_macro.dwo&quot; to &quot;.debug_str_offsets.dwo&quot;
+* (po): from &quot;.debug_macro.dwo&quot; to &quot;.debug_str.dwo&quot;
+
+There is a note for a link (fo) which is missing in the figure.
+
+RESOLUTION
+
+Add the following text at the end of Section B.2:
+
+(lo)      .debug_str_offsets to .debug_str.dwo
+Entries in the string offsets table are offsets to the corresponding string text
+in the .debug_str.dwo section.
+
+(lmo)   .debug_line.dwo to .debug_str_offsets.dwo
+The value of a DW_FORM_line_strp form refers to a string section specific
+to the line number table. This form can be used in a .debug_line.dwo section
+(as well as in a .debug_info.dwo section).
+
+(mo)    .debug_macro.dwo to .debug_str_offsets.dwo
+Within the .debug_macro.dwo sections, the second operand of DW_MACRO_define_strx
+and DW_MACRO_undef_strx operations is an unsigned LEB128 value interpreted as an
+index into the .debug_str_offsets.dwo section.
+
+(po)     .debug_macro.dwo to .debug_str.dwo
+Within the .debug_macro.dwo sections, the second operand of DW_MACRO_define_strp
+and DW_MACRO_undef_strp operations is an unsigned LEB128 value interpreted as an
+index into the .debug_str.dwo section.
+
+For the missing arrow that goes with (fo), add an arrow directed 210 degrees (SSW)
+from .debug_info.dwo to a small circle containing an asterask (implicitly 
+something external).
+
+There is also a missing arrow from .debug_macro.dwo back to inself, for DW_MACRO_import...
+
+See figure:  http://dwarfstd.org/doc/Issue_200519.1_Draft_Figure_B.2.pdf
+
+--
+03/14/21 -- Updated
+06/13/21 -- Added link to figure
+06/14/20 -- Accepted with modification: Add text to explain diagram style.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

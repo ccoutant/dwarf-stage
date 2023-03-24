@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: address computation overflow (seen in Location List Entries)</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 110120.1: address computation overflow (seen in Location List Entries)</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Joel Brobecker</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Michael Eager</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2011-01-20</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Clarification</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Rejected</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>5</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section 2.6.2 Location Lists, pg 30
+This is a suggestion that was made while discussing the following DWARF 
+data about a variable declared as global inside a C unit (the variable was 
+not declared static):
+
+ &lt;1&gt;&lt;143010&gt;: Abbrev Number: 135 (DW_TAG_variable)
+    &lt;143012&gt;   DW_AT_decl_line   : 166
+    &lt;143014&gt;   DW_AT_decl_file   : 26
+    &lt;143016&gt;   DW_AT_type        : &lt;0xe6e1&gt;
+    &lt;14301a&gt;   DW_AT_external    : 1
+    &lt;14301b&gt;   DW_AT_location    : 0x90068      (location list)
+    &lt;14301f&gt;   DW_AT_name        : blablabla
+
+The location list contains only one entry (besides the end-of-list terminator), 
+and the offsets are: 0x0, and 0xffffffff.  The CU address size is 32bits.
+
+After adding the base address, which in this case is the CU base address, 
+readelf interprets this location as follow (there is an overflow/wrap-around 
+that happens):
+
+    Offset   Begin    End      Expression
+    00090068 0009f7c4 0009f7c3 (DW_OP_addr: 4000d120)
+    00090068 &lt;End of list&gt;
+
+As discussed on the dwarf-discuss mailing-list, a location should have been 
+used in the first place.  However, it has also been suggested that it would be 
+helpful for DWARF to be more explicit on how to treat such an entry.
+
+Suggestion by Roland McGrath:
+&gt; I think it would be
+&gt; helpful for DWARF to say explicitly that such calculations should not
+&gt; overflow/wrap.  That is, if the base address plus a list entry address
+&gt; exceeds the maximum address representable by the CU&#x27;s address_size (as in
+&gt; this example), the list entry is invalid.
+
+Michael Eager said:
+
+&gt; The end offset should be the highest address where the address
+&gt; is valid, perhaps the end of the compilation unit.
+&gt;
+&gt; To again quote the DWARF 4 standard:
+&gt;
+&gt;  2.6.2 Location Lists
+&gt;
+&gt;  Location lists are used in place of location expressions
+&gt;  whenever the object whose location is being described can
+&gt;  change location during its lifetime.
+&gt;
+&gt; Since there is no intent that the object&#x27;s location can change
+&gt; during it&#x27;s lifetime, use of a location list is inappropriate.
+&gt; As this paragraph suggests, and as Roland said, a location
+&gt; expression should be used when the location of an object
+&gt; does not change during it&#x27;s lifetime.
+
+
+---
+
+1/15/2013 - Rejected.  This is incorrect DWARF, since it uses a Loc List
+to attempt to describe an object whose location does not change during
+it&#x27;s lifetime.  
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

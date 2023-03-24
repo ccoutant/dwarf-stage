@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: DWARF package files (Split DWARF, part 5/5)</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 140421.1: DWARF package files (Split DWARF, part 5/5)</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Cary Coutant</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Cary Coutant</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2014-04-21</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>5</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Introduction
+------------
+
+With the current DWARF format, the debug information is designed
+with the expectation that it will be processed by the linker to
+produce an output binary with complete debug information, and
+with fully-resolved references to locations within the
+application. For very large applications, however, this approach
+can result in excessively large link times and excessively large
+output files. Several vendors have independently developed
+proprietary approaches that allow the debug information to remain
+in the relocatable object files, so that the linker does not have
+to process the debug information or copy it to the output file.
+These approaches have all required that additional information be
+made available to the debug information consumer, and that the
+consumer perform some minimal amount of relocation in order to
+interpret the debug info correctly. The additional information
+required, in the form of load maps or symbol tables, and the
+details of the relocation are not covered by the DWARF
+specification, and vary with each vendor&#x27;s implementation.
+
+For more background information, see the GCC wiki page at:
+
+    http://gcc.gnu.org/wiki/DebugFission
+
+This is the fifth in a series of proposals to extend the DWARF
+specification to support the use of unlinked and unrelocated
+debug information.
+
+  * The first proposal introduces a mechanism for referring to
+    strings indirectly, collecting the string offsets into a new
+    section, and introducing a new form code for this purpose.
+
+  * The second proposal introduces a similar indirect mechanism
+    for referring to relocatable addresses in the loadable
+    segments of the program, collecting all such addresses in a
+    single section.
+
+  * The third proposal introduces a mechanism for referring to
+    range table entries in the .debug_ranges section with a
+    single relocation per compilation unit rather than one for
+    each reference.
+
+  * The fourth proposal introduces a mechanism for splitting the
+    DWARF debugging information into two sets of sections. One
+    set remains in the relocatable object (.o) files, and is
+    linked into the final executable; the other set is written to
+    a non-relocatable DWARF object (.dwo) file, and remains in
+    the build tree as an independent file where the debugger can
+    reference it as needed.
+
+  * This fifth proposal introduces a package file format for
+    collecting the DWARF object (.dwo) files so that the
+    debugging information can be easily saved and transported for
+    debugging applications outside of the build tree.
+
+
+DWARF Package File Format
+-------------------------
+
+This proposal describes the file format for DWARF package files,
+version 2. (Version 1 was experimental.) A DWARF package file is
+an ELF-format file that collects the contents from the separate
+DWARF object (.dwo) files produced during the compilation of an
+application. DWARF object (.dwo) files are produced when
+compiling with GCC&#x27;s -gsplit-debug option.
+
+
+Design Goals
+------------
+
+The design of the DWARF package (.dwp) file is guided by the
+following goals:
+
+1.  It must provide quick and efficient access to individual
+    compilation units, keyed by a compilation unit signature,
+    which is a 64-bit signature that uniquely identifies a DWARF
+    compilation unit. The signature is given by the
+    DW_AT_GNU_dwo_id attribute in a skeleton compilation unit in
+    the application binary.
+
+2.  Likewise, it must provide quick and efficient access to
+    individual type units, keyed by a type signature, which is
+    also a 64-bit signature that uniquely identifies the debug
+    information for a type definition. The type signature is
+    typically obtained from the DW_AT_type attribute in variable
+    and subprogram DIEs, and may also come from a skeleton type
+    unit in the application binary.
+
+3.  It must allow for the removal of duplicate type units. Each
+    .dwo file will contain a set of type units defining types
+    that are referenced by that compilation unit. Many such type
+    units will appear in more than on .dwo file, and the .dwp
+    file should contain only one copy of each.
+
+4.  It must allow for the removal of duplicate strings. Each .dwo
+    file will contain a .debug_str.dwo section with all the
+    strings referenced by that unit. The .dwp file should contain
+    a single combined string table where all duplicate strings
+    have been coalesced.
+
+5.  The package format must be re-combinable; that is, it must be
+    possible to combine one set of .dwo files into a .dwp file,
+    combine another set of .dwo files into another .dwp file,
+    then combine the two .dwp files into a new .dwp file that is
+    equivalent to one created in one step.
+
+
+Proposed Changes to the DWARF Specification
+-------------------------------------------
+
+Add the following to Chapter 7:
+
+=================================================================
+7.3.5 DWARF Package Files
+
+[begin non-normative]
+Using split DWARF objects allows the developer to compile, link,
+and debug an application quickly with less link-time overhead,
+but a more convenient format is needed for saving the debug
+information for later debugging of a deployed application. A
+DWARF package file can be used to collect the debugging
+information from the object (or separate DWARF object) files
+produced during the compilation of an application.
+
+The package file is typically placed in the same directory as the
+application, and is given the same name with a &quot;.dwp&quot; extension.
+[end non-normative]
+
+A DWARF package file file is itself an object file, using the
+same object file format, byte order, and size as the
+corresponding application binary. It consists only of a file
+header, section table, a number of DWARF debug information
+sections, and two index sections.
+
+Each DWARF package file contains no more than one of each of the
+following sections, copied from a set of object or DWARF object
+files, and combined, section by section:
+
+    .debug_info.dwo
+    [.debug_types.dwo]
+    .debug_abbrev.dwo
+    .debug_line.dwo
+    .debug_loc.dwo
+    .debug_str_offsets.dwo
+    .debug_str.dwo
+    .debug_macinfo.dwo
+    .debug_macro.dwo
+
+The string table section in .debug_str.dwo contains all the
+strings referenced from DWARF attributes using the form
+DW_FORM_str_index. Any attribute in a compilation unit or a type
+unit using this form will refer to an entry in that unit&#x27;s
+contribution to the .debug_str_offsets.dwo section, which in turn
+will provide the offset of a string in the .debug_str.dwo
+section.
+
+The DWARF package file also contains two index sections that
+provide a fast way to locate debug information by compilation
+unit signature (DW_AT_dwo_id) for compilation units, or by type
+signature for type units:
+
+    .debug_cu_index
+    .debug_tu_index
+
+
+7.3.5.1 The CU Index Section
+
+The .debug_cu_index section is a hashed lookup table that maps a
+compilation unit signature to a set of contributions in the
+various debug information sections. Each contribution is stored
+as an offset within its corresponding section and a size.
+
+Each compilation unit set may contain contributions from the
+following sections:
+
+    .debug_info.dwo (required)
+    .debug_abbrev.dwo (required)
+    .debug_line.dwo
+    .debug_loc.dwo
+    .debug_str_offsets.dwo
+    .debug_macinfo.dwo
+    .debug_macro.dwo
+
+(Note that a set should not contain both .debug_macinfo.dwo and
+.debug_macro.dwo. The latter is an extension that is intended to
+replace the former in a future version of DWARF.)
+
+
+7.3.5.2 The TU Index Section
+
+The .debug_tu_index section is a hashed lookup table that maps a
+type signature to a set of offsets into the various debug
+information sections. Each contribution is stored as an offset
+within its corresponding section and a size.
+
+Each type unit set may contain contributions from the following
+sections:
+
+    .debug_types.dwo [.debug_info.dwo] (required)
+    .debug_abbrev.dwo (required)
+    .debug_line.dwo
+    .debug_str_offsets.dwo
+
+
+7.3.5.3 Format of the CU and TU Index Sections
+
+Both index sections have the same format, and serve to map a
+64-bit signature to a set of contributions to the debug sections.
+Each section begins with a header, followed by a hash table of
+signatures, a parallel table of indexes, a table of offsets, and
+a table of sizes. The index sections will be aligned at 8-byte
+boundaries in the file.
+
+The index section header contains four unsigned 32-bit values
+(using the byte order of the application binary):
+
+  * The version number of the format of this index (currently 5)
+  * L, the number of columns in the table of section offsets
+  * N, the number of compilation units or type units in the index
+  * M, the number of slots in the hash table
+
+(We assume that N and M will not exceed 2^32.)
+
+The size of the hash table, M, must be 2^k such that:
+
+    2^k &gt; 3 * N / 2
+
+The hash table begins at offset 16 in the section, and consists
+of an array of M 64-bit slots. Each slot contains a 64-bit
+signature (using the byte order of the application binary).
+
+The parallel table begins immediately after the hash table (at
+offset 16 + 8 * M from the beginning of the section), and
+consists of an array of M 32-bit slots (using the byte order of
+the application binary), corresponding 1-1 with slots in the hash
+table. Each entry in the parallel table contains a row index into
+the tables of offsets and sizes.
+
+Unused slots in the hash table will have 0 in both the hash table
+entry and the parallel table entry. While 0 is a valid hash
+value, the row index in a used slot will always be non-zero.
+
+Given a 64-bit compilation unit signature or a type signature S,
+an entry in the hash table is located as follows:
+
+1.  Calculate a primary hash H = S &amp; MASK(k), where MASK(k) is a
+    mask with the low-order k bits all set to 1.
+
+2.  Calculate a secondary hash H&#x27; = (((S &gt;&gt; 32) &amp; MASK(k)) | 1).
+
+3.  If the hash table entry at index H matches the signature, use
+    that entry. If the hash table entry at index H is unused (all
+    zeroes), terminate the search: the signature is not present
+    in the table.
+
+4.  Let H = (H + H&#x27;) modulo M. Repeat at Step 3.
+
+Because M &gt; N and H&#x27; and M are relatively prime, the search is
+guaranteed to stop at an unused slot or find the match.
+
+The table of offsets begins immediately following the parallel
+table (at offset 16 + 12 * M from the beginning of the section).
+The table is a two-dimensional array of 32-bit words (using the
+byte order of the application binary), with L columns and N+1
+rows, in row-major order. Each row in the array is indexed
+starting from 0. The first row provides a key to the columns:
+each column in this row provides an identifier for a debug
+section, and the offsets in the same column of subsequent rows
+refer to that section. The section identifiers are:
+
+  * DW_SECT_INFO (1): .debug_info.dwo
+  * DW_SECT_TYPES (2): .debug_types.dwo
+  * DW_SECT_ABBREV (3): .debug_abbrev.dwo
+  * DW_SECT_LINE (4): .debug_line.dwo
+  * DW_SECT_LOC (5): .debug_loc.dwo
+  * DW_SECT_STR_OFFSETS (6): .debug_str_offsets.dwo
+  * DW_SECT_MACINFO (7): .debug_macinfo.dwo
+  * DW_SECT_MACRO (8): .debug_macro.dwo
+
+The offsets provided by the CU and TU index sections are the base
+offsets for the contributions made by each CU or TU to the
+corresponding section in the package file. Each CU and TU header
+contains an abbrev_offset field, used to find the abbreviations
+table for that CU or TU within the contribution to the
+.debug_abbrev.dwo section for that CU or TU, and should be
+interpreted as relative to the base offset given in the index
+section. Likewise, offsets into .debug_line.dwo from
+DW_AT_stmt_list attributes should be interpreted as relative to
+the base offset for .debug_line.dwo, and offsets into other debug
+sections obtained from DWARF attributes should also be
+interpreted as relative to the corresponding base offset.
+
+The table of sizes begins immediately following the table of
+offsets, and provides the sizes of the contributions made by each
+CU or TU to the corresponding section in the package file. Like
+the table of offsets, it is a two-dimensional array of 32-bit
+words, with L columns and N rows, in row-major order. Each row in
+the array is indexed starting from 1 (row 0 of the table of
+offsets also serves as the key for the table of sizes).
+=================================================================
+
+Add the following to Appendix F:
+
+=================================================================
+F.3 DWARF Package File Example
+
+[TBD]
+=================================================================
+
+Add the following rows to Table G.1 (Section version numbers) in
+Appendix G:
+
+=================================================================
+Section Name       V2  V3  V4  V5
+---------------------------------
+.debug_cu_index     x   x   x   5
+.debug_tu_index     x   x   x   5
+=================================================================
+
+--
+Revised 2014-06-16.
+Accepted 2014-06-17, Appendix F text to be supplied
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

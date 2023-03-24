@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Add Address Size to Frame Info</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 040928.1: Add Address Size to Frame Info</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Don Darling</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Jim Blandy</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2004-09-28</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Extension</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>4</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Background 
+
+If one was to encounter a DW_OP_addr in the middle of a
+DW_CFA_expression, how is one supposed to determine the size of a target
+address, so they know how many bytes to read?  You could find the
+debug_info compile unit that references the same code as the FDE, but
+there are a lot of hoops to jump through to do this.  Also, some
+compiler vendors always generate .debug_frame sections, even if no other
+debugging information is generated.  Thus, they cannot rely on there
+being a .debug_info compile unit header to find the address size.
+
+The same is true for DW_CFA_set_loc.
+
+We have always encoded all target addresses as 4-byte values for all
+ISAs to avoid these issues, even if they are actually smaller.  I&#x27;m just
+curious about how a completely generic DWARF reader might handle this,
+without any knowledge of the target architecture.
+
+Jim Blandy wrote:
+|&gt; &gt;Does the .debug_frame section carry any indication of how large the
+|&gt; &gt;addresses it contains should be?  I&#x27;m talking about the
+|&gt; &gt;initial_location in the FDE, and the DW_CFA_set_loc operand.  One is
+|&gt; &gt;tempted to suggest using some compilation unit&#x27;s address size, but
+|&gt; &gt;.debug_frame is supposed to be self-contained.
+..
+|&gt; &gt;It seems to me this is worth bumping the version number to fix.
+
+Ron (Brender?) writes (attribution not really clear):
+|&gt; But does one good fix deserve another -- or three?
+|&gt;
+|&gt; The .debug_line section has the same problem. Shall we bump its
+|&gt; version number (actually we already did) and add an address_size
+|&gt; byte there too?
+|&gt;
+|&gt; Worse yet are the .debug_loc and .debug_ranges sections -- these
+|&gt; have no header at all, hence no version number to bump, hence no
+|&gt; possibility to upwardly add an address_size header field at all!
+|&gt;
+|&gt; Sigh...
+
+Daniel Jacobowitz wrote, 25 Apr 2004
+|Is there any use in .debug_loc and .debug_ranges without first reading
+|the .debug_info section, which does contain the address size?  For
+|.debug_line there&#x27;s a little more of an argument.
+
+PROPOSAL (revised 4/2/2007):
+
+This change requires changing the version number of .debug_frame.
+
+In the .debug_frame section, add address size and segment size fields
+to CIEs.  Specifically, in section 6.4.1, add, between &#x27;augmentation&#x27;
+and &#x27;code_alignment_factor&#x27; in the CIE text:
+
+    5.  address_size (ubyte)
+
+    The size of a target address in this CIE and any FDEs that use it, in
+    bytes.  If a Compilation Unit exists for this frame that Compilation
+    Unit address size must match the address size here.
+
+    6.  segment_size (ubyte)
+
+    The size of a segment selector in this CIE and any FDEs that use it,
+    in bytes.
+
+In the FDE description, add the following to the end of the
+description of &#x27;initial location&#x27;:
+
+    If the &#x27;segment_size&#x27; field of this FDE&#x27;s CIE is non-zero, the
+    initial location is preceded by a segment selector of the given
+    length.
+
+In section 6.4.2.1, &quot;Row Creation instructions&quot;, change the word
+&#x27;address&#x27; in the first sentence to &#x27;target address&#x27;, to make it
+clearer that the size of the field is controlled by the CIE&#x27;s
+address_size field.  To the end of the paragraph, add the sentence:
+
+    If the &#x27;segment_size&#x27; field of this FDE&#x27;s CIE is non-zero, the
+    address operand is preceded by a segment selector of the given
+    length.
+
+------------------------------------------
+
+Proposal accepted 6/5/2007.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

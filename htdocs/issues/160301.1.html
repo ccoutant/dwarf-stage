@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Explicit import of C++ anonymous namespace</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 160301.1: Explicit import of C++ anonymous namespace</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Paul Robinson</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Paul Robinson</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2016-03-01</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Improvement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>5</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section 3.2.2, pg 50
+(Page 50 of DWARF 4; page 68 in dwarf5.20151019.pdf.)
+
+The C++ standard says that declarations in the &quot;anonymous
+namespace&quot; are implicitly available in the containing scope,
+as if the namespace had a made-up unique name and the containing
+scope had a &quot;using&quot; directive with that name.
+
+This breaks the standard scoping that DWARF assumes about all
+languages. While some consumers will notice that the language
+for the compilation unit is C++, and may implicitly make
+declarations within the anonymous namespace visible outside
+the namespace, DWARF should not assume that ALL consumers will
+do this.  DWARF should recommend that producers emit explicit
+syntax to describe the language-specific scoping behavior.
+
+Section 3.2.2 has a non-normative paragraph that discusses
+the anonymous namespace, which reads as follows:
+
+&quot;The C++ compilation unit specific &quot;unnamed namespace&quot; may be
+represented by a namespace entry with no name attribute in the
+original namespace declaration entry (and therefore no name
+attribute in any namespace extension entry of this namespace).&quot;
+
+I propose adding to the paragraph as follows:
+
+*&quot;C++ states that declarations in the unnamed namespace are
+implicitly available in the containing scope; a producer
+should make this effect explicit with the DW_AT_export_symbols
+attribute, or by using a DW_TAG_imported_module that is a
+sibling of the namespace entry and references it.&quot;*
+
+--
+
+06/21/2016 -- Accepted.  
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Missing link in section relationships</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 200427.1: Missing link in section relationships</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Paul T Robinson</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Ron Brender</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2020-04-27</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Editorial</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted with modification</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>6</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+ISSUE
+
+In Section B.1, pg 274:
+
+1) Figure B.1 &quot;Debug section relationships&quot; is missing an arc from
+.debug_rnglists to .debug_addr; the arc should be there because of a
+couple of DW_RLE entry types that use .debug_addr indexes.
+
+2) Along the same lines, the arc from .debug_loclists to .debug_addr
+and note (o) to the figure mention only two DW_OP expression opcodes,
+there are also a couple of DW_LLE entry types that use .debug_addr
+indexes.
+
+PROPOSED RESOLUTION
+
+The issue statement is correct. To fix things:
+
+1) Add a new link (t) with a new note at the end of page 275:
+
+(t) .debug_rnglists to .debug_addr
+    Some operands of DW_RLE_base_addressx, DW_RLE_startx_endx and
+    DW_RLE_startx_length range list entries are an index into the
+    .debug_addr section.
+
+2) Add the following to Note (o) on page 274:
+
+    Also, some operands of DW_LLE_base_addressx, DW_LLE_startx_endx and
+    DW_LLE_startx_length location list entries are an
+    index into the .debug_addr section.
+ 
+3) Add the new link (t) in Figure B.1 by rearranging the lower right
+corner of the figure. Briefly, the circled A, the (r,s) link and the
+.debug_line_str section are moved up to make room to place the new link.
+This is not shown here but will be available when the next draft of the
+document is available. 
+
+See figure: http://dwarfstd.org/doc/Issue_200427.1_Draft_Figure_B.1.pdf
+
+-- 
+03/16/21 -- Updated
+06/13/21 -- Added link to figure
+06/14/20 -- Accepted with modification: Add text to explain diagram style.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

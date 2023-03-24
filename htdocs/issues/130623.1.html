@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: DW_AT_string_length_bit_size</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 130623.1: DW_AT_string_length_bit_size</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Ron Brender</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Ron Brender</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2013-06-23</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>5</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section 
+
+Background
+----------
+
+During the development of DWARF V4 we made an effort to regularize
+the allowed uses of DW_AT_byte_size and DW_AT_bit_size so that they
+could be used in all the same places. We stopped short of doing this
+for string types because we were reluctant to make its byte size
+anomaly even worse.
+
+When we adopted 110110.1 as revised, we added a new
+DW_AT_string_length_byte_size
+attribute to specify the size of the string length datum itself, but a
+parallel DW_AT_string_length_bit_size attribute was not included.
+
+Quite honestly I thought we had added DW_AT_string_length_bit_size as well--
+I know I intended to propose we do so to maintain the bit/byte parallelism, but
+maybe I missed that discussion. But I can find no justification for that
+belief in the minutes.
+
+dwarf5.20130622.pdf reflects my flawed recollection--for which I apologize.
+Adopting this proposal will correct that. If this proposal is not adopted, I
+will of course have more work to do...
+
+Proposal Text
+-------------
+
+Change the whole of 5.11 String Type Entries to read as follows:
+
+*A &quot;string&quot; is a sequence of characters that have specific semantics
+and operations that distinguish them from arrays of characters. Fortran is 
+one of the languages that has a string type. Note that &quot;string&quot; in this 
+context refers to a target machine concept, not the class string as used 
+in this document (except for the name attribute).*
+
+A string type is represented by a debugging information entry with the tag
+DW_TAG_string_type. If a name has been given to the string type in the source
+program, then the corresponding string type entry has a DW_AT_name attribute
+whose value is a null-terminated string containing the string type name as it
+appears in the source program.
+
+The string type entry may have a DW_AT_byte_size attribute or
+DW_AT_bit_size attribute, whose value (see Section 2.21 on page 41) is the
+amount of storage needed to hold a value of the string type.
+
+The string type entry may also have a DW_AT_string_length attribute whose
+value is a location description yielding the location where the length
+of the string is stored in the program. If the DW_AT_string_length attribute 
+is not present, the size of the string is assumed to be the amount of storage 
+that is allocated for the string (as specified by the DW_AT_byte_size or 
+DW_AT_bit_size attribute).
+
+The string type entry may also have a DW_AT_string_length_byte_size attribute
+or DW_AT_string_length_bit_size attribute, whose value (see Section 2.21 on
+page 41) is the size of the data to be retrieved from the location
+referenced by the string length attribute. If no (byte or bit) size 
+attribute is present, the size of the data to be retrieved is the same as 
+the size of an address on the target machine.
+
+*Prior to DWARF Version 5, the meaning of a DW_AT_byte_size attribute 
+depends on the presence of the DW_AT_string_length attribute:
+ - If DW_AT_string_length is present, DW_AT_byte_size specifies the size of the
+   length data to be retrieved from the location specified by the
+   DW_AT_string_length attribute.
+ - If DW_AT_string_length is not present, DW_AT_byte_size specifies the amount
+   of storage allocated for objects of the string type.
+In DWARF Version 5, DW_AT_byte_size always specifies the amount of storage
+allocated for objects of the string type.*&quot;
+
+In addition:
+ o add DW_AT_string_length_bit_size to Tables 2.2, Table 7.3 (code 0x6f)
+   and 7.25
+ o add the following to the end of the first paragraph of 2.21:
+           &quot;The DW_AT_string_length_byte_size and DW_AT_string_length_bit_size
+                attributes are similar.&quot;
+
+---
+
+Accepted 8/20/2013.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

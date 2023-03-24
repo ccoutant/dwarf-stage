@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Deprecate the DW_AT_segment attribute</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 220427.1: Deprecate the DW_AT_segment attribute</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Zoran Zaric</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Zoran Zaric</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2022-04-27</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted with modifications</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>6</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Various
+
+ Background
+----------------
+
+Memory segmentation was originally implemented by Intel for their x86
+instruction set back in the 1978 as a way to allow programs to address
+more than 64 KB of memory.
+
+DW_AT_segment attribute was originally introduced in DWARF version 2
+as a way to support architectures which addresses are specified as
+offsets in a given segment rather than as a location within single
+flat address space.
+
+An additional support for the memory segmentation model was added in
+DWARF version 5 in a form of a segment selector, to allow segmented
+addresses to be used in all DWARF sections that reference a memory
+address.
+
+However, for the last 19 years, Intel has not exposed this hardware
+feature to the user and it is mostly used implicitly by the instruction
+set or described by other means (TLS).
+
+There is also no other known vendor that currently exposes this feature
+to the users, leaving the memory segment support potentially unneeded.
+
+Additional confirmation to this claim, is the fact that widely used
+producer (clang) and consumers (gdb and lldb) never had a support for
+the DW_AT_segment attribute implemented.
+
+There was the idea to re-purpose the memory segmentation concept to
+describe address spaces of some architectures (for example SIMD/SIMT),
+but the problem is that those two concepts are not similar enough and
+representing address spaces requires a finer level of granularity
+compared to the DIE level that DW_AT_segment attribute prescribes.
+
+Cleaner (and less confusing) approach would be to just remove the
+memory segmentation support from the standard completely, to leave
+room for the new concepts.
+
+To avoid increasing the versions of the affected DWARF section headers,
+the previously introduced segment_selector_size header value is marked
+as reserved with a default value of 0.
+
+It is worth mentioning here that even though the DW_AT_address_class
+attribute was introduced alongside the DW_AT_segment attribute, there
+are existing architectures  (Atmel AVR and FTDI FT32 32-bit for
+example) that are using (or misusing) that attribute to represent address
+space like features. Together with the fact that SIMD/SIMT architectures
+require a similar mechanism too, it would be reasonable to keep the
+attribute as is.
+
+Proposed Change
+------------------------
+
+In section 1.3.2, &quot;Architecture Independence&quot;,  p. 3, line 20, replace
+the first sentence of the first paragraph:
+
+  &quot;DWARF can be used with a wide range of processor architectures,
+   whether byte or word oriented, linear or segmented, with any
+   word or byte size.&quot;
+
+with text:
+
+  &quot;DWARF can be used with a wide range of processor architectures,
+   whether byte or word oriented, with any word or byte size.&quot;
+
+In section 1.3.2, &quot;Architecture Independence&quot;,  p. 3, line 27, replace
+the paragraph:
+
+  &quot;DWARF assumes that memory has individual units (words or bytes)
+   which have unique addresses which are ordered. (Some architectures
+   like the i386 can represent the same physical machine location with
+   different segment and offset pairs. Identifying aliases is an
+   implementation issue.)&quot;
+   
+with text:
+
+  &quot;DWARF assumes that memory has individual units (words or bytes)
+   which have unique addresses which are ordered. (Identifying aliases
+   is an implementation issue.)&quot;
+
+In section 2.2, &quot;Attribute types&quot;, p. 22, remove DW_AT_segment row from
+the table 2.2 &quot;Attribute names&quot;.
+
+In section 2.12, &quot;Segmented Address&quot;, p 48, line 1, change section name
+to &quot;Address Classes&quot;
+
+On the same page, line 2 remove first three paragraphs.
+
+At line 25, remove the Intel 386 example along with the Table 2.7
+&quot;Example address class codes&quot;.
+
+In section 3.3.3, &quot;Subroutine and Entry Point Locations&quot;, p. 78,
+line 27 replace the paragraph:
+
+  &quot;Subroutines and entry points may also have DW_AT_segment and
+   DW_AT_address_class attributes, as appropriate, to specify which
+   segments the code for the subroutine resides in and the addressing
+   mode to be used in calling that subroutine.&quot;
+
+with text:
+
+  &quot;Subroutines and entry points may also have DW_AT_address_class
+   attribute, to specify in which address space the code for the
+   subroutine resides in.&quot;
+
+In section 3.3.8.1, &quot;Abstract Instances&quot;, p. 82, line 21, replace the
+paragraph:
+
+  &quot;For example, the DW_AT_low_pc, DW_AT_high_pc, DW_AT_ranges,
+   DW_AT_entry_pc, DW_AT_location, DW_AT_return_addr, DW_AT_start_scope,
+   and DW_AT_segment attributes typically should be omitted; however,
+   this list is not exhaustive.&quot;
+   
+with text:
+
+  &quot;For example, the DW_AT_low_pc, DW_AT_high_pc, DW_AT_ranges,
+   DW_AT_entry_pc, DW_AT_location, DW_AT_return_addr and
+   DW_AT_start_scope attributes typically should be omitted; however,
+   this list is not exhaustive.&quot;
+
+In section 4.1, &quot;Data Object Entries&quot;, p. 98, line 15, remove the
+paragraph.
+
+In section 5.1.1.2, &quot;Character Encodings&quot;, p. 105, remove the section
+2.12 reference at the end of the table 5.1.
+
+Replace segment_selector_size value description for all section headers
+with text:
+
+  &quot;Reserved to DWARF (must be zero).&quot;
+
+Sections that are impacted by the change are:
+  - 6.1.2, &quot;Lookup by Address&quot;, p. 148, line 7,
+  - 6.2.4, &quot;The Line Number Program Header&quot;, p 154, line 16,
+  - 6.4.1, &quot;Structure of Call Frame Information&quot;, p 175, line 5,
+  - 7.21, &quot;Address Range Table&quot;, p 235, lines 23,
+  - 7.27, &quot;Address Table&quot;, p 241, lines 23,
+  - 7.28, &quot;Range List Table&quot;, p 242. line 16 and
+  - 7.29, &quot;Location List Table&quot;, p 243, line 23.
+
+Similarly, the address_size value description also needs to be changed
+for all section headers. The problem is that the description text
+deviates from a section to section:
+
+  1. In section 6.1.2 &quot;Lookup by Address&quot;, p 148, line 4, replace the
+     paragraph:
+
+       &quot;4. address_size (ubyte)
+           The size of an address in bytes on the target architecture.
+           For segmented addressing, this is the size of the offset
+           portion of the address.&quot;
+
+     with text:
+
+       &quot;4. address_size (ubyte)
+           The size of an address in bytes on the target architecture.&quot;
+         
+  2. In sections:
+         - 6.2.4, &quot;The Line Number Program Header&quot;, p 154, line 10,
+         - 7.21, &quot;Address Range Table&quot;, p 235 lines 20,
+         - 7.27, &quot;Address Table&quot;, p 241, line 20,
+         - 7.28, &quot;Range List Table&quot;, p 242, line 13 and
+         - 7.29, &quot;Location List Table&quot;, p 243, lines 20.
+
+     replace the sentence:
+ 
+       &quot;A 1-byte unsigned integer containing the size in bytes of
+        an address (or offset portion of an address for segmented
+        addressing) on the target system.&quot;
+         
+     with text:
+ 
+       &quot;A 1-byte unsigned integer containing the size in bytes of
+        an address on the target system.&quot;
+
+  3. In sections:
+         - 7.5.1.1, &quot;Full and Partial Compilation Unit Headers&quot;,
+           p 200, line 22,
+         - 7.5.1.2, &quot;Skeleton and Split Compilation Unit Headers&quot;.
+           p 201 line 22 and
+         - 7.5.1.3, &quot;Type Unit Headers&quot;, p 202, lines 21.
+ 
+     replace paragraph:
+ 
+       &quot;4. address_size (ubyte)
+           A 1-byte unsigned integer representing the size in bytes of
+           an address on the target architecture. If the system uses
+           segmented addressing, this value represents the size of the
+           offset portion of an address.&quot;
+
+     with text:
+
+       &quot;4. address_size (ubyte)
+           A 1-byte unsigned integer representing the size in bytes of
+           an address on the target architecture.&quot;
+       
+In section 6.1.2 &quot;Lookup by Address&quot;, p 148, line 10, replace the
+paragraph:
+
+   &quot;This header is followed by a variable number of address range
+    descriptors. Each descriptor is a triple consisting of a segment
+    selector, the beginning address within that segment of a range of
+    text or data covered by some entry owned by the corresponding
+    compilation unit, followed by the non-zero length of that range.
+    A particular set is terminated by an entry consisting of three
+    zeroes. When the segment_selector_size value is zero in the header,
+    the segment selector is omitted so that each descriptor is just a
+    pair, including the terminating entry. By scanning the table, a
+    debugger can quickly decide which compilation unit to look in to
+    find the debugging information for an object that has a given
+    address.&quot;
+   
+with text:
+
+   &quot;This header is followed by a variable number of address range
+    descriptors. Each descriptor is a pair consisting of the beginning
+    address of a range of text or data covered by some entry owned
+    by the corresponding compilation unit, followed by the non-zero
+    length of that range. A particular set is terminated by an entry
+    consisting of two zeroes. By scanning the table, a debugger can
+    quickly decide which compilation unit to look in to find the
+    debugging information for an object that has a given address.&quot;
+
+In section 6.4.1, &quot;Structure of Call Frame Information&quot;, p 176, line 1
+replace paragraph:
+
+   &quot;3. initial_location (segment selector and target address)
+       The address of the first location associated with this table
+       entry. If the segment_selector_size field of this FDE’s CIE is
+       non-zero, the initial location is preceded by a segment selector
+       of the given length.&quot;
+
+with text:
+
+   &quot;3. initial_location (target address)
+       The address of the first location associated with this table
+       entry.&quot;
+
+In section 6.4.2.1, &quot;Row Creation Instructions&quot;, p 177, line 2 replace
+paragraph:
+
+   &quot;1. DW_CFA_set_loc
+       The DW_CFA_set_loc instruction takes a single operand that
+       represents a target address. The required action is to create a
+       new table row using the specified address as the location. All
+       other values in the new row are initially identical to the
+       current row. The new location value is always greater than the
+       current one. If the segment_selector_size field of this FDE’s
+       CIE is non-zero, the initial location is preceded by a segment
+       selector of the given length.&quot;
+
+with text:
+
+   &quot;1. DW_CFA_set_loc
+       The DW_CFA_set_loc instruction takes a single operand that
+       represents a target address. The required action is to create a
+       new table row using the specified address as the location. All
+       other values in the new row are initially identical to the
+       current row. The new location value is always greater than the
+       current one.&quot;
+
+In section 7.5.4, &quot;Attribute Encodings&quot; p 210 remove DW_AT_segment row
+from Table 7.5 &quot;Attribute encodings&quot;.
+ 
+In section 7.21, &quot;Address Range Table&quot;, p 235 line 26 replace paragraph:
+
+   &quot;This header is followed by a series of tuples. Each tuple consists
+    of a segment, an address and a length. The segment selector size is
+    given by the segment_selector_size field of the header; the address
+    and length size are each given by the address_size field of the
+    header. The first tuple following the header in each set begins at
+    an offset that is a multiple of the size of a single tuple (that
+    is, the size of a segment selector plus twice the size of an
+    address). The header is padded, if necessary, to that boundary.
+    Each set of tuples is terminated by a 0 for the segment, a 0 for
+    the address and 0 for the length. If the segment_selector_size
+    field in the header is zero, the segment selectors are omitted from
+    all tuples, including the terminating tuple.&quot;
+   
+with text:
+
+   &quot;This header is followed by a series of pairs. Each pair consists of
+    an address and a length. The address and length size are each given
+    by the address_size field of the header. The first pair following
+    the header in each set begins at an offset that is a multiple of
+    the size of a single pair (that is twice the size of an address).
+    The header is padded, if necessary, to that boundary. Each set of
+    pairs is terminated by a 0 for the address and 0 for the length.&quot;
+
+In section 7.27, &quot;Address Table&quot;, p 241, line 26 replace paragraph:
+
+   &quot;This header is followed by a series of segment/address pairs. The
+    segment size is given by the segment_selector_size field of the
+    header, and the address size is given by the address_size field of
+    the header. If the segment_selector_size field in the header is
+    zero, the entries consist only of an addresses.&quot;
+
+with text:
+
+   &quot;This header is followed by a series of addresses where the address
+    size is given by the address_size field of the header.&quot;
+ 
+In section 7.28, &quot;Range List Table&quot; (page 243) line 1 remove paragraph:
+
+   &quot;The segment size is given by the segment_selector_size field of the
+    header, and the address size is given by the address_size field of
+    the header. If the segment_selector_size field in the header is
+    zero, the segment selector is omitted from the range list entries.&quot;
+
+In section 7.29, &quot;Location List Table&quot;, p 244, line 7 remove paragraph:
+
+   &quot;The segment size is given by the segment_selector_size field of the
+    header, and the address size is given by the address_size field of
+    the header. If the segment_selector_size field in the header is
+    zero, the segment selector is omitted from location list entries.&quot;
+
+In section 7.32, &quot;Type Signature Computation&quot;, p 247, remove
+DW_AT_segment attribute from Table 7.32 &quot;Attributes used in type
+signature computation&quot;
+ 
+In section Appendix A, remove all instances of DW_AT_segment attribute
+from Table &quot;Attribute by Tag&quot;
+ 
+In section Appendix D remove segment size information from Table D.5
+&quot;Call frame information example: common information entry encoding&quot;.
+ 
+In section Index, remove all mention of terms:
+ - segment,
+ - segmented,
+ - DW_AT_segment and
+ - segment_selector_size
+
+--
+2022-07-18:  Revised.
+2022-07-25:  Accepted with modifications: 
+   Editorial changes to &quot;reserved&quot; wording.
+   Reserve segment selector size field. 
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

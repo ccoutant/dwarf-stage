@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Allow DW_AT_type with DW_TAG_string_type</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 121221.1: Allow DW_AT_type with DW_TAG_string_type</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Kendrick Wong</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Kendrick Wong</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2012-12-21</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>5</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section 5.9, pg 98
+The purpose of this write up is to replace the existing proposal 120213.1 by Tobias Burnus: 
+&quot;Allow DW_AT_type with DW_TAG_string_type&quot;
+
+Section 5.9 String Type Entries, pg 98
+
+The DWARF spec currently does not allow to specify the type (DW_AT_type) for strings (DW_TAG_string_type).
+
+That&#x27;s a problem for Fortran, where different string types can exists. For instance, GCC&#x27;s gfortran [since 
+4.4] has a kind=1 (one byte) and a kind=4 (four bytes, for UCS-4) character type. The NAG compiler (nagfor 
+5.3) supports besides the one-byte type also UCS-2, UCS-4, and Shift-JIS.
+
+Note: UCS-4 is an (optional) feature of the Fortran 2003 standard (ISO/IEC 1539-1:2004; see also Fortran 
+2008, ISO/IEC 1539-1:2010).
+
+[Information from John Bishop]
+From the document with this title page:
+
+   WD 1539-1 J3/10-007r1 (F2008 Working Document) 24th November 2010 16:43
+
+Section 4.4.3 Character type; subsection 4.4.3.1 Character sets, paragraphy 3:
+
+[quote]
+The character set specified in ISO/IEC 646:1991 (International Reference Version) is referred to as the 
+ASCII character set and its corresponding representation method is ASCII character kind.  The character 
+set UCS-4 as specified in ISO/IEC 10646 is referred to as the ISO 10646 character set and its corresponding
+method is the ISO 10646 character kind.
+[end quote]
+
+Section 4.4.3.2 says that there is no standard list of character &quot;kinds&quot; but every kind provided by the 
+&quot;processor&quot; (the combined hardware/software system from a vendor) must have a blank character.
+
+Section 13.7.145 (&quot;selected_char_kind(name)&quot;) says that the defined kinds are DEFAULT, ASCII and ISO_10646 
+and that processors may support other kinds.
+[end Information from John Bishop]
+
+Proposal:
+
+A string type entry may have a DW_AT_type attribute describing how each character is encoded and is to be 
+interepreted.  The value of this attribute is a base type entry represented by a debugging information entry 
+with the tag DW_TAG_base_type.  If the attribute is absent, then the character is encoded using the system 
+default.
+
+Add new encoding value:
+DW_ATE_UCS      Unicode character (fixed size per character)
+DW_ATE_ascii    ASCII character
+
+The DW_ATE_UCS encoding is intended for Unicode character encoding (see ISO/IEC 10646).  For example, UCS-4
+(ISO 10646 character set) is represented by a base type entry with an encoding attribute whose value is 
+DW_ATE_UCS and a byte size attribute whose value is 4.
+
+The DW_ATE_ascii encoding is intended for single byte ASCII character encoding (see ISO/IEC 646:1991, ASCII 
+character set).
+
+Fortran 2003 example:
+
+              program character_kind
+                use iso_fortran_env
+                implicit none
+                integer, parameter :: ascii = selected_char_kind (&quot;ascii&quot;)
+                integer, parameter :: ucs4  = selected_char_kind (&#x27;ISO_10646&#x27;)
+              
+                character(kind=ascii, len=26) :: alphabet
+                character(kind=ucs4,  len=30) :: hello_world
+              
+                alphabet = ascii_&quot;abcdefghijklmnopqrstuvwxyz&quot;
+                hello_world = ucs4_&#x27;Hello World and Ni Hao -- &#x27; &amp;
+                              // char (int (z&#x27;4F60&#x27;), ucs4)     &amp;
+                              // char (int (z&#x27;597D&#x27;), ucs4)
+              
+                write (*,*) alphabet
+              
+                open (output_unit, encoding=&#x27;UTF-8&#x27;)
+                write (*,*) trim (hello_world)
+              end program character_kind
+
+Proposed DWARF output:
+$1: DW_TAG_base_type
+      DW_AT_encoding (DW_ATE_ascii)
+      
+$2: DW_TAG_base_type
+      DW_AT_encoding (DW_ATE_UCS)
+      DW_AT_byte_size (4)
+      
+$3: DW_TAG_string_type
+      DW_AT_type ($1)
+      DW_AT_string_length ( ... )
+      DW_AT_string_length_byte_size ( ... )
+      DW_AT_data_location ( ... )
+      
+$4: DW_TAG_string_type
+      DW_AT_type ($2)
+      DW_AT_string_length ( ... )
+      DW_AT_string_length_byte_size ( ... )
+      DW_AT_data_location ( ... )
+
+$5: DW_TAG_variable
+      DW_AT_name (alphabet)
+      DW_AT_type ($3)
+      DW_AT_location ( ... )
+      
+$6: DW_TAG_variable
+      DW_AT_name (hello_world)
+      DW_AT_type ($4)
+      DW_AT_location ( ... )
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

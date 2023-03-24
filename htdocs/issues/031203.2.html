@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: UPC Language Code</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 031203.2: UPC Language Code</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>James Cownie</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>James Cownie</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2003-12-03</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Extension</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Closed - See 050224.1</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>3</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+See  http://upc.gwu.edu/
+
+UPC is a new language based on C.
+
+(Documentation then the UPC Quick reference card may be a good place
+to start, or maybe &quot;Getting started with UPC&quot;. I wouldn&#x27;t start with
+the formal spec !)
+
+
+&gt; It seems that UPC is really a language extension and not a
+&gt; whole new language, or a &quot;level&quot; of a standard language.
+
+Not really.
+
+Although the initial description for users can be condensed into a
+small space the full specification remains quite large, and the
+implementation is non-trivial (talk to Larry Meadows if you want some
+in Sun experience).
+
+The current UPC standard is extensions ISO-C. I cannot imagine anyone
+now starting a UPC implementation which was UPC extensions to an older
+C dialect.
+
+&gt; Perhaps you want to know, before reading the rest of the tags,
+&gt; whether the CU might contain UPC extensions.
+
+But surely you know this from the fact that the language is DW_LANG_Upc.
+
+&gt; If that&#x27;s the case, it might be better to have a &quot;language_extensions&quot;
+&gt; tag, which can contain child tags naming specific extensions.
+&gt;
+&gt; But is that really necessary?
+
+I don&#x27;t believe so. IMO UPC is best treated as a different language
+from C. And, in any case DWARF has already taken the view that the
+different dialects of C you cited (which are _more_ similar than C and
+UPC) are best treated as different languages, so there seems little
+reason to change that model on account of UPC.
+
+
+PROPOSAL:
+
+add the new language code
+   DW_LANG_Upc   0x12 or whatever is the next value in the table (sec 7.12).
+
+=====================================================
+
+5/17/2005:  Closed.  This issue will be addressed with 050224.1.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

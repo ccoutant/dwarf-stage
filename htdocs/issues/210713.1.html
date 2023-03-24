@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Fix "file 0"</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 210713.1: Fix "file 0"</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Paul Robinson</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Paul Robinson</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2021-07-13</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Improvement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>6</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section 2.14, 6.2.2, 6.2.4, pg various
+BACKGROUND
+
+In DWARF v5, we changed the line-table header so that the directory and
+file tables started with index 0 (not 1) and specifically required that
+directory 0 match the CU&#x27;s DW_AT_comp_dir, and file 0 describe the main
+source file, matching the CU&#x27;s DW_AT_name.  Thus, file 0 necessarily 
+points to directory 0, and the combination matches DW_AT_comp_dir + 
+DW_AT_name.
+
+However, we missed making two related changes.  First, the initial state
+for the &quot;file&quot; register of the line-table state machine remained 1, even
+though it would make more sense for it to be 0; second, the description
+of DW_AT_decl_file said that 0 meant &quot;no source file.&quot;  (Note that prior
+DWARF versions didn&#x27;t specify any particular file number for the main
+source file, and presumably we picked 1 because what else would you do.)
+
+While it is technically possible to conform to both the line table&#x27;s
+requirement that file 0 mean the primary source file, and DW_AT_decl_file
+not using file 0 (by duplicating an entry for the primary source file),
+this is wasteful and inconsistent.
+
+Also, non-normative text introduced in DWARF v5 suggested that file 0
+had always meant the primary source file; that&#x27;s actually not true.
+
+This proposal fixes all the above problems.
+
+SPECIFIC CHANGES
+
+Section 2.14 Declaration Coordinates
+
+- p.50 lines 20-21, delete the sentence starting &quot;The value 0...&quot;
+
+Section 6.2.2 State Machine Registers
+
+- p.151, in the description of the &quot;file&quot; register, add:
+
+    Files are numbered beginning at 0.
+
+Table 6.4 Line number program initial state
+
+- change the initial value for &quot;file&quot; from 1 to 0
+
+Section 6.2.4 The Line Number Program Header
+
+- p.158, lines 4-8, edit the non-normative paragraph starting &quot;Prior to
+  DWARF Version 5, ...&quot; so that it reads as follows.
+
+*Prior to DWARF Version 5, the current compilation file name did not have
+a specific entry in the file_names field.  Starting in DWARF Version 5,
+the current compilation file name has index 0.*
+--
+2022-07-25:  Accepted.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: DW_TAG_refine_type add additional attributes to type</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 121112.1: DW_TAG_refine_type add additional attributes to type</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Kendrick Wong</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Kendrick Wong</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2012-11-12</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Withdrawn</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>5</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section 5 - TYPE ENTRIES, pg 104
+Applicable to Section 5 - TYPE ENTRIES
+(The next logical subsection is 5.16 - Type Refining Entries)
+Overview:
+Adding DW_TAG_refine_type to provide additional attributes to a type without having its base 
+type characteristics duplicated.
+
+Background:
+Some languages, such as Fortran, provide types whose values may be dynamically allocated or
+associated with a variable under explicit program control. Currently, these attributes, such 
+as DW_AT_allocated and DW_AT_associated are placed on the type DIE.  This approach forces 
+creation of duplicate types for a single Fortran type.
+
+Consider this Fortran example:
+type :: dt (l)
+  integer, len :: l
+  integer :: arr(l)
+end type
+
+integer :: n = 4
+contains
+
+subroutine s()
+type (dt(n))               :: t1
+type (dt(n)), pointer      :: t2
+type (dt(n)), allocatable  :: t3
+end subroutine
+
+end
+
+t1, t2 and t3 all share the same type &#x27;dt&#x27;.  The current DWARF spec places all
+descriptor related attributes (DW_AT_data_location, DW_AT_associated and DW_AT_allocated)
+on the DW_TAG_structure_type DIE for &#x27;dt&#x27;.  Doing so would mean we have to generate 3 
+different DW_TAG_structure_type DIEs to describe this program.
+
+If we place the descriptor related attributes on the variable, then the descriptor
+related attributes would have to be duplicated for each variable of the same type. i.e.
+  type (dt(n)), allocatable  :: t3, t4
+would result in both t3 and t4 having the same dynamic type attributes.
+
+Proposal:
+
+New subsection to Section 5, tentatively: 5.16 &quot;Type Refining Entries&quot;
+
+&lt;I&gt;
+Some type attributes are tied more closely to the variable than the type itself.  For
+example, Fortran dynamic type properties (i.e. DW_AT_allocated and DW_AT_associated) 
+can be different for each variable of the same type.  In such cases, the dynamic type 
+properties can be attached to a type refining entry.
+&lt;/I&gt;
+
+A type refining entry is represented by a debugging information entry with the tag 
+DW_TAG_refine_type. The type refining entry has a DW_AT_type attribute to describe 
+the type of object, whose additional attributes applies to.  Any other attributes 
+and/or children debugging information entries on the type refining entry would 
+behave identically as if the attributes and/or children DIEs are attached to the 
+referencing type entry.
+
+The new DWARF for the example program would look like:
+
+$11: DW_TAG_structure_type
+      DW_AT_name (dt)
+$12:  DW_TAG_member ...
+
+$13: DW_TAG_refine_type            ! plain version
+      DW_AT_data_location (...)
+      DW_AT_type ($11)
+
+$14: DW_TAG_refine_type
+      DW_AT_data_location (...)
+      DW_AT_associated (...)       ! &#x27;pointer&#x27;
+      DW_AT_type ($11)
+
+$15: DW_TAG_refine_type
+      DW_AT_data_location (...)
+      DW_AT_allocated (...)        ! &#x27;allocatable&#x27;
+      DW_AT_type ($11)
+
+$16: DW_TAG_variable
+      DW_AT_name (t1)
+      DW_AT_type ($13)
+      DW_AT_location (...)
+$17: DW_TAG_variable
+      DW_AT_name (t2)
+      DW_AT_type ($14)
+      DW_AT_location (...)
+$18: DW_TAG_variable
+      DW_AT_name (t3)
+      DW_AT_type ($15)
+      DW_AT_location (...)
+
+---
+This issue was withdrawn and replaced by 130318.1.
+See http://www.dwarfstd.org/issues/130318.1..html
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

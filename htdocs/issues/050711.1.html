@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Specification of compiled units which are not 'named disk files'</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 050711.1: Specification of compiled units which are not 'named disk files'</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Matthew Gretton-Dann</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Matthew Gretton-Dann</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2005-07-11</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Error</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>3</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Section: 6.3.2
+Page: 100
+
+[This follows on from a discussion earlier this year on the dwarf-discuss 
+mailing list entitled: Referring to the stdin &#x27;file&#x27; in .debug_macinfo 
+sections.  The first email in the discussion was sent by me on Thu, 21 Apr 
+2005.]
+
+Section 6.3.2 of Draft 9 of the DWARF Standard says:
+
+..If the base source file for a compilation is submitted to the compiler via 
+some means other than via a named disk file (e.g. via the standard input 
+stream on a UNIX system) then the compiler should still produce ... the file 
+name indicated (indirectly) by the DW_MACINFO_start_file entry of the pair 
+should designate a line number information file name entry consisting of a 
+null string.
+
+Unfortuantely a null string is also taken to terminate the list of files in 
+a .debug_line section (see 6.2.4 item 11).  And so implementations that follow
+the above can cause incorrect .debug_line sections to be produced.
+
+PROPOSAL (as suggested by Michael Eager)
+
+change the end of the first paragraph of Section 6.3.2 to read:
+
+..entry of the pair should designate a line number information file name 
+entry consisting of a filename &#x27;-&#x27;.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

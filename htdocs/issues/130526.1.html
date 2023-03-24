@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Type Unit Merge</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 130526.1: Type Unit Merge</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Eric Christopher</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Eric Christopher</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2013-05-26</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Accepted with modifications</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>5</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Introduction
+----------------
+
+The type unit DIEs from DWARF4 were a great addition that allowed easy
+merging and locating of types in the type section. However, type units
+have made accessing data in a unified manner more difficult. There are
+now two sections with offsets, or multiple types of data (type unit,
+data4/8, ref4/8, sec_offset) that must be used to access an individual
+DIE in the debug info. This isn&#x27;t optimal for space or speed of access
+as either we need to have multiple abbreviations or use flags to
+distinguish based on the type of data we expect to have rather than
+going straight to the DIE we&#x27;re looking for.
+
+
+Overview
+----------------
+
+This proposal merges the type units into the .debug_info section and
+extends the existing headers to distinguish between the two as we
+iterate through the units in the section.
+
+
+Changes to the DWARF Specification
+-------------------------------------------------
+
+Remove references to .debug_types from the following locations:
+
+Section 2.1, last paragraph.
+Section 2.5.1.5, bullet item 4.
+Section 6, first paragraph.
+Section 6.1.2, bullet item 3.
+Section 7.2.2, first paragraph.
+Section 7.4, bullet item 2.
+Section 7.5.3, second paragraph.
+Section 7.25, first paragraph.
+Appendix B, Figure 43.
+Appendix F, second paragraph, Figure 97, and third bullet item under Notes.
+
+Section 7.5 (Format of Debugging Information)
+
+Replace with the following:
+
+For each compilation unit compiled with a DWARF producer, a
+contribution is made to the .debug_info section of the object file.
+Each such contribution consists of a compilation unit header (see
+Section 7.5.1.1) followed by a single DW_TAG_compile_unit or
+DW_TAG_partial_unit debugging information entry, together with its
+children.
+
+For each type defined in a compilation unit a separate contribution
+may be made to the .debug_info section instead of a standard
+contribution (see Section 2). Each separate contribution consists of a
+type unit header (see Section 7.5.1.2) followed by a DW_TAG_type_unit
+entry, together with its children.
+
+Each debugging information entry begins with a code that represents an
+entry in a separate abbreviations table. This code is followed
+directly by a series of attribute values.
+
+The appropriate entry in the abbreviations table guides the
+interpretation of the information contained directly in the
+.debug_info section.
+
+Multiple debugging information entries may share the same abbreviation
+table entry. Each compilation unit is associated with a particular
+abbreviation table, but multiple compilation units may share the same
+table.
+
+
+Section 7.5.1.1 (Compilation Unit Header)
+
+In bullet item 2, change &quot;The value in this field is 4&quot; to &quot;The value
+in this field is 5.&quot;
+
+Between bullet items 2 and 3, add the following new field:
+
+3.    unit_type (ubyte)
+The value 1, identifying this unit as a compilation unit.
+
+and renumber the following accordingly.
+
+Section 7.5.1.2 (Type Unit Header)
+
+In the first paragraph, replace &quot;within the .debug_types section&quot; with
+&quot;within the .debug_types or .debug_info sections&quot;
+
+In bullet item 2, change &quot;The value in this field is 4&quot; to &quot;The value
+in this field is 5.&quot;
+
+Between bullet items 2 and 3, add the following new field:
+
+3.    unit_type (ubyte)
+The value 2, identifying this unit as a type unit.
+
+(Renumber the following bullets as necessary.)
+
+
+Appendix E
+
+Replace the first three paragraphs of Section E.2 (Using Type Units)
+with the following:
+
+A large portion of debug information is type information, and in a
+typical compilation environment, many types are duplicated many times.
+One method of controlling the amount of duplication is separating each
+type into a separate COMDAT section and arranging for the linker to
+recognize and eliminate duplicates at the individual type level.
+
+Using this technique, each substantial type definition is placed in
+its own individual section, while the remainder of the DWARF
+information (non-type information, incomplete type declarations, and
+definitions of trivial types) is placed in the usual debug information
+section. In a typical implementation, the relocatable object file may
+contain one of each of these debug sections:
+
+ .debug_abbrev
+ .debug_info
+ .debug_line
+
+and any number of additional COMDAT .debug_info sections containing type units.
+
+As discussed in the previous section (Section E.1), many linkers today
+support the concept of a COMDAT group or linkonce section. The general
+idea is that a &quot;key&quot; can be attached to a section or a group of
+sections, and the linker will include only one copy of a section group
+(or individual section) for any given key. For type unit sections, the
+key is the type signature formed from the algorithm given in Section
+7.27.
+
+--
+
+Revised 1/20/2014.
+Accepted 2/25/2014 with following modifications:
+   Values for unit_type:
+   DW_UT_compile      1     ! For DW_TAG_compile_unit
+   DW_UT_type         2     ! For DW_RAG_type_unit
+   DW_UT_partial code 3     ! For DW_TAG_partial_unit
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

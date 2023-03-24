@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: DWARF-embedded source for online-compiled programs</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 161018.1: DWARF-embedded source for online-compiled programs</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Simon Brand</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Tony Tye</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2016-10-18</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Enhancement</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Duplicate</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>6</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<p>Programming models such as OpenCL can often have source generated at runtime,
+which is compiled online, with its output not written to file. This raises an
+issue for the compiler: in the generated DWARF, what should it put as the file
+name of the compile unit and associated line table information?</p>
+<p>Common solutions to this problem include generating some temporary source file
+name and having a contract with the debugger to get the source somehow and write
+it out to that file. Since OpenCL and friends generally have quite small source
+files, it's quite reasonable to embed the entire source in the binary, then have
+the debugger look in a known section or address to extract the source. If there
+was a way to express this in DWARF, then runtime-generated source files could 
+work without an additional contract between the compiler and debugger. This is
+particularly important when dealing with platforms where the filesystem is not 
+writable, which is a common situation in mobile computing.</p>
+<p>Here is a proposal for embedding the source file in the DWARF string tables and
+referencing it from the compile unit DIE and line table. This proposal has been
+discussed in the Dwarf-Discuss thread entitled "DWARF and online-compiled programs".</p>
+<h2>Changes to compile unit sections:</h2>
+<p>I added a DW_AT_source attribute, which is a string attribute identifying the 
+source code. The intention is for implementations to use DW_FORM_strp so that 
+the string is held in the .debug_str section and referenced from both the 
+compile unit DIE and line table.</p>
+<p>Section 3.1.1:</p>
+<p>Replace bullet 2 with this:</p>
+<blockquote>
+<p>A DW_AT_name or DW_AT_source attribute identifying the primary source from 
+which the compilation unit was derived. If a DW_AT_name attribute is used, 
+its value is a null-terminated string containing the full or relative path 
+name of the source file. If a DW_AT_source attribute is used, its value is 
+a null-terminated string containing the full contents of the source code 
+from which the compilation unit was derived is stored. The source code 
+string is UTF-8 encoded and encodes line endings with <code>\n</code>.</p>
+</blockquote>
+<p>Figure 2:</p>
+<p>Add DW_AT_source, which identifies "Embedded source code".</p>
+<p>Figure 20:</p>
+<p>Add DW_AT_source, whose class is "string"</p>
+<p>Figure 42:</p>
+<p>Add DW_AT_source to DW_TAG_compile_unit and DW_TAG_partial_unit entries.</p>
+<h2>Changes to line table sections:</h2>
+<p>I have based my modifications off of issue 140724.1. I don't know if this 
+has since been modified, so there may be some inconsistencies.</p>
+<p>These changes are a bit more complex, as there is currently the assumption 
+that a given .debug_line section will only have a single file_name_entry_format.
+This would not support having a mix of usual source files and source-in-memory
+in the same program.</p>
+<p>One solution would be to add the concept of a file name entry set, of which 
+there can be more than one in a given header, and each can have its own 
+file_name_entry_format. The header would contain a field specifying the 
+number of file_name_entry_sets, then fields 17-21 would be repeated for 
+each set. Another possibility would be to encode the sets in the same 
+file_name_entry_format and file_names fields, but specify the sizes of 
+each set. This is not quite as clear, but it seems desirable to avoid 
+repeating the fields. I've sketched out the second option below.</p>
+<pre><code>Field  Field Name                             Value(s)
+Number
+1        Same as in Version 4                 ...
+2        version                              5
+3        Not present in Version 4  -
+4        Not present in Version 4  -
+5-12   Same as in Version 4                   ...
+13      directory_entry_format_count          1
+14      directory_entry_format                DW_LNCT_path, DW_FORM_string
+15      directories_count                     &lt;n+1&gt;
+16      directories                           &lt;n+1&gt;*&lt;null terminated string&gt;
+17      file_name_entry_set_count             2
+18      file_name_entry_format_set_counts     4,2
+19      file_name_entry_format                DW_LNCT_path, DW_FORM_string,
+                                              DW_LNCT_directory_index, DW_FORM_udata,
+                                              DW_LNCT_timestamp, DW_FORM_udata,
+                                              DW_LNCT_size, DW_FORM_udata,
+                                              DW_LNCT_source, DW_FORM_strp,
+                                              DW_LNCT_size, DW_FORM_udata
+
+20      file_name_set_count                   &lt;m&gt;, &lt;n&gt;
+21      file_names                            &lt;m&gt;*{&lt;null terminated string&gt;,
+                                              &lt;index&gt;, &lt;timestamp&gt;, &lt;size&gt;},
+                                              &lt;n&gt;*{&lt;source offset&gt;, &lt;size&gt;}
+</code></pre>
+<p>Section 6.2.4:</p>
+<p>Add bullets after "16. directories"</p>
+<pre><code>17. file_name_entry_set_count (ubyte)
+    A count of the number of file name entry sets that occur in the following 
+    fields. If this field is zero, then the file_name_entry_format_set_sizes 
+    field (see below) must also be zero.
+
+18. file_name_entry_format_set_counts (sequence of ubytes)
+    A sequence of counts of the number of entry formats for each file name 
+    entry set.
+</code></pre>
+<p>Section 6.2.4.1:</p>
+<p>Add bullet after "5. DW_LNCT_MD5"</p>
+<pre><code>6. DW_LNCT_source
+   The component is an offset into the .debug_str section where a 
+   null-terminated string contains the source code from which the 
+   compilation unit was derived. The string is UTF-8 encoded and encodes 
+   line endings using '\n'. Only one of DW_LNCT_path and DW_LNCT_source 
+   will be specified for a given file_name_entry_format. This content 
+   code is paired with the form DW_FORM_strp.
+</code></pre>
+<p>Append paragraph to bullet 1:</p>
+<blockquote>
+<p>Only one of DW_LNCT_path and DW_LNCT_source will be specified for a 
+given file_name_entry_format.</p>
+</blockquote>
+<p>Add paragraph after the first paragraph of bullet 2:</p>
+<blockquote>
+<p>The index is 0 if the source is identified by a memory location.</p>
+</blockquote>
+<p>Table 7.25:</p>
+<p>Add DW_LNCT_source 0x6 to the table</p>
+<p>The description for DW_LNE_define_file will also need updating with 
+similar text.</p>
+<hr />
+<p>2021-08-17:  Duplicate.  See Issue <a href="180201.1.html">180201.1</a>.</p>
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

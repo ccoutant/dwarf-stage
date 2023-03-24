@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Separate compilation units</title>
+  <link rel="stylesheet" href="../../htdocs/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../../htdocs/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../../htdocs/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 030814.1: Separate compilation units</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Chris Quenelle</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>None</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2003-08-14</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Clarification</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Closed - no change</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>3</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<pre class="proposal">
+Chris Quenelle started the discussion with a question.
+
+[ A very long thread is skipped here with various questions asked
+and answered. I *think* this is the extraction of a possible
+document change, or at least a hint of one. -- David Anderson  
+Contributors to the discussion:
+Chris Quenelle
+Daniel Jacobowitz
+Michael Eager
+David Anderson
+Ron Brender
+]
+
+
+Chris Quenelle
+&gt; It seems that with the addition of the DW_TAG_partial_unit tag, the
+&gt; term &quot;compilation unit&quot; becomes a little ambiguous (at least to me).
+&gt; Does &quot;compilation unit&quot; still refer to any block of data in the
+&gt; .debug_info section, that has CU-header?  (I think of these as &quot;CU-blocks&quot;
+&gt; What term do I use to describe the connected tree of dies that
+&gt; originates inside one DW_TAG_compile_unit and spans several CU-blocks?
+&gt; (I think of this as &quot;the information for an object file (.o file)&quot;)
+
+Ron Brender
+|Unfortunately there is a awkward vocabulary problem here. At the time we
+|introduced DW_TAG_partial_unit we debated whether the term &quot;compilation
+|unit&quot; should include partial units or not. In favor of being inclusive
+|is the fact that something like 90% of the statements throughout that DWARF
+|spec that refer to &quot;compilation units&quot; are true of both DW_TAG_compile_unit
+|and DW_TAG_partial_unit. If compilation unit was not inclusive, then
+|we would need to add &quot;and partial units&quot; in lots of places. So we went
+|with the inclusive concept. In retrospect that may have been the wrong
+|decision. We should probably revisit that choice at the next opportunity.
+|(Note: this is not a substantive issue, &quot;merely&quot; one of presentation.)
+
+&gt;&gt; In this paragraph, it&#x27;s not clear what &quot;ordinary compilation unit&quot;
+&gt;&gt; means.
+&gt;
+&gt;An &quot;ordinary compilation unit&quot; would be one which contained descriptions
+&gt;of all entities from it&#x27;s source or include files, without using any of
+&gt;the space compression techniques in Appendix E.
+
+|The complaint about the undefined phrase and the suggested definition
+|are both right on. Perhaps we can work that definition into the document...
+
+PROPOSAL: none at this time
+
+--------------------------------
+
+Closed without changes to standard.  If there is a specific proposal, 
+submission is invited.
+</pre>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="index.html">Home</a></li>
+	<li>DWARF Standards
+	<ul>
+		<li><a href="../../htdocs/download.html">Download</a></li>
+		<li><a href="../../htdocs/languages.html">Current Language Codes</a></li>
+	</ul>
+	</li>
+	<li>Public Comment
+	<ul>
+		<li><a href="../../htdocs/comment.html">Submit a Comment</a></li>
+		<li><a href="../../htdocs/submissions.html">Submission Guidelines</a></li>
+		<li><a href="../../htdocs/issues.html">Issues</a></li>
+	</ul>
+	</li>
+	<li>About the Committee
+	<ul>
+		<li><a href="../../htdocs/members.html">Members</a></li>
+		<li><a href="../../htdocs/bylaws.html">Bylaws</a></li>
+		<li><a href="../../htdocs/code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../../htdocs/member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../../htdocs/procedures.html">Committee Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>
