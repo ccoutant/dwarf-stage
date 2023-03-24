@@ -37,7 +37,7 @@ for f in [source_file, dest_dir, template_file]:
         sys.exit(1)
 
 vars = {
-    'root': os.path.relpath(root_dir, source_dir),
+    'root': os.path.relpath(root_dir, dest_dir),
     }
 
 with open(source_file, 'r', encoding="utf-8") as f:
