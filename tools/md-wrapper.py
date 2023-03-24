@@ -5,16 +5,20 @@ import sys
 import re
 import getopt
 import markdown
+import html
 
+is_proposal = False
 root_dir = ""
 template_file = ""
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "r:t:")
+    opts, args = getopt.getopt(sys.argv[1:], "pr:t:")
 except getopt.GetoptError as err:
     sys.stderr.write(err + "\n")
     sys.exit(2)
 for o, a in opts:
+    if o == "-p":
+        is_proposal = True
     if o == "-r":
         root_dir = a
     elif o == "-t":
@@ -32,23 +36,27 @@ for f in [source_file, dest_dir, template_file]:
         sys.stderr.write("error: %s does not exist\n" % f)
         sys.exit(1)
 
+vars = {
+    'root': os.path.relpath(root_dir, source_dir),
+    }
+
 with open(source_file, 'r', encoding="utf-8") as f:
+    while True:
+        l = f.readline().strip()
+        if not l:
+            break
+        m = re.match(r"([^:]+):\s*(.*)", l)
+        if m:
+            vars[m.group(1).lower()] = m.group(2)
     text = f.read()
 
 with open(template_file, 'r', encoding="utf-8") as f:
     tmpl = f.read()
 
-md = markdown.Markdown(extensions = ['tables', 'meta'])
-
-html = md.convert(text)
-
-vars = {
-    'root': os.path.relpath(root_dir, source_dir),
-    'content': html
-    }
-
-for v in md.Meta:
-    vars[v] = md.Meta[v][0]
+if is_proposal and not "markdown" in vars:
+    vars["content"] = '<pre class=\"proposal\">\n' + html.escape(text) + "</pre>\n"
+else:
+    vars["content"] = markdown.markdown(text, extensions = ['tables'])
 
 # Substitution function for replacing template variables.
 # Treats "{{@filename}}" as an include.

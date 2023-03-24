@@ -43,7 +43,7 @@ echo "Generating issue pages..."
 for f in $SRCDIR/issues/*.md
 do
   b=$(basename "$f" ".md")
-  $TOOLSDIR/md-wrapper.py -r "$DESTDIR" -t "$ISSUE_TEMPLATE" "$f" "$DESTDIR/issues/$b.html"
+  $TOOLSDIR/md-wrapper.py -p -r "$DESTDIR" -t "$ISSUE_TEMPLATE" "$f" "$DESTDIR/issues/$b.html"
 done
 
 # Build the issue indexes
