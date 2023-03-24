@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{title}}</title>
+  <link rel="stylesheet" href="{{root}}/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="{{root}}/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="{{root}}/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+<h1>{{ title }}</h1>
+{{ content }}
+
+<p>Status explanations:</p>
+<ul>
+<li><strong>Open:</strong>  The issue is open, and is being discussed or is pending evaluation.</li>
+<li><strong>Incomplete:</strong>  The issue is open, but is awaiting revision by its author or its champion.</li>
+<li><strong>Accepted:</strong>  The issue was evaluated and the proposal was accepted without change.</li>
+<li><strong>Accepted pending revision:</strong>  The issue was evaluated and the proposal provisionally accepted, pending submission of revised wording.</li>
+<li><strong>Accepted with modifications:</strong>  The issue was evaluated and the proposal was accepted with modifications or a substitute proposal was accepted.  </li>
+<li><strong>Closed:</strong>  The issue was closed without modification to the standard.</li>
+<li><strong>Duplicate:</strong>  The issue is a duplicate of another issue.</li>
+<li><strong>Deferred:</strong>  The issue will be reconsidered at a later time.</li>
+<li><strong>Rejected:</strong>  The issue was evaluated but the proposal was not accepted.</li>
+<li><strong>Withdrawn:</strong>  The issue was withdrawn by its author.</li>
+<li><strong>Lang code assigned:</strong>  The issue was a request for a new language code, which has been assigned.</li>
+</ul>
+<p>A detailed description of the resolution of each issue is listed at the bottom of each resolved issue.</p>
+
+<p>See also:</p>
+<ul>
+<li><a href="issues-v3.html">Issues closed in DWARF Version 3</a></li>
+<li><a href="issues-v4.html">Issues closed in DWARF Version 4</a></li>
+<li><a href="issues-v5.html">Issues closed in DWARF Version 5</a></li>
+</ul>
+
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+{{ @nav.html }}
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+{{ @footer.html }}
+  </div> <!-- footer -->
+</body>
+</html>

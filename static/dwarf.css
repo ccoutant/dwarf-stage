@@ -1,0 +1,191 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+:root {
+  --body-font: "Open Sans", sans-serif;
+  --code-font: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+  --header-color: #0000ff;
+  --code-color: #2000A0;
+  --table-border-color: #d8d8d8;
+  --small-screen-nav-background-color: #f0f0f0;
+  --footer-background-color: white;
+  --footer-text-color: #383838;
+  --footer-border-color: #d8d8d8;
+}
+
+body, div, h1, h2, h3, h4, h5, h6, th, td, p, li, dd, code {
+  font-family: var(--body-font);
+  }
+
+* {
+  box-sizing: border-box;
+}
+
+/* Basic page layout */
+
+body {
+  font-size: 12pt;
+  line-height: 1.33;
+  margin: 0 auto;
+  padding: 1em;
+  max-width: 1000px;
+  }
+
+div.pageheader {
+  width: 100%;
+  text-align: left;
+  margin-bottom: 10px;
+}
+
+#dwarf-logo {
+  width: 140px;
+}
+
+div.contentwrapper {
+  float: left;
+  width: 100%;
+}
+
+div.content {
+  margin-left: 220px;
+  padding-left: 10px;
+}
+
+div.nav {
+  float: left;
+  width: 220px;
+  padding: 10px;
+  margin-left: -100%;
+  font-size: 0.9em;
+}
+
+div.clearer {
+  clear: both;
+}
+
+div.pagefooter {
+  border-top: 1px solid var(--footer-border-color);
+  padding: 20px 0;
+  margin-top: 40px;
+}
+
+div.pagefooter p {
+  margin: 1em 0 0 0;
+  font-size: 90%;
+  font-style: italic;
+  color: #606060;
+  text-align: center;
+}
+
+div.pagefooter p:first-child {
+  margin: 0;
+}
+
+/* Custom styles */
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--header-color);
+}
+
+h1 {
+  font-size: 180%;
+}
+
+div.content > h1:first-child {
+  margin-top: 0;
+}
+
+h2 {
+  margin-top: 2em;
+  font-size: 110%;
+}
+
+h3 {
+  margin-top: 1em;
+  font-size: 100%;
+}
+
+pre, tt, code {
+  font-family: var(--code-font);
+  font-size: 0.9em;
+  color: var(--code-color);
+}
+
+table {
+  margin: 1em auto 1em 0;
+  width: auto;
+  border: none;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+tr {
+  vertical-align: top;
+}
+
+thead tr {
+  vertical-align: bottom;
+}
+
+th {
+  text-align: left;
+  padding: 0.25em;
+  border-bottom: 2px solid black;
+}
+
+td {
+  padding: 0.25em;
+  border-bottom: 1px solid var(--table-border-color);
+}
+
+table.issueheader {
+  min-width: 400px;
+  border: 1px solid black;
+}
+
+table.issueheader th, table.issueheader td {
+  padding: 5px;
+  text-align: left;
+  border-bottom: 1px solid black;
+}
+
+/* Navigation sidebar styles */
+
+div.nav ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+div.nav ul ul {
+  list-style-type: disc;
+  margin: 0;
+  padding: 0 0 0 1.5em;
+}
+
+div.nav ul li {
+  margin: 0.25em 0;
+}
+
+/* Responsive layout: for narrow screens, move nav to bottom */
+
+@media screen and (max-width: 875px) {
+  div.contentwrapper {
+    float: none;
+  }
+
+  div.content {
+    margin-left: 0;
+    min-width: 320px;
+  }
+
+  div.nav {
+    margin: 20px 0 0 0;
+    width: 100%;
+    background-color: var(--small-screen-nav-background-color);
+  }
+
+  div.pagefooter {
+    margin-top: 0;
+    background-color: var(--small-screen-nav-background-color);
+  }
+}

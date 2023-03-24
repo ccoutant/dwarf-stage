@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{title}}</title>
+  <link rel="stylesheet" href="{{root}}/static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="{{root}}/images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="{{root}}/images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+{{ content }}
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+{{ @nav.html }}
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+{{ @footer.html }}
+  </div> <!-- footer -->
+</body>
+</html>
