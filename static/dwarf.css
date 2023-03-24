@@ -116,6 +116,7 @@ pre {
   margin: 1em;
   background-color: var(--pre-background-color);
   padding: 0.5em;
+  overflow-x: scroll;
 }
 
 pre.proposal {
@@ -159,7 +160,7 @@ td {
 }
 
 table.issueheader {
-  min-width: 400px;
+  min-width: 300px;
   border: 1px solid black;
 }
 
