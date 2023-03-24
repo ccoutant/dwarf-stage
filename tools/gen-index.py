@@ -15,7 +15,7 @@ issue_column_titles = [
     "Issue #", "Title", "Author", "Champion", "Type", "Status"
 ]
 issue_column_fields = [
-    "Propid", "Title", "Author", "Champion", "Type", "Status"
+    "propid", "title", "author", "champion", "type", "status"
 ]
 
 try:
@@ -33,7 +33,7 @@ for o, a in opts:
 
 title = "DWARF Issues"
 if version:
-    title += " for Version " + version
+    title = "Issues for DWARF Version " + version
 
 source_dir = args[0]
 dest_file = args[1]
@@ -61,11 +61,11 @@ for source_file in issue_files:
                 break
             m = re.match(r"([^:]+):\s*(.*)", l)
             if m:
-                per_file_meta[m.group(1)] = m.group(2)
-    if not version or ("Version" in per_file_meta and version == per_file_meta["Version"]):
+                per_file_meta[m.group(1).lower()] = m.group(2)
+    if not version or ("version" in per_file_meta and version == per_file_meta["version"]):
         href = os.path.join(root_path, "issues", os.path.basename(source_file.replace(".md", ".html")))
         issue_table += "  <tr>\n"
-        issue_table += "    <td><a href=\"%s\">%s</a></td>\n" % (href, per_file_meta["Propid"])
+        issue_table += "    <td><a href=\"%s\">%s</a></td>\n" % (href, per_file_meta["propid"])
         issue_table += "".join("    <td>%s</td>\n" % html.escape(per_file_meta[s]) for s in issue_column_fields[1:])
         issue_table += "  </tr>\n"
 issue_table += "</tbody>\n</table>\n"
