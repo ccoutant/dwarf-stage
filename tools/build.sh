@@ -59,6 +59,7 @@ $TOOLSDIR/gen-index.py -v "$DWARF_VERSION" -r "$DESTDIR" -t "$INDEX_TEMPLATE" "$
 
 # Hardlink the static files into the build tree
 echo "Hard-linking static files..."
+ln -f .htaccess "$DESTDIR"
 for d in $STATICDIRS
 do
   mkdir -p "$DESTDIR/$d"
