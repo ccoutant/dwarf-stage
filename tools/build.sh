@@ -1,7 +1,7 @@
 #!/bin/sh
 
 SRCDIR="md"
-DESTDIR="htdocs"
+DESTDIR="docs"
 TEMPLATEDIR="templates"
 TOOLSDIR="tools"
 STATICDIRS="doc images static"
