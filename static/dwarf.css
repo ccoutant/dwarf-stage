@@ -112,6 +112,25 @@ pre, tt, code {
   color: var(--code-color);
 }
 
+pre {
+  margin: 1em;
+  background-color: var(--pre-background-color);
+  padding: 0.5em;
+}
+
+pre.proposal {
+  margin: 1em 0;
+  background-color: inherit;
+  padding: 0;
+  color: inherit;
+}
+
+blockquote {
+  margin-left: 1em;
+  border-left: 3px solid var(--blockquote-border-color);
+  padding-left: 1em;
+}
+
 table {
   margin: 1em auto 1em 0;
   width: auto;
@@ -165,26 +184,11 @@ div.nav ul ul {
 }
 
 div.nav ul li {
-  margin: 0.25em 0;
-}
-
-blockquote {
-  margin-left: 1em;
-  border-left: 3px solid var(--blockquote-border-color);
-  padding-left: 1em;
-}
-
-pre {
-  margin: 1em;
-  background-color: var(--pre-background-color);
-  padding: 0.5em;
-}
-
-pre.proposal {
   margin: 1em 0;
-  background-color: inherit;
-  padding: 0;
-  color: inherit;
+}
+
+div.nav ul ul li {
+  margin: 0.25em 0;
 }
 
 /* Responsive layout: for narrow screens, move nav to bottom */
