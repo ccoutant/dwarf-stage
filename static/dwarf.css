@@ -166,6 +166,12 @@ div.nav ul li {
   margin: 0.25em 0;
 }
 
+blockquote {
+  margin-left: 1em;
+  border-left: 3px solid #cccccc;
+  padding-left: 1em;
+}
+
 /* Responsive layout: for narrow screens, move nav to bottom */
 
 @media screen and (max-width: 875px) {
