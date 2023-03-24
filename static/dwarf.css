@@ -10,6 +10,8 @@
   --footer-background-color: white;
   --footer-text-color: #383838;
   --footer-border-color: #d8d8d8;
+  --blockquote-border-color: #f0f0f0;
+  --pre-background-color: #f0f0f0;
 }
 
 body, div, h1, h2, h3, h4, h5, h6, th, td, p, li, dd, code {
@@ -168,8 +170,21 @@ div.nav ul li {
 
 blockquote {
   margin-left: 1em;
-  border-left: 3px solid #cccccc;
+  border-left: 3px solid var(--blockquote-border-color);
   padding-left: 1em;
+}
+
+pre {
+  margin: 1em;
+  background-color: var(--pre-background-color);
+  padding: 0.5em;
+}
+
+pre.proposal {
+  margin: 1em 0;
+  background-color: inherit;
+  padding: 0;
+  color: inherit;
 }
 
 /* Responsive layout: for narrow screens, move nav to bottom */
