@@ -31,8 +31,8 @@ request on the [Public Comment](comment.html) page.
 |Kotlin                  |`DW_LNAME_Kotlin`                    |0x000e|0                  |                                        |
 |Modula 2                |`DW_LNAME_Modula2`                   |0x000f|1                  |                                        |
 |Modula 3 †              |`DW_LNAME_Modula3`                   |0x0010|1                  |                                        |
-|Ojective C              |`DW_LNAME_ObjC`                      |0x0011|0                  |                                        |
-|Ojective C++            |`DW_LNAME_ObjC_plus_plus`            |0x0012|0                  |                                        |
+|Objective C             |`DW_LNAME_ObjC`                      |0x0011|0                  |                                        |
+|Objective C++           |`DW_LNAME_ObjC_plus_plus`            |0x0012|0                  |                                        |
 |OCaml                   |`DW_LNAME_OCaml`                     |0x0013|0                  |                                        |
 |OpenCL †                |`DW_LNAME_OpenCL`                    |0x0014|0                  |                                        |
 |ISO Pascal              |`DW_LNAME_Pascal`                    |0x0015|1                  |                                        |
@@ -44,5 +44,5 @@ request on the [Public Comment](comment.html) page.
 |Unified Parallel C (UPC)|`DW_LNAME_UPC`                       |0x001b|0                  |                                        |
 |Zig                     |`DW_LNAME_Zig`                       |0x001c|0                  |                                        |
 
-† Names marked with † and their associated values are reserved, but
+† These names and their associated values are reserved, but
 the languages they represent are not well supported.

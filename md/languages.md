@@ -71,5 +71,5 @@ for the new codes.
 |`DW_LANG_Ada2012`               |0x002f|0                  |
 |`DW_LANG_HIP`                   |0x0030|0                  |
 
-† -- Names marked with † and their associated values are reserved, but
+† These names and their associated values are reserved, but
 the languages they represent are not well supported.
