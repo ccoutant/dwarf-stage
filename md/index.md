@@ -47,5 +47,5 @@ companies working on compilers and debuggers.
 Committee bylaws and other organizational documents can be found
 [here](organization.html).
 
-[ml]: http://lists.dwarfstd.org/listinfo.cgi/dwarf-discuss-dwarfstd.org
+[ml]: https://lists.dwarfstd.org/mailman/listinfo/dwarf-discuss
 [intro]: doc/Debugging-using-DWARF-2012.pdf
