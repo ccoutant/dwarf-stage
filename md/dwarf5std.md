@@ -1,10 +1,12 @@
-Title: DWARF 5 Standard
+Title: DWARF Version 5
 
-# DWARF 5 Standard
+# DWARF Version 5
 
 The **DWARF Version 5 Debugging Format Standard**
 is based on the [**DWARF Version 4 Standard**](dwarf4std.html).
 It is an upward compatible extension to the previous version of the standard.
+
+Download the [DWARF Version 5 Standard (PDF)](doc/DWARF5.pdf).
 
 The major enhancements in DWARF Version 5 are:
 
@@ -73,6 +75,4 @@ The DWARF Version 5 Standard is compatible with DWARF Version 4 except as follow
 
 * New representations for macro definitions, symbol lookup, location lists and range lists.
 
-Read the [press release](dwarf5-press-release.html)
-
-[Download DWARF Version 5 Standard (PDF)](doc/DWARF5.pdf)
+Read the [press release](dwarf5-press-release.html).
