@@ -10,13 +10,18 @@ debuggers, and other tools; suggested improvements or
 extensions to the DWARF Standard; or other topics related to
 compilation or debugging.
 
-All proposed changes or enhancements to the DWARF Standard must be
-submitted using the [Public Comment](comment.html) page.
-The [DWARF Discussion](mailto:dwarf-discuss@lists.dwarfstd.org)
+## Proposals
+
+The [dwarf-discuss](mailto:dwarf-discuss@lists.dwarfstd.org)
 mailing list can be used to ask questions about the DWARF Standard,
 about implementation methods, or for other DWARF-related issues.
 
-**All submissions are accepted under the following conditions:**
+To propose a changes or enhancement to the DWARF Standard,
+please visit the [Public Comments](comment.html) page.
+
+## Conditions
+
+All submissions are accepted under the following conditions:
 
 * Copyright on each submission is retained by its author,
   but the DWARF Standard Committee (and any successor) is
