@@ -1,5 +1,22 @@
 #!/usr/bin/python3
 
+"""
+Copyright © 2023 Cary Coutant
+
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation, either version 3 of the License, or (at your
+option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program. If not, see <https://www.gnu.org/licenses/>.
+"""
+
 import os
 import sys
 import re
@@ -7,9 +24,8 @@ import getopt
 import glob
 import html
 
-root_dir = ""
-version = ""
-template_file = ""
+def usage():
+    sys.stderr.write("usage: gen-index.py [-r rootdir] [-v dwarf-version] [-t template] source-directory index-file\n")
 
 issue_column_titles = [
     "Issue #", "Title", "Author", "Champion", "Type", "Status"
@@ -18,22 +34,30 @@ issue_column_fields = [
     "propid", "title", "author", "champion", "type", "status"
 ]
 
+root_dir = ""
+version = ""
+template_file = ""
+
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "r:v:t:")
+    opts, args = getopt.getopt(sys.argv[1:], "hr:v:t:")
 except getopt.GetoptError as err:
-    sys.stderr.write(err + "\n")
+    sys.stderr.write(str(err) + "\n")
+    usage()
     sys.exit(2)
 for o, a in opts:
-    if o == "-r":
+    if o == "-h":
+        usage()
+        sys.exit(0)
+    elif o == "-r":
         root_dir = a
     elif o == "-v":
         version = a
     elif o == "-t":
         template_file = a
 
-title = "DWARF Issues"
-if version:
-    title = "Issues for DWARF Version " + version
+if len(args) < 2:
+    usage()
+    sys.exit(2)
 
 source_dir = args[0]
 dest_file = args[1]
@@ -41,6 +65,10 @@ dest_file = args[1]
 dest_dir = os.path.dirname(dest_file)
 template_dir = os.path.dirname(template_file)
 root_path = os.path.relpath(root_dir, dest_dir)
+
+title = "DWARF Issues"
+if version:
+    title = "Issues for DWARF Version " + version
 
 for f in [source_dir, dest_dir, template_file]:
     if f and not os.path.exists(f):

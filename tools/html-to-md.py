@@ -1,19 +1,40 @@
 #! /usr/bin/python3
 
-# html-to-md
-# Rudimentary conversion of HTML to Markdown.
-# -h
-#    Strips the header and footer elements from the page.
-#    Looks for the specific patterns used in the DWARF HTML code.
-# -p
-#    Tailors the conversion to DWARF issue pages, extracting
-#    metadata from the start of the file, and using the
-#    contents of the <pre> element as the markdown.
-#    The metadata is placed at the top of the generated
-#    markdown file.
-# -v n
-#    Specifies the target DWARF version number (for issue metadata).
-#    Default: 6.
+"""
+html-to-md
+
+Rudimentary conversion of HTML to Markdown.
+
+-h
+   Strips the header and footer elements from the page.
+   Looks for the specific patterns used in the DWARF HTML code.
+
+-p
+   Tailors the conversion to DWARF issue pages, extracting
+   metadata from the start of the file, and using the
+   contents of the <pre> element as the markdown.
+   The metadata is placed at the top of the generated
+   markdown file.
+
+-v n
+   Specifies the target DWARF version number (for issue metadata).
+   Default: 6.
+
+Copyright © 2023 Cary Coutant
+
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation, either version 3 of the License, or (at your
+option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program. If not, see <https://www.gnu.org/licenses/>.
+"""
 
 import sys
 import re
@@ -549,10 +570,17 @@ convert_proposal = False
 dwarf_version = "6"
 debug = False
 
+def usage():
+    sys.stderr.write("usage: html-to-md.py [-h] [-d] [-p] [-v dwarf-version] < source.html > dest.md\n")
+    sys.stderr.write("  -h: Strip header and footer tables (tailored to old DWARF site)\n")
+    sys.stderr.write("  -d: Debug -- print HTML tree\n")
+    sys.stderr.write("  -p: Extract metadata from DWARF proposals\n")
+
 try:
     opts, args = getopt.getopt(sys.argv[1:], "hdpv:")
 except getopt.GetoptError as err:
-    sys.stderr.write(err + "\n")
+    sys.stderr.write(str(err) + "\n")
+    usage()
     sys.exit(2)
 for o, a in opts:
     if o == "-p":
