@@ -28,7 +28,7 @@ The Committee Members are:
 |Markus T Metzger |markus.t.metzger at intel.com  |Intel               |
 |Jeremy Morse     |jeremy.morse.llvm at gmail.com |Sony                |
 |Adrian Prantl    |aprantl at apple.com           |Apple               |
-|Hafiz Abid Qadeer|`abid_qadeer` at mentor.com    |Mentor Graphics     |
+|Hafiz Abid Qadeer|abid\_qadeer at mentor.com     |Mentor Graphics     |
 |Jason Merrill    |jason at redhat.com            |Red Hat             |
 |Paul Robinson    |paul.robinson at sony.com      |Sony                |
 |Tom Russell      |Tom.Russell at sony.com        |Sony                |
