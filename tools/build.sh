@@ -54,8 +54,11 @@ do
   $TOOLSDIR/gen-index.py -v "$v" -r "$DESTDIR" -t "$INDEX_TEMPLATE" "$SRCDIR/issues" "$dest"
 done
 
+dest="$DESTDIR/issues-closed.html"
+$TOOLSDIR/gen-index.py -c -v "$DWARF_VERSION" -r "$DESTDIR" -t "$INDEX_TEMPLATE" "$SRCDIR/issues" "$dest"
+
 dest="$DESTDIR/issues.html"
-$TOOLSDIR/gen-index.py -v "$DWARF_VERSION" -r "$DESTDIR" -t "$INDEX_TEMPLATE" "$SRCDIR/issues" "$dest"
+$TOOLSDIR/gen-index.py -o -v "$DWARF_VERSION" -r "$DESTDIR" -t "$INDEX_TEMPLATE" "$SRCDIR/issues" "$dest"
 
 # Hardlink the static files into the build tree
 echo "Hard-linking static files..."
