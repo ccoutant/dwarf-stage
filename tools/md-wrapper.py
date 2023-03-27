@@ -39,12 +39,11 @@ import html
 def usage():
     sys.stderr.write("usage: md-wrapper.py [-r root-dir] [-t template-file] source.md dest.html\n")
 
-is_proposal = False
 root_dir = ""
 template_file = ""
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "hpr:t:")
+    opts, args = getopt.getopt(sys.argv[1:], "hr:t:")
 except getopt.GetoptError as err:
     sys.stderr.write(str(err) + "\n")
     usage()
@@ -53,8 +52,6 @@ for o, a in opts:
     if o == "-h":
         usage()
         sys.exit(0)
-    elif o == "-p":
-        is_proposal = True
     if o == "-r":
         root_dir = a
     elif o == "-t":
@@ -93,7 +90,7 @@ with open(source_file, 'r', encoding="utf-8") as f:
 with open(template_file, 'r', encoding="utf-8") as f:
     tmpl = f.read()
 
-if is_proposal and not "markdown" in vars:
+if "format" in vars and vars["format"] != "markdown":
     vars["content"] = '<pre class=\"proposal\">\n' + html.escape(text) + "</pre>\n"
 else:
     vars["content"] = markdown.markdown(text, extensions = ['tables'])
