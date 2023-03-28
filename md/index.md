@@ -36,7 +36,7 @@ please go to the [Public Comment](comment.html) page.
 
 For a quick introduction to DWARF, read
 [Introduction to the DWARF Debugging Format][intro]
-(revised 2012), by Michael Eager (PDF).
+(PDF, revised 2012), by Michael Eager.
 
 ## About the DWARF Committee
 
