@@ -32,17 +32,22 @@ Redirect 301 /DownloadDwarf5.php /doc/DWARF5.pdf
 Redirect 301 /Home.php /
 
 # Issues.php?issues=closed(2|3|4) are lists of issues for Dwarf[3|4|5]
-#RewriteEngine On
-#RewriteCond %{QUERY_STRING} ^type=closed([234]) [NC]
-#RewriteRule ^Issues\.php$ /issues-closed%1.html [L,NE,QSD,R=302]
+RewriteEngine On
+RewriteCond %{QUERY_STRING} ^type=closed([234]) [NC]
+RewriteRule ^Issues\.php$ /issues-closed%1.html [L,NE,QSD,R=301]
+
+# Now move the closed issues to their final place
+Redirect 301 /issues-closed2.html /issues-v3.html
+Redirect 301 /issues-closed3.html /issues-v4.html
+Redirect 301 /issues-closed4.html /issues-v5.html
 
 # Issues.php?type=open is just the (current) issues list.
-#RewriteCond %{QUERY_STRING} ^type=open [NC]
-#RewriteRule ^Issues\.php$ /issues.html [L,NE,QSD,R=302]
+RewriteCond %{QUERY_STRING} ^type=open [NC]
+RewriteRule ^Issues\.php$ /issues.html [L,NE,QSD,R=301]
 
 # And finally the (open) issues page itself
 Redirect 301 /Issues.php /issues.html
 
 # Redirect ShowIssue.php?issue=xyz to issues/xyz.html
 RewriteCond %{QUERY_STRING} ^issue=(.+) [NC]
-RewriteRule ^ShowIssue\.php$ /issues/%1.html [L,NE,QSD,R=302]
+RewriteRule ^ShowIssue\.php$ /issues/%1.html [L,NE,QSD,R=301]
