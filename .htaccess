@@ -11,6 +11,19 @@ Redirect 301 /Members.php /members.html
 Redirect 301 /Organization.php /organization.html
 Redirect 301 /Submissions.php /submissions.html
 
+# Old html pages/redirects had slightly different names
+Redirect 301 /Comment.html /comment.html
+Redirect 301 /Download.html /download.html
+Redirect 301 /Dwarf3Std.html /dwarf3std.html
+Redirect 301 /Dwarf4Std.html /dwarf4std.html
+Redirect 301 /DWARF5PressRelease.html /dwarf5-press-release.html
+Redirect 301 /Dwarf5Std.html /dwarf5std.html
+Redirect 301 /Languages.html /languages.html
+Redirect 301 /LanguagesV6.html /languages-v6.html
+Redirect 301 /Members.html /members.html
+Redirect 301 /Organization.html /organization.html
+Redirect 301 /Submissions.html /submissions.html
+
 # There used to be a form to collect names and addresses
 # to download the spec, just redirect directly to the spec.
 Redirect 301 /DownloadDwarf5.php /doc/DWARF5.pdf
