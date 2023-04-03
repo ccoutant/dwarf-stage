@@ -11,6 +11,7 @@ effort.  They (and their companies) have our thanks.
 
 * Cary Coutant, Chair
 * David Anderson
+* David Blaikie (Google)
 * Ron Brender
 * Paul Robinson (Sony)
 
@@ -18,7 +19,6 @@ effort.  They (and their companies) have our thanks.
 
 * Todd Allen (Concurrent Real-Time)
 * Pedro Alves (Pedro Alves Services)
-* David Blaikie (Google)
 * Andrew Cagney
 * Eric Christopher (Google)
 * John DelSignore (Perforce)
