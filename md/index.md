@@ -18,8 +18,7 @@ is now available.
 While each revision of the standard documents the DWARF language codes
 that had been assigned as of the publication date, support for new
 languages may be added between revisions.
-
-[View the list of language codes](languages.html).
+View the up-to-date list of [assigned language codes](languages.html).
 
 ## Public Comments
 
