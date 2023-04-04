@@ -1,0 +1,36 @@
+This is the source for the DWARF website.
+
+doc/
+    Various already-formatted documents --
+    a mixture of troff, MS Word, PDF, and LaTeX.
+
+images/
+    Various images used on the website (e.g., logo, backgrounds,
+    favicon).
+
+md/
+    Markdown sources for all the top-level pages on the site.
+
+md/issues/
+    Markdown sources for the issue pages.
+
+static/
+    Other static files (e.g., CSS, Javascript).
+
+templates/
+    HTML templates for building the website.
+
+tools/
+    Tools for building the website.
+
+To build the website, run make in the top-level directory.
+It will build the site under the htdocs/ directory (this can
+be overridden with "make BUILD_DIR=some-other-directory").
+Using make will update the build directory based on what files
+have changed.
+
+You can also use tools/build.sh to build the website. This
+script will build everything, and will hard-link the static
+files into the build directory, rather than copy them.
+
+The .gitignore file is set to ignore everything under htdocs/.

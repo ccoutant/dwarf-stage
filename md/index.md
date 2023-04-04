@@ -18,8 +18,7 @@ is now available.
 While each revision of the standard documents the DWARF language codes
 that had been assigned as of the publication date, support for new
 languages may be added between revisions.
-
-[View the list of language codes](languages.html).
+View the up-to-date list of [assigned language codes](languages.html).
 
 ## Public Comments
 
@@ -36,7 +35,7 @@ please go to the [Public Comment](comment.html) page.
 
 For a quick introduction to DWARF, read
 [Introduction to the DWARF Debugging Format][intro]
-(revised 2012), by Michael Eager (PDF).
+(PDF, revised 2012), by Michael Eager.
 
 ## About the DWARF Committee
 
