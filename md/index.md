@@ -23,13 +23,12 @@ View the up-to-date list of [assigned language codes](languages.html).
 ## Public Comments
 
 The DWARF Committee welcomes contributions of all forms.
-Please review our [submission guidelines](submissions.html).
 
 To ask questions and participate in discussions about the DWARF format,
 please join the [dwarf-discuss][ml] mailing list.
 
 To submit a comment or suggestion for changing the standard,
-please go to the [Public Comment](comment.html) page.
+please go to the [Public Comments](comment.html) page.
 
 ## DWARF Introduction
 
