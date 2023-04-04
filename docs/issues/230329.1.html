@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DWARF Issue: Tables which have a unit_length header field must be contiguous</title>
+  <link rel="stylesheet" href="../static/dwarf.css" type="text/css" />
+  <link rel="icon" type="image/png" sizes="48x48" href="../images/favicon.png" />
+</head>
+<body>
+  <div class="pageheader">
+    <img id="dwarf-logo" alt="DWARF Debugging Format" src="../images/dwarf-logo.svg" />
+  </div>
+
+  <div class="contentwrapper">
+    <div class="content">
+
+      <h1>Issue 230329.1: Tables which have a unit_length header field must be contiguous</h1>
+
+      <table class="issueheader">
+        <tbody>
+          <tr>
+            <th>Author:</th>
+            <td>Keith Walker</td>
+          </tr>
+          <tr>
+            <th>Champion:</th>
+            <td>Keith Walker</td>
+          </tr>
+          <tr>
+            <th>Date submitted:</th>
+            <td>2023-03-29</td>
+          </tr>
+          <tr>
+            <th>Type:</th>
+            <td>Clarification</td>
+          </tr>
+          <tr>
+            <th>Status:</th>
+            <td>Open</td>
+          </tr>
+          <tr>
+            <th>DWARF Version:</th>
+            <td>6</td>
+          </tr>
+    
+        </tbody>
+      </table>
+
+<h2>Problem</h2>
+<p>There is no statement if tables must be contiguous or if
+there can be padding between the tables.</p>
+<h2>Background</h2>
+<p>Some sections have an implicit assumption that the tables in a section
+are contiguous so the section can be processed by serially reading the
+section. Sections in this category are:</p>
+<pre><code>.debug_info (Unit Headers, Section 7.5.1)
+.debug_aranges (Address Lookup Tables, Section 6.1.2)
+.debug_names (Name Index Section Header, Section 6.1.1)
+.debug_frame (Section 6.4.1)
+</code></pre>
+<p>All other tables may be accessed indirectly via an offset into a section,
+so in theory there is no need to ensure the tables are contiguous, provided
+the tables are only accessed via these offsets.</p>
+<p>However there are use cases when this can be a problem:</p>
+<ul>
+<li>
+<p>The file is "stripped" to just contain line information (<code>.debug_line</code> /
+  <code>.debug_line_str</code>). The <code>.debug_line_str</code> was added for exactly this use case.
+  There is now the assumption that the <code>.debug_line</code> section can be processed
+  serially.</p>
+</li>
+<li>
+<p>File dump utilities which list the contents of the sections serially.</p>
+</li>
+</ul>
+<p>Sections with tables which have headers with a <code>unit_length</code> field:</p>
+<pre><code>.debug_aranges (Section 6.1.2)
+.debug_addr (Section 7.27)
+.debug_info / .debug_info.dwo (Section 7.5.1)
+.debug_line / .debug_line.dwo  (Section 6.2.4)
+.debug_loclists / .debug_loclists.dwo (Section 7.29)
+.debug_names (Section 6.1.1)
+.debug_rnglists / .debug_rnglists.dwo (Section 7.28)
+.debug_str_offsets / .debug_str_offsets.dwo (Section 7.26)
+</code></pre>
+<p>Sections with tables/contributions without headers:</p>
+<pre><code>.debug_abbrev / .debug_abbrev.dwo (Section 7.5.3)
+.debug_frame (Section 6.4.1)
+.debug_line_str
+.debug_macro / .debug_macro.dwo (Section 6.3.1)
+.debug_str / .debug_str.dwo
+</code></pre>
+<p>It is a point for discussion on whether to only require the tables
+with a <code>unit_length</code> header field be contiguous, or should all tables be
+made contiguous.</p>
+<h2>Proposed Addition</h2>
+<blockquote>
+<p>7.34 Contiguous Tables</p>
+<p>Tables which start with a <code>unit_length</code> field must be contiguous with the
+preceding table in the section or start of the section if there is no
+preceding table.</p>
+</blockquote>
+<h2>Alternative Proposed Addition</h2>
+<blockquote>
+<p>7.34 Contiguous Tables</p>
+<p>Tables must be contiguous with the preceding table in the section or
+start of the section if there is no preceding table.</p>
+</blockquote>
+    </div> <!-- content -->
+  </div> <!-- contentwrapper -->
+
+  <div class="nav">
+<ul>
+	<li><a href="../index.html">Home</a></li>
+	<li>The DWARF Standard
+	<ul>
+		<li><a href="../dwarf5std.html">DWARF Version 5</a></li>
+		<li><a href="../languages.html">Assigned Language Codes</a></li>
+		<li><a href="../download.html">Downloads</a></li>
+	</ul>
+	<li>Revising the Standard
+	<ul>
+		<li><a href="https://lists.dwarfstd.org/mailman/listinfo/dwarf-discuss">Mailing List</a></li>
+		<li><a href="../comment.html">Submit a Comment</a></li>
+		<li><a href="../issues.html">Current Issues</a></li>
+	</ul>
+	</li>
+	<li>About the DWARF Committee
+	<ul>
+		<li><a href="../members.html">Members</a></li>
+		<li><a href="../bylaws.html">Bylaws</a></li>
+		<li><a href="../code-of-conduct.html">Code of Conduct</a></li>
+		<li><a href="../member-agreement.html">Membership Agreement</a></li>
+		<li><a href="../procedures.html">Procedures</a></li>
+	</ul>
+	</li>
+</ul>
+
+  </div> <!-- nav -->
+
+  <div class="clearer"></div>
+
+  <div class="pagefooter">
+<p>dwarfstd.org is supported by <a href="https://sourceware.org/">Sourceware</a>.
+Contributions are welcome.</p>
+<p>Copyright &copy; 2023 DWARF Debugging Information Format Committee</p>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+
+  </div> <!-- footer -->
+</body>
+</html>

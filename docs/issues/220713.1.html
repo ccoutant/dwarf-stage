@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <th>Status:</th>
-            <td>Open</td>
+            <td>Accepted</td>
           </tr>
           <tr>
             <th>DWARF Version:</th>
@@ -48,13 +48,25 @@
       </table>
 
 <p>DWARF5 Section 6.1.1.2, page 140</p>
-<p>When implementing a reader of the DWARF5 name table I found the
-bottom part (Entry Pool part) of page 140 to be less than helpful.</p>
-<p>Page 140 leaves out mention of the Abbrev Table entirely,
-and says attributes are in the Entry Pool, which is incorrect
-as the Entry Pool has abbrev codes and <em>values for attributes</em>,
-not attributes themselves (Is there a terminology in the document
-to distinguish these two ideas?).</p>
+<p>The Bottom part of Figure 6.1 pages 139 and 140 referencing
+abbreviations and index entries is misleading.
+Page 139 omits mention of the abbrev table.
+Page 140 also omits the abbrev table and uses
+incorrect terminology for the Entry Pool.</p>
+<p>As to terminology, notice Section 2.2 Attribute types which
+begins "Each attribute value is characterized by an attribute name."
+Page 23 line three uses "attribute value" too.</p>
+<p>The new pages correctly categorize these two tables.</p>
+<p>The new Page 140 shows Abbreviations.
+(Note that where it says "idx attr"
+it should, for consistency say "idx attr name".)</p>
+<p>FORMs really only have a name, so simply calling
+something a FORM is sufficiently precise.</p>
+<p>The new Page 141 shows Index Entries.
+Note this refers to attribute value
+in the right hand expanded index entry
+whereas "index attribute value" is more
+correct.</p>
 <p>What follows incorporates significant suggestions by Ron Brender
 on how things could look.</p>
 <p>Given the difficulty of communicating a graphic with text wording Ron B
@@ -66,7 +78,9 @@ and the top boxes on page 143.</p>
 <p><a href="../doc/Issue_220713.1_dwarf6-proposed-fig6.1-20221205.pdf">Proposed Figure 6.1</a></p>
 <hr />
 <p>2022-12-05:  Revised<br />
-   Previous version: http://dwarfstd.org/issues/220713.1-1.html</p>
+2023-03-29:  Revised<br />
+2023-04-03:  Accepted. The figure will be updated as described in the
+proposal update.</p>
     </div> <!-- content -->
   </div> <!-- contentwrapper -->
 
@@ -77,11 +91,13 @@ and the top boxes on page 143.</p>
 	<ul>
 		<li><a href="../dwarf5std.html">DWARF Version 5</a></li>
 		<li><a href="../languages.html">Assigned Language Codes</a></li>
-		<li><a href="../issues.html">Current Issues</a></li>
-		<li><a href="../submissions.html">Submission Guidelines</a></li>
+		<li><a href="../download.html">Downloads</a></li>
+	</ul>
+	<li>Revising the Standard
+	<ul>
 		<li><a href="https://lists.dwarfstd.org/mailman/listinfo/dwarf-discuss">Mailing List</a></li>
 		<li><a href="../comment.html">Submit a Comment</a></li>
-		<li><a href="../download.html">Downloads</a></li>
+		<li><a href="../issues.html">Current Issues</a></li>
 	</ul>
 	</li>
 	<li>About the DWARF Committee
