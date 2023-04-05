@@ -208,12 +208,8 @@ ul.issuenav li {
   display: inline;
 }
 
-ul.issuenav li::before {
+ul.issuenav li:not(:first-child)::before {
   content: " | ";
-}
-
-ul.issuenav li:first-child::before {
-  content: "";
 }
 
 li.self a {
