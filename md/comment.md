@@ -3,9 +3,9 @@ Title: DWARF Public Comments
 # Public Comments
 
 The DWARF Committee invites comments from the public about the
-**DWARF Version 5 Standard**. Comments may range from grammatical or
-editorial notes, to requests for clarification, to suggestions for
-modifications to the standard.
+[DWARF Version 5 Standard](dwarf5std.html).
+Comments may range from grammatical or editorial notes,
+to requests for clarification, to suggestions for modifications to the standard.
 
 Please send comments to the
 [dwarf-discuss](mailto:dwarf-discuss@lists.dwarfstd.org) mailing list.
