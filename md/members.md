@@ -1,8 +1,8 @@
-Title: DWARF Standards Committee Members
+Title: DWARF Committee Members
 
-# DWARF Standards Committee Members
+# DWARF Committee Members
 
-The DWARF Standards Committee consists of individuals working to
+The DWARF Committee consists of individuals working to
 develop and improve the DWARF Debugging Standard.  Committee members
 have contributed significant amounts of their time and energy to this
 effort.  They (and their companies) have our thanks.
