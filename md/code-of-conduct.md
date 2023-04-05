@@ -2,7 +2,7 @@ Title: DWARF Committee Code of Conduct
 
 # DWARF Debugging Information Format Committee Code of Conduct
 
-*(DRAFT) April 14, 2021*
+*April 14, 2021*
 
 The DWARF Debugging Information Format community has always worked to be
 a welcoming and respectful community, and we want to ensure that doesn’t

@@ -2,7 +2,7 @@ Title: DWARF Committee Procedures
 
 # DWARF Debugging Information Format Committee Procedures
 
-*(Draft) May 16, 2021*
+*May 16, 2021*
 
 These are the processes and procedures used by the DWARF committee.
 
