@@ -77,7 +77,7 @@ if version:
 if issue_filter == "c":
     title = "Closed " + title
 elif issue_filter == "o":
-    title = "Open " + title
+    title = "Current " + title
 
 for f in [source_dir, dest_dir, template_file]:
     if f and not os.path.exists(f):
@@ -119,10 +119,13 @@ issue_table += "</tbody>\n</table>\n"
 with open(template_file, 'r', encoding="utf-8") as f:
     tmpl = f.read()
 
+class_self = "self:" + os.path.basename(dest_file.rsplit('.', 1)[0])
+
 vars = {
     'root': root_path,
     'title': title,
-    'content': issue_table
+    'content': issue_table,
+    class_self: "self"
     }
 
 # Substitution function for replacing template variables.

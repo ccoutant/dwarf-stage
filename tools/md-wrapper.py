@@ -73,8 +73,11 @@ for f in [source_file, dest_dir, template_file]:
         sys.stderr.write("error: %s does not exist\n" % f)
         sys.exit(1)
 
+class_self = "self:" + os.path.basename(dest_file.rsplit('.', 1)[0])
+
 vars = {
     'root': os.path.relpath(root_dir, dest_dir),
+    class_self: "self"
     }
 
 with open(source_file, 'r', encoding="utf-8") as f:
