@@ -198,6 +198,29 @@ div.nav ul ul li {
   margin: 0.25em 0;
 }
 
+ul.issuenav {
+  list-style-type: none;
+  margin: 0 0 2em 0;
+  padding: 0;
+}
+
+ul.issuenav li {
+  display: inline;
+}
+
+ul.issuenav li::before {
+  content: " | ";
+}
+
+ul.issuenav li:first-child::before {
+  content: "";
+}
+
+li.self a {
+  text-decoration: none;
+  color: inherit;
+}
+
 /* Responsive layout: for narrow screens, move nav to bottom */
 
 @media screen and (max-width: 875px) {
