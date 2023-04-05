@@ -1,4 +1,4 @@
-Title: Sample Proposal Template
+Title: Sample Proposal
 
 # Sample Proposal
 
