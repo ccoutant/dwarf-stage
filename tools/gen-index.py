@@ -77,7 +77,7 @@ if version:
 if issue_filter == "c":
     title = "Closed " + title
 elif issue_filter == "o":
-    title = "Current " + title
+    title = "Open " + title
 
 for f in [source_dir, dest_dir, template_file]:
     if f and not os.path.exists(f):
@@ -86,11 +86,10 @@ for f in [source_dir, dest_dir, template_file]:
 
 issue_files = sorted(glob.glob(source_dir + "/*.md"))
 
-issue_table = "<table class=\"issueindex\">\n<thead>\n"
-issue_table += "  <tr>\n" + "".join(["    <th>%s</th>\n" % s for s in issue_column_titles]) + "  </tr>\n"
-issue_table += "</thead>\n<tbody>\n"
+issue_list = []
 for source_file in issue_files:
-    per_file_meta = { }
+    row = { }
+    row["href"] = os.path.join(root_path, "issues", os.path.basename(source_file.replace(".md", ".html")))
     with open(source_file, 'r', encoding="utf-8") as f:
         while True:
             l = f.readline().strip()
@@ -98,33 +97,48 @@ for source_file in issue_files:
                 break
             m = re.match(r"([^:]+):\s*(.*)", l)
             if m:
-                per_file_meta[m.group(1).lower()] = m.group(2)
-    if version and "version" in per_file_meta and version != per_file_meta["version"]:
+                row[m.group(1).lower()] = m.group(2)
+    status = row.get("status", "open").lower()
+    status_code = "o"
+    if status.startswith(("acc", "app", "ans", "lang")):
+        status_code = "ca"
+    elif status.startswith(("closed", "dup", "rej", "repl")):
+        status_code = "cr"
+    elif status.startswith("withdrawn"):
+        status_code = "cw"
+    row["statuscode"] = status_code
+    if version and version != row.get("version", ""):
         continue
-    if issue_filter:
-        is_closed = False
-        if "status" in per_file_meta:
-            is_closed = re.match(r"accepted|approved|closed|duplicate|deferred|rejected|withdrawn|lang", per_file_meta["status"], re.I)
-        if issue_filter == "c" and not is_closed:
-            continue
-        if issue_filter == "o" and is_closed:
-            continue
-    href = os.path.join(root_path, "issues", os.path.basename(source_file.replace(".md", ".html")))
-    issue_table += "  <tr>\n"
-    issue_table += "    <td><a href=\"%s\">%s</a></td>\n" % (href, per_file_meta["propid"])
-    issue_table += "".join("    <td>%s</td>\n" % html.escape(per_file_meta[s]) for s in issue_column_fields[1:])
-    issue_table += "  </tr>\n"
-issue_table += "</tbody>\n</table>\n"
+    if issue_filter and issue_filter != status_code[0]:
+        continue
+    issue_list.append(row)
 
 with open(template_file, 'r', encoding="utf-8") as f:
     tmpl = f.read()
+
+# Generate HTML code for the table of issues.
+def gen_issue_table(issue_list):
+    html_code = '<table id="issueindex" class="issueindex">\n<thead>\n'
+    html_code += '  <tr>\n'
+    for f in issue_column_titles:
+        html_code += '    <th>' + f + '</th>\n'
+    html_code += '  </tr>\n'
+    html_code += '</thead>\n<tbody>\n'
+    for row in issue_list:
+        html_code += '  <tr data-id="%s" data-status="%s">\n' % (row["propid"], row["statuscode"])
+        html_code += '    <td><a href="%s">%s</a></td>\n' % (row["href"], row["propid"])
+        for f in issue_column_fields[1:]:
+            html_code += '    <td>' + html.escape(row[f]) + '</td>\n'
+        html_code += '  </tr>\n'
+    html_code += '</tbody>\n</table>\n'
+    return html_code
 
 class_self = "self:" + os.path.basename(dest_file.rsplit('.', 1)[0])
 
 vars = {
     'root': root_path,
     'title': title,
-    'content': issue_table,
+    'content': gen_issue_table(issue_list),
     class_self: "self"
     }
 
