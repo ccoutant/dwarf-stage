@@ -200,7 +200,7 @@ div.nav ul ul li {
 
 ul.issuenav {
   list-style-type: none;
-  margin: 0 0 2em 0;
+  margin: 0 0 1em 0;
   padding: 0;
 }
 
@@ -215,6 +215,38 @@ ul.issuenav li:not(:first-child)::before {
 li.self a {
   text-decoration: none;
   color: inherit;
+}
+
+/* Issue index styles */
+
+#issuefilter {
+  display: none;
+  list-style-type: none;
+  margin: 0 0 1em 0;
+  padding: 0;
+}
+
+#issuefilter.enabled {
+  display: block;
+}
+
+#issuefilter li {
+  display: inline;
+  padding: 0 1em 0 0;
+}
+
+#issuefilter label {
+  font-size: 90%;
+  padding-right: 0.5em;
+}
+
+#resultcount {
+  font-size: 90%;
+  font-style: italic;
+}
+
+table.issueindex {
+  margin: 2em 0;
 }
 
 /* Responsive layout: for narrow screens, move nav to bottom */
