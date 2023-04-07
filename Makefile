@@ -31,7 +31,6 @@ ALL_INDEXES = $(BUILD_DIR)/issues-v3.html \
 DWARF_TEMPLATE = templates/dwarf-template.html
 ISSUE_TEMPLATE = templates/issue-template.html
 INDEX_TEMPLATE = templates/index-template.html
-TEMPLATES = $(DWARF_TEMPLATE) $(ISSUE_TEMPLATE) $(INDEX_TEMPLATE)
 
 # Files included by the templates (indirect dependencies).
 OTHER_DEPS = templates/nav.html templates/footer.html
@@ -104,4 +103,4 @@ $(BUILD_DIR)/issues-closed.html:
 $(BUILD_DIR)/issues.html:
 	@mkdir -p $(@D)
 	@echo GEN_INDEX $@
-	@$(GEN_INDEX) -o -v 6 -r "$(BUILD_DIR)" -t "$(INDEX_TEMPLATE)" "$(SOURCE_DIR)/issues" $@
+	@$(GEN_INDEX) -v 6 -r "$(BUILD_DIR)" -t "$(INDEX_TEMPLATE)" "$(SOURCE_DIR)/issues" $@
