@@ -12,11 +12,12 @@
   --footer-border-color: #d8d8d8;
   --blockquote-border-color: #f0f0f0;
   --pre-background-color: #f0f0f0;
+  --issue-hover-background-color: #f0f0ff;
 }
 
 body, div, h1, h2, h3, h4, h5, h6, th, td, p, li, dd, code {
   font-family: var(--body-font);
-  }
+}
 
 * {
   box-sizing: border-box;
@@ -30,7 +31,7 @@ body {
   margin: 0 auto;
   padding: 1em;
   max-width: 1000px;
-  }
+}
 
 div.pageheader {
   position: relative;
@@ -200,7 +201,7 @@ div.nav ul ul li {
 
 ul.issuenav {
   list-style-type: none;
-  margin: 0 0 2em 0;
+  margin: 0 0 1em 0;
   padding: 0;
 }
 
@@ -208,17 +209,49 @@ ul.issuenav li {
   display: inline;
 }
 
-ul.issuenav li::before {
+ul.issuenav li:not(:first-child)::before {
   content: " | ";
-}
-
-ul.issuenav li:first-child::before {
-  content: "";
 }
 
 li.self a {
   text-decoration: none;
   color: inherit;
+}
+
+/* Issue index styles */
+
+#issuefilter {
+  display: none;
+  list-style-type: none;
+  margin: 0 0 1em 0;
+  padding: 0;
+}
+
+#issuefilter.enabled {
+  display: block;
+}
+
+#issuefilter li {
+  display: inline;
+  padding: 0 1em 0 0;
+}
+
+#issuefilter label {
+  font-size: 90%;
+  padding-right: 0.5em;
+}
+
+#resultcount {
+  font-size: 90%;
+  font-style: italic;
+}
+
+table.issueindex {
+  margin: 2em 0;
+}
+
+table.issueindex tbody tr:hover {
+  background-color: var(--issue-hover-background-color);
 }
 
 /* Responsive layout: for narrow screens, move nav to bottom */

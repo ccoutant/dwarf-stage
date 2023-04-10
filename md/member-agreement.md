@@ -2,7 +2,7 @@ Title: DWARF Committee Member Participation Agreement
 
 # DWARF Debugging Information Format Committee Member Participation Agreement
 
-*(Draft) April 16, 2021*
+*April 16, 2021*
 
 The DWARF Committee [bylaws](bylaws.html) article 2 item 3 states:
 “Members shall be active participants in the development and extension

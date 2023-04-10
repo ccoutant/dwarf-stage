@@ -6,6 +6,7 @@
   <title>{{title}}</title>
   <link rel="stylesheet" href="{{root}}/static/dwarf.css" type="text/css" />
   <link rel="icon" type="image/png" sizes="48x48" href="{{root}}/images/favicon.png" />
+  <script src="{{root}}/static/issuefilter.js" type="text/javascript"></script>
 </head>
 <body>
   <div class="pageheader">
@@ -21,13 +22,32 @@
 <li class="{{self:issues-v3}}"><a href="issues-v3.html">Version 3</a></li>
 <li class="{{self:issues-v4}}"><a href="issues-v4.html">Version 4</a></li>
 <li class="{{self:issues-v5}}"><a href="issues-v5.html">Version 5</a></li>
-<li class="{{self:issues-closed}}"><a href="issues-closed.html">Version 6</a></li>
 <li class="{{self:issues}}"><a href="issues.html">Current Issues</a></li>
 </ul>
 
+<ul id="issuefilter">
+<li>
+  <label for="by_status">Filter by status:</label>
+  <select id="by_status">
+    <option value="*">All</option>
+    <option value="o">Open</option>
+    <option value="c">Closed</option>
+    <option value="ca">&emsp;Accepted</option>
+    <option value="cr">&emsp;Rejected</option>
+    <option value="cw">&emsp;Withdrawn</option>
+  </select>
+</li>
+<li>
+  <input id="search_box" type="text" size="30" placeholder="Search issues…" />
+  <svg id="search_cancel" style="height: 1em; transform: translateY(.2em);" viewBox="0 0 24.00 24.00" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="" stroke-width="0.00024"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#777" stroke-width="0.096"></g><g id="SVGRepo_iconCarrier"> <path d="M12 2C6.49 2 2 6.49 2 12C2 17.51 6.49 22 12 22C17.51 22 22 17.51 22 12C22 6.49 17.51 2 12 2ZM15.36 14.3C15.65 14.59 15.65 15.07 15.36 15.36C15.21 15.51 15.02 15.58 14.83 15.58C14.64 15.58 14.45 15.51 14.3 15.36L12 13.06L9.7 15.36C9.55 15.51 9.36 15.58 9.17 15.58C8.98 15.58 8.79 15.51 8.64 15.36C8.35 15.07 8.35 14.59 8.64 14.3L10.94 12L8.64 9.7C8.35 9.41 8.35 8.93 8.64 8.64C8.93 8.35 9.41 8.35 9.7 8.64L12 10.94L14.3 8.64C14.59 8.35 15.07 8.35 15.36 8.64C15.65 8.93 15.65 9.41 15.36 9.7L13.06 12L15.36 14.3Z" fill="#777"></path> </g></svg>
+</li>
+</ul>
+
+<div id="resultcount"></div>
+
 {{ content }}
 
-<p>Status explanations:</p>
+<p>Status codes:</p>
 <ul>
 <li><strong>Open:</strong>  The issue is open, and is being discussed or is pending evaluation.</li>
 <li><strong>Incomplete:</strong>  The issue is open, but is awaiting revision by its author or its champion.</li>
