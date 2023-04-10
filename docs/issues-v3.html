@@ -6,6 +6,7 @@
   <title>Issues for DWARF Version 3</title>
   <link rel="stylesheet" href="./static/dwarf.css" type="text/css" />
   <link rel="icon" type="image/png" sizes="48x48" href="./images/favicon.png" />
+  <script src="./static/issuefilter.js" type="text/javascript"></script>
 </head>
 <body>
   <div class="pageheader">
@@ -21,11 +22,30 @@
 <li class="self"><a href="issues-v3.html">Version 3</a></li>
 <li class=""><a href="issues-v4.html">Version 4</a></li>
 <li class=""><a href="issues-v5.html">Version 5</a></li>
-<li class=""><a href="issues-closed.html">Version 6</a></li>
 <li class=""><a href="issues.html">Current Issues</a></li>
 </ul>
 
-<table class="issueindex">
+<ul id="issuefilter">
+<li>
+  <label for="by_status">Filter by status:</label>
+  <select id="by_status">
+    <option value="*">All</option>
+    <option value="o">Open</option>
+    <option value="c">Closed</option>
+    <option value="ca">&emsp;Accepted</option>
+    <option value="cr">&emsp;Rejected</option>
+    <option value="cw">&emsp;Withdrawn</option>
+  </select>
+</li>
+<li>
+  <input id="search_box" type="text" size="30" placeholder="Search issues…" />
+  <svg id="search_cancel" style="height: 1em; transform: translateY(.2em);" viewBox="0 0 24.00 24.00" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="" stroke-width="0.00024"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#777" stroke-width="0.096"></g><g id="SVGRepo_iconCarrier"> <path d="M12 2C6.49 2 2 6.49 2 12C2 17.51 6.49 22 12 22C17.51 22 22 17.51 22 12C22 6.49 17.51 2 12 2ZM15.36 14.3C15.65 14.59 15.65 15.07 15.36 15.36C15.21 15.51 15.02 15.58 14.83 15.58C14.64 15.58 14.45 15.51 14.3 15.36L12 13.06L9.7 15.36C9.55 15.51 9.36 15.58 9.17 15.58C8.98 15.58 8.79 15.51 8.64 15.36C8.35 15.07 8.35 14.59 8.64 14.3L10.94 12L8.64 9.7C8.35 9.41 8.35 8.93 8.64 8.64C8.93 8.35 9.41 8.35 9.7 8.64L12 10.94L14.3 8.64C14.59 8.35 15.07 8.35 15.36 8.64C15.65 8.93 15.65 9.41 15.36 9.7L13.06 12L15.36 14.3Z" fill="#777"></path> </g></svg>
+</li>
+</ul>
+
+<div id="resultcount"></div>
+
+<table id="issueindex" class="issueindex">
 <thead>
   <tr>
     <th>Issue #</th>
@@ -37,7 +57,7 @@
   </tr>
 </thead>
 <tbody>
-  <tr>
+  <tr data-id="011219.1" data-status="ca">
     <td><a href="./issues/011219.1.html">011219.1</a></td>
     <td>Clarification of DW_OP_le etc.</td>
     <td>David Anderson</td>
@@ -45,7 +65,7 @@
     <td>Clarification</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="011228.1" data-status="ca">
     <td><a href="./issues/011228.1.html">011228.1</a></td>
     <td>UTF-8 Clarification</td>
     <td>David Anderson</td>
@@ -53,7 +73,7 @@
     <td>Clarification</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="020101.1" data-status="ca">
     <td><a href="./issues/020101.1.html">020101.1</a></td>
     <td>DW_AT_allocated type</td>
     <td>Ron Brender</td>
@@ -61,7 +81,7 @@
     <td>Editorial</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="020118.1" data-status="ca">
     <td><a href="./issues/020118.1.html">020118.1</a></td>
     <td>Opcode_base Value</td>
     <td>Ron Brender</td>
@@ -69,7 +89,7 @@
     <td>Editorial</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="020201.1" data-status="ca">
     <td><a href="./issues/020201.1.html">020201.1</a></td>
     <td>DW_AT_segment</td>
     <td>Keith Walker</td>
@@ -77,7 +97,7 @@
     <td>Clarification</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="020202.1" data-status="ca">
     <td><a href="./issues/020202.1.html">020202.1</a></td>
     <td>DW_LNS_set_isa Incomplete</td>
     <td>Al Dunsmuir</td>
@@ -85,7 +105,7 @@
     <td>Clarification</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="020401.1" data-status="ca">
     <td><a href="./issues/020401.1.html">020401.1</a></td>
     <td>Cobol Data Types</td>
     <td>Ron Brender</td>
@@ -93,7 +113,7 @@
     <td>Extension</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="020612.1" data-status="ca">
     <td><a href="./issues/020612.1.html">020612.1</a></td>
     <td>Thread-local Storage</td>
     <td>Jim Blandy</td>
@@ -101,7 +121,7 @@
     <td>Extension</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="020702.1" data-status="ca">
     <td><a href="./issues/020702.1.html">020702.1</a></td>
     <td>FORM_data&lt;n&gt; signed or unsigned.</td>
     <td>James Cownie</td>
@@ -109,7 +129,7 @@
     <td>Clarification</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="020705.1" data-status="ca">
     <td><a href="./issues/020705.1.html">020705.1</a></td>
     <td>Call Frame Instructions</td>
     <td>Jim Blandy</td>
@@ -117,7 +137,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="020712.1" data-status="ca">
     <td><a href="./issues/020712.1.html">020712.1</a></td>
     <td>New operator: DW_OP_call_frame_cfa</td>
     <td>Todd Allen</td>
@@ -125,7 +145,7 @@
     <td>Extension</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="020902.1" data-status="ca">
     <td><a href="./issues/020902.1.html">020902.1</a></td>
     <td>Describing the Stack Pointer in the Call Frame Information</td>
     <td>David Anderson</td>
@@ -133,7 +153,7 @@
     <td>Extension</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="021016.1" data-status="ca">
     <td><a href="./issues/021016.1.html">021016.1</a></td>
     <td>C++ namespaces example</td>
     <td>David Anderson</td>
@@ -141,7 +161,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="021206.1" data-status="ca">
     <td><a href="./issues/021206.1.html">021206.1</a></td>
     <td>CFI addressing unit size</td>
     <td>David Anderson</td>
@@ -149,7 +169,7 @@
     <td>Extension</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="030318.1" data-status="ca">
     <td><a href="./issues/030318.1.html">030318.1</a></td>
     <td>DW_AT_ranges and address size</td>
     <td>David Anderson</td>
@@ -157,7 +177,7 @@
     <td>Clarification</td>
     <td>Accepted with modification</td>
   </tr>
-  <tr>
+  <tr data-id="030603.1" data-status="ca">
     <td><a href="./issues/030603.1.html">030603.1</a></td>
     <td>Static data members</td>
     <td>Keith Walker</td>
@@ -165,7 +185,7 @@
     <td>Clarification</td>
     <td>Accepted with modification</td>
   </tr>
-  <tr>
+  <tr data-id="030626.1" data-status="ca">
     <td><a href="./issues/030626.1.html">030626.1</a></td>
     <td>DW_AT_start_scope and discontiguous scopes</td>
     <td>David Anderson</td>
@@ -173,7 +193,7 @@
     <td>Clarification</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="030716.1" data-status="ca">
     <td><a href="./issues/030716.1.html">030716.1</a></td>
     <td>Catch Block Entries</td>
     <td>Brian Nettleton</td>
@@ -181,7 +201,7 @@
     <td>Editorial</td>
     <td>Accepted with modification</td>
   </tr>
-  <tr>
+  <tr data-id="030812.1" data-status="ca">
     <td><a href="./issues/030812.1.html">030812.1</a></td>
     <td>Return Address Clarification</td>
     <td>Unclear</td>
@@ -189,7 +209,7 @@
     <td>Editorial</td>
     <td>Accepted pending revision</td>
   </tr>
-  <tr>
+  <tr data-id="030812.2" data-status="ca">
     <td><a href="./issues/030812.2.html">030812.2</a></td>
     <td>CFA Calculation</td>
     <td>David Anderson</td>
@@ -197,7 +217,7 @@
     <td>Extension</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="030813.1" data-status="ca">
     <td><a href="./issues/030813.1.html">030813.1</a></td>
     <td>CIE initial state</td>
     <td>Andrew Cagney</td>
@@ -205,7 +225,7 @@
     <td>Clarification</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="030814.1" data-status="cr">
     <td><a href="./issues/030814.1.html">030814.1</a></td>
     <td>Separate compilation units</td>
     <td>Chris Quenelle</td>
@@ -213,7 +233,7 @@
     <td>Clarification</td>
     <td>Closed - no change</td>
   </tr>
-  <tr>
+  <tr data-id="030815.1" data-status="cr">
     <td><a href="./issues/030815.1.html">030815.1</a></td>
     <td>Describing Unsaved Stack Pointers</td>
     <td>Daniel Jacobowitz</td>
@@ -221,7 +241,7 @@
     <td>Extension</td>
     <td>Duplicate of 030812.2</td>
   </tr>
-  <tr>
+  <tr data-id="030915.1" data-status="ca">
     <td><a href="./issues/030915.1.html">030915.1</a></td>
     <td>Line Number Small Omission</td>
     <td>David Anderson</td>
@@ -229,7 +249,7 @@
     <td>Editorial</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="031001.1" data-status="cr">
     <td><a href="./issues/031001.1.html">031001.1</a></td>
     <td>Index Info</td>
     <td>Chris Quenelle</td>
@@ -237,7 +257,7 @@
     <td>Extension</td>
     <td>Closed</td>
   </tr>
-  <tr>
+  <tr data-id="031002.1" data-status="ca">
     <td><a href="./issues/031002.1.html">031002.1</a></td>
     <td>Where is OP_piece Value Stored?</td>
     <td>Andrew Cagney</td>
@@ -245,7 +265,7 @@
     <td>Clarification</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="031002.2" data-status="ca">
     <td><a href="./issues/031002.2.html">031002.2</a></td>
     <td>Endianity Proposal</td>
     <td>Michael Eager</td>
@@ -253,7 +273,7 @@
     <td>Extension</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="031203.1" data-status="ca">
     <td><a href="./issues/031203.1.html">031203.1</a></td>
     <td>Objective C Language Codes</td>
     <td>Jason Molenda</td>
@@ -261,7 +281,7 @@
     <td>Extension</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="031203.2" data-status="cr">
     <td><a href="./issues/031203.2.html">031203.2</a></td>
     <td>UPC Language Code</td>
     <td>James Cownie</td>
@@ -269,7 +289,7 @@
     <td>Extension</td>
     <td>Closed - See 050224.1</td>
   </tr>
-  <tr>
+  <tr data-id="040113.1" data-status="ca">
     <td><a href="./issues/040113.1.html">040113.1</a></td>
     <td>Use HEX not DEC in tables</td>
     <td>Jason Molenda</td>
@@ -277,7 +297,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="040308.1" data-status="ca">
     <td><a href="./issues/040308.1.html">040308.1</a></td>
     <td>Version Numbering</td>
     <td>Jason Molenda</td>
@@ -285,7 +305,7 @@
     <td>Clarification</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="040405.1" data-status="ca">
     <td><a href="./issues/040405.1.html">040405.1</a></td>
     <td>DW_AT_decl_file signedness</td>
     <td>David Anderson</td>
@@ -293,7 +313,7 @@
     <td>Editorial</td>
     <td>Accepted as modified</td>
   </tr>
-  <tr>
+  <tr data-id="040511.1" data-status="ca">
     <td><a href="./issues/040511.1.html">040511.1</a></td>
     <td>Static Member Function</td>
     <td>David Anderson</td>
@@ -301,7 +321,7 @@
     <td>Clarification</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="040618.1" data-status="ca">
     <td><a href="./issues/040618.1.html">040618.1</a></td>
     <td>Explicit Type for Enumerations</td>
     <td>James Cownie</td>
@@ -309,7 +329,7 @@
     <td>Extension</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="040729.1" data-status="ca">
     <td><a href="./issues/040729.1.html">040729.1</a></td>
     <td>Outermost Frame Identification</td>
     <td>David Anderson</td>
@@ -317,7 +337,7 @@
     <td>Extension</td>
     <td>Accepted revised proposal</td>
   </tr>
-  <tr>
+  <tr data-id="040909.1" data-status="ca">
     <td><a href="./issues/040909.1.html">040909.1</a></td>
     <td>DW_AT_default_value</td>
     <td>Alasdair Grant</td>
@@ -325,7 +345,7 @@
     <td>Extension</td>
     <td>Accepted with modification</td>
   </tr>
-  <tr>
+  <tr data-id="041108.1" data-status="cr">
     <td><a href="./issues/041108.1.html">041108.1</a></td>
     <td>Is Extra Padding Allowed</td>
     <td>David Anderson</td>
@@ -333,7 +353,7 @@
     <td>Clarification</td>
     <td>Closed with no change</td>
   </tr>
-  <tr>
+  <tr data-id="050222.1" data-status="ca">
     <td><a href="./issues/050222.1.html">050222.1</a></td>
     <td>Location list entries should allow ending address to be same as starting address</td>
     <td>Daniel Berlin</td>
@@ -341,7 +361,7 @@
     <td>Error</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="050223.1" data-status="ca">
     <td><a href="./issues/050223.1.html">050223.1</a></td>
     <td>mutable is not a C++ type qualifier</td>
     <td>Al Grant</td>
@@ -349,7 +369,7 @@
     <td>Error</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="050224.1" data-status="ca">
     <td><a href="./issues/050224.1.html">050224.1</a></td>
     <td>UPC support</td>
     <td>James Cownie</td>
@@ -357,7 +377,7 @@
     <td>Enhancement</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="050317.1" data-status="ca">
     <td><a href="./issues/050317.1.html">050317.1</a></td>
     <td>Extensions for decimal floating point</td>
     <td>Ben Elliston</td>
@@ -365,7 +385,7 @@
     <td>Enhancement</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="050408.1" data-status="ca">
     <td><a href="./issues/050408.1.html">050408.1</a></td>
     <td>D Language Support</td>
     <td>John Demme</td>
@@ -373,7 +393,7 @@
     <td>Extension</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="050510.1" data-status="ca">
     <td><a href="./issues/050510.1.html">050510.1</a></td>
     <td>DW_AT_frame_base clarifications</td>
     <td>Jeff Nelson</td>
@@ -381,7 +401,7 @@
     <td>Clarification</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="050518.1" data-status="ca">
     <td><a href="./issues/050518.1.html">050518.1</a></td>
     <td>DW_OP_bit_piece</td>
     <td>John Bishop</td>
@@ -389,7 +409,7 @@
     <td>Enhancement</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="050616.1" data-status="cr">
     <td><a href="./issues/050616.1.html">050616.1</a></td>
     <td>Null entries and null sibling references</td>
     <td>Ron Brender</td>
@@ -397,7 +417,7 @@
     <td>Clarification</td>
     <td>Closed</td>
   </tr>
-  <tr>
+  <tr data-id="050701.1" data-status="ca">
     <td><a href="./issues/050701.1.html">050701.1</a></td>
     <td>Improve description of DW_OP_piece, with small extension</td>
     <td>Ron Brender and Jim Blandy</td>
@@ -405,7 +425,7 @@
     <td>Improvement</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="050711.1" data-status="ca">
     <td><a href="./issues/050711.1.html">050711.1</a></td>
     <td>Specification of compiled units which are not &#x27;named disk files&#x27;</td>
     <td>Matthew Gretton-Dann</td>
@@ -413,7 +433,7 @@
     <td>Error</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="050711.2" data-status="ca">
     <td><a href="./issues/050711.2.html">050711.2</a></td>
     <td>Add DW_AT_object_pointer for &quot;this&quot; parameters</td>
     <td>Chris Quenelle</td>
@@ -421,7 +441,7 @@
     <td>Enhancement</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="050712.1" data-status="ca">
     <td><a href="./issues/050712.1.html">050712.1</a></td>
     <td>C++ explicit keyword</td>
     <td>Chris Quenelle</td>
@@ -429,7 +449,7 @@
     <td>Enhancement</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="050715.1" data-status="ca">
     <td><a href="./issues/050715.1.html">050715.1</a></td>
     <td>Slices of bit arrays</td>
     <td>Ron Brender</td>
@@ -437,7 +457,7 @@
     <td>Enhancement</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="050715.2" data-status="ca">
     <td><a href="./issues/050715.2.html">050715.2</a></td>
     <td>Bit strides and byte strides</td>
     <td>Ron Brender</td>
@@ -445,7 +465,7 @@
     <td>Improvement</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="050718.1" data-status="ca">
     <td><a href="./issues/050718.1.html">050718.1</a></td>
     <td>FORTRAN extensions</td>
     <td>Jim Cownie</td>
@@ -453,7 +473,7 @@
     <td>Extension</td>
     <td>Accepted with modification</td>
   </tr>
-  <tr>
+  <tr data-id="050720.1" data-status="ca">
     <td><a href="./issues/050720.1.html">050720.1</a></td>
     <td>DW_AT_mutable (replaces DW_TAG_mutable_type)</td>
     <td>Chris Quenelle</td>
@@ -461,7 +481,7 @@
     <td>Enhancement</td>
     <td>Accpeted</td>
   </tr>
-  <tr>
+  <tr data-id="050720.2" data-status="cr">
     <td><a href="./issues/050720.2.html">050720.2</a></td>
     <td>DW_AT_object_pointer (v2)</td>
     <td>Chris Quenelle</td>
@@ -469,7 +489,7 @@
     <td>Enhancement</td>
     <td>Closed - Duplicate</td>
   </tr>
-  <tr>
+  <tr data-id="050726.1" data-status="cr">
     <td><a href="./issues/050726.1.html">050726.1</a></td>
     <td>Meanings of &quot;basic_block&quot; and &quot;end_sequence&quot;</td>
     <td>John Bishop</td>
@@ -477,7 +497,7 @@
     <td>Improvement</td>
     <td>Rejected with explaination</td>
   </tr>
-  <tr>
+  <tr data-id="050731.1" data-status="ca">
     <td><a href="./issues/050731.1.html">050731.1</a></td>
     <td>Change D.2.2 Ada example to reference upper bound memory directly</td>
     <td>Todd Allen</td>
@@ -485,7 +505,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="050808.1" data-status="ca">
     <td><a href="./issues/050808.1.html">050808.1</a></td>
     <td>Discontiguous scopes</td>
     <td>John Bishop</td>
@@ -493,7 +513,7 @@
     <td>Clarification</td>
     <td>Accepted without change</td>
   </tr>
-  <tr>
+  <tr data-id="050808.2" data-status="cr">
     <td><a href="./issues/050808.2.html">050808.2</a></td>
     <td>Add a new entry to identify the main function in a program</td>
     <td>Wu Zhou</td>
@@ -505,7 +525,7 @@
 </table>
 
 
-<p>Status explanations:</p>
+<p>Status codes:</p>
 <ul>
 <li><strong>Open:</strong>  The issue is open, and is being discussed or is pending evaluation.</li>
 <li><strong>Incomplete:</strong>  The issue is open, but is awaiting revision by its author or its champion.</li>

@@ -6,6 +6,7 @@
   <title>Issues for DWARF Version 4</title>
   <link rel="stylesheet" href="./static/dwarf.css" type="text/css" />
   <link rel="icon" type="image/png" sizes="48x48" href="./images/favicon.png" />
+  <script src="./static/issuefilter.js" type="text/javascript"></script>
 </head>
 <body>
   <div class="pageheader">
@@ -21,11 +22,30 @@
 <li class=""><a href="issues-v3.html">Version 3</a></li>
 <li class="self"><a href="issues-v4.html">Version 4</a></li>
 <li class=""><a href="issues-v5.html">Version 5</a></li>
-<li class=""><a href="issues-closed.html">Version 6</a></li>
 <li class=""><a href="issues.html">Current Issues</a></li>
 </ul>
 
-<table class="issueindex">
+<ul id="issuefilter">
+<li>
+  <label for="by_status">Filter by status:</label>
+  <select id="by_status">
+    <option value="*">All</option>
+    <option value="o">Open</option>
+    <option value="c">Closed</option>
+    <option value="ca">&emsp;Accepted</option>
+    <option value="cr">&emsp;Rejected</option>
+    <option value="cw">&emsp;Withdrawn</option>
+  </select>
+</li>
+<li>
+  <input id="search_box" type="text" size="30" placeholder="Search issues…" />
+  <svg id="search_cancel" style="height: 1em; transform: translateY(.2em);" viewBox="0 0 24.00 24.00" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="" stroke-width="0.00024"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#777" stroke-width="0.096"></g><g id="SVGRepo_iconCarrier"> <path d="M12 2C6.49 2 2 6.49 2 12C2 17.51 6.49 22 12 22C17.51 22 22 17.51 22 12C22 6.49 17.51 2 12 2ZM15.36 14.3C15.65 14.59 15.65 15.07 15.36 15.36C15.21 15.51 15.02 15.58 14.83 15.58C14.64 15.58 14.45 15.51 14.3 15.36L12 13.06L9.7 15.36C9.55 15.51 9.36 15.58 9.17 15.58C8.98 15.58 8.79 15.51 8.64 15.36C8.35 15.07 8.35 14.59 8.64 14.3L10.94 12L8.64 9.7C8.35 9.41 8.35 8.93 8.64 8.64C8.93 8.35 9.41 8.35 9.7 8.64L12 10.94L14.3 8.64C14.59 8.35 15.07 8.35 15.36 8.64C15.65 8.93 15.65 9.41 15.36 9.7L13.06 12L15.36 14.3Z" fill="#777"></path> </g></svg>
+</li>
+</ul>
+
+<div id="resultcount"></div>
+
+<table id="issueindex" class="issueindex">
 <thead>
   <tr>
     <th>Issue #</th>
@@ -37,7 +57,7 @@
   </tr>
 </thead>
 <tbody>
-  <tr>
+  <tr data-id="040928.1" data-status="ca">
     <td><a href="./issues/040928.1.html">040928.1</a></td>
     <td>Add Address Size to Frame Info</td>
     <td>Don Darling</td>
@@ -45,7 +65,7 @@
     <td>Extension</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="060615.1" data-status="cr">
     <td><a href="./issues/060615.1.html">060615.1</a></td>
     <td>Address size clarification</td>
     <td>Stephane Chauveau</td>
@@ -53,7 +73,7 @@
     <td>Clarification</td>
     <td>Closed</td>
   </tr>
-  <tr>
+  <tr data-id="070426.1" data-status="ca">
     <td><a href="./issues/070426.1.html">070426.1</a></td>
     <td>Constant expressions in location lists</td>
     <td>Cary Coutant</td>
@@ -61,7 +81,7 @@
     <td>Extension</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="070426.2" data-status="ca">
     <td><a href="./issues/070426.2.html">070426.2</a></td>
     <td>Support bundled instructions</td>
     <td>Cary Coutant</td>
@@ -69,7 +89,7 @@
     <td>Extension</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="070512.1" data-status="ca">
     <td><a href="./issues/070512.1.html">070512.1</a></td>
     <td>Clarify location expressions</td>
     <td>Dave Anderson</td>
@@ -77,7 +97,7 @@
     <td>Editorial</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="070516.1" data-status="ca">
     <td><a href="./issues/070516.1.html">070516.1</a></td>
     <td>Section offset FORMs</td>
     <td>Ron Brender</td>
@@ -85,7 +105,7 @@
     <td>Extension</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="070519.1" data-status="cr">
     <td><a href="./issues/070519.1.html">070519.1</a></td>
     <td>Line table support for VLIW</td>
     <td>Michael Eager</td>
@@ -93,7 +113,7 @@
     <td>Extension</td>
     <td>Rejected</td>
   </tr>
-  <tr>
+  <tr data-id="070619.1" data-status="ca">
     <td><a href="./issues/070619.1.html">070619.1</a></td>
     <td>Identify main function</td>
     <td>Chris Quenelle/Michael Eager</td>
@@ -101,7 +121,7 @@
     <td>Extension</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="070709.1" data-status="ca">
     <td><a href="./issues/070709.1.html">070709.1</a></td>
     <td>Segment terminology cleanup</td>
     <td>Jim Blandy</td>
@@ -109,7 +129,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="070716.1" data-status="ca">
     <td><a href="./issues/070716.1.html">070716.1</a></td>
     <td>Encode High-PC as constant offset from Low-PC</td>
     <td>Todd Allen</td>
@@ -117,7 +137,7 @@
     <td>Extension</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="071227.1" data-status="ca">
     <td><a href="./issues/071227.1.html">071227.1</a></td>
     <td>Calculate value in DWARF expression</td>
     <td>John Bishop</td>
@@ -125,7 +145,7 @@
     <td>Extension</td>
     <td>Accepted with changes</td>
   </tr>
-  <tr>
+  <tr data-id="080112.1" data-status="cr">
     <td><a href="./issues/080112.1.html">080112.1</a></td>
     <td>FORM Reform Proposal 1: Reference Class Forms</td>
     <td>Cary Coutant</td>
@@ -133,7 +153,7 @@
     <td>Extension</td>
     <td>Rejected</td>
   </tr>
-  <tr>
+  <tr data-id="080112.2" data-status="ca">
     <td><a href="./issues/080112.2.html">080112.2</a></td>
     <td>FORM Reform Proposal 2: Block Class Forms and Expressions</td>
     <td>Cary Coutant</td>
@@ -141,7 +161,7 @@
     <td>Extension</td>
     <td>Accepted with changes</td>
   </tr>
-  <tr>
+  <tr data-id="080112.3" data-status="ca">
     <td><a href="./issues/080112.3.html">080112.3</a></td>
     <td>FORM Reform Proposal 3: Implicit Flag Form</td>
     <td>Cary Coutant</td>
@@ -149,7 +169,7 @@
     <td>Extension</td>
     <td>Accepted with changes</td>
   </tr>
-  <tr>
+  <tr data-id="080128.1" data-status="ca">
     <td><a href="./issues/080128.1.html">080128.1</a></td>
     <td>Clarify recommendations for filenames</td>
     <td>Cary Coutant</td>
@@ -157,7 +177,7 @@
     <td>Improvement</td>
     <td>Accepted with modification</td>
   </tr>
-  <tr>
+  <tr data-id="080205.1" data-status="cr">
     <td><a href="./issues/080205.1.html">080205.1</a></td>
     <td>Location List inconsistency?</td>
     <td>Julian Seward</td>
@@ -165,7 +185,7 @@
     <td>Ambiguity</td>
     <td>Closed -- explanation</td>
   </tr>
-  <tr>
+  <tr data-id="080404.1" data-status="cr">
     <td><a href="./issues/080404.1.html">080404.1</a></td>
     <td>Calculate value in DWARF expression</td>
     <td>Cary Coutant</td>
@@ -173,7 +193,7 @@
     <td>Extension</td>
     <td>Rejected</td>
   </tr>
-  <tr>
+  <tr data-id="080422.1" data-status="ca">
     <td><a href="./issues/080422.1.html">080422.1</a></td>
     <td>default lower bound of DW_TAG_subrange_type for Ada</td>
     <td>Joel Brobecker</td>
@@ -181,7 +201,7 @@
     <td>Extension</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="080516.1" data-status="ca">
     <td><a href="./issues/080516.1.html">080516.1</a></td>
     <td>Default Array Lower Bounds</td>
     <td>Ron Brender</td>
@@ -189,7 +209,7 @@
     <td>Extension</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="080621.1" data-status="ca">
     <td><a href="./issues/080621.1.html">080621.1</a></td>
     <td>Sharing Abbreviations</td>
     <td>David Anderson</td>
@@ -197,7 +217,7 @@
     <td>Clarification</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="080622.1" data-status="ca">
     <td><a href="./issues/080622.1.html">080622.1</a></td>
     <td>Multiple entry stack values</td>
     <td>Ron Brender</td>
@@ -205,7 +225,7 @@
     <td>Clarification</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="080930.1" data-status="ca">
     <td><a href="./issues/080930.1.html">080930.1</a></td>
     <td>Using COMDAT Sections to Reduce the Size of DWARF Debug Information</td>
     <td>Cary Coutant</td>
@@ -213,7 +233,7 @@
     <td>Enhancement</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="081130.1" data-status="ca">
     <td><a href="./issues/081130.1.html">081130.1</a></td>
     <td>Packed unaligned bit fields</td>
     <td>Ron Brender</td>
@@ -221,7 +241,7 @@
     <td>Enhancement</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="081211.1" data-status="ca">
     <td><a href="./issues/081211.1.html">081211.1</a></td>
     <td>Allow DW_AT_bit_size like DW_AT_byte_size</td>
     <td>Ron Brender</td>
@@ -229,7 +249,7 @@
     <td>Enhancement</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="090106.1" data-status="ca">
     <td><a href="./issues/090106.1.html">090106.1</a></td>
     <td>Support C++0x r-value reference</td>
     <td>Kendrick Wong</td>
@@ -237,7 +257,7 @@
     <td>Enhancement</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="090107.1" data-status="ca">
     <td><a href="./issues/090107.1.html">090107.1</a></td>
     <td>Support C++0x generalized constant expression - user-defined literal</td>
     <td>Kendrick Wong</td>
@@ -245,7 +265,7 @@
     <td>Enhancement</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="090107.2" data-status="cr">
     <td><a href="./issues/090107.2.html">090107.2</a></td>
     <td>Support C++0x Variadic templates</td>
     <td>Kendrick Wong</td>
@@ -253,7 +273,7 @@
     <td>Enhancement</td>
     <td>Rejected</td>
   </tr>
-  <tr>
+  <tr data-id="090109.1" data-status="ca">
     <td><a href="./issues/090109.1.html">090109.1</a></td>
     <td>Support C++0x new string literals</td>
     <td>Kendrick Wong</td>
@@ -261,7 +281,7 @@
     <td>Enhancement</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="090112.1" data-status="ca">
     <td><a href="./issues/090112.1.html">090112.1</a></td>
     <td>Support C++0x template aliases</td>
     <td>Kendrick Wong</td>
@@ -269,7 +289,7 @@
     <td>Enhancement</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="090128.1" data-status="ca">
     <td><a href="./issues/090128.1.html">090128.1</a></td>
     <td>Line Number Table to Support Profiling</td>
     <td>Cary Coutant</td>
@@ -277,7 +297,7 @@
     <td>Enhancement</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="090303.1" data-status="ca">
     <td><a href="./issues/090303.1.html">090303.1</a></td>
     <td>Support C++0x strongly typed enumerations</td>
     <td>Kendrick Wong</td>
@@ -285,7 +305,7 @@
     <td>Enhancement</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="090321.1" data-status="ca">
     <td><a href="./issues/090321.1.html">090321.1</a></td>
     <td>DW_AT_declaration inheritance by DW_AT_specification</td>
     <td>Jan Kratochvil</td>
@@ -293,7 +313,7 @@
     <td>Ambiguity</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="090402.1" data-status="cr">
     <td><a href="./issues/090402.1.html">090402.1</a></td>
     <td>DWARF support for overlays</td>
     <td>John DelSignore</td>
@@ -301,7 +321,7 @@
     <td>Clarification</td>
     <td>Rejected</td>
   </tr>
-  <tr>
+  <tr data-id="090402.2" data-status="ca">
     <td><a href="./issues/090402.2.html">090402.2</a></td>
     <td>Clarify DW_TAG_condition_name</td>
     <td>Paul Robinson</td>
@@ -309,7 +329,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="090406.1" data-status="ca">
     <td><a href="./issues/090406.1.html">090406.1</a></td>
     <td>Template types</td>
     <td>Todd Allen</td>
@@ -317,7 +337,7 @@
     <td>Clarification</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="090503.1" data-status="cr">
     <td><a href="./issues/090503.1.html">090503.1</a></td>
     <td>DW_OP_linkage_name and DW_OP_linkage_name_ptr operations</td>
     <td>Ron Brender</td>
@@ -325,7 +345,7 @@
     <td>Enhancement</td>
     <td>Rejected</td>
   </tr>
-  <tr>
+  <tr data-id="090707.1" data-status="ca">
     <td><a href="./issues/090707.1.html">090707.1</a></td>
     <td>Template types appendix</td>
     <td>Todd Allen</td>
@@ -333,7 +353,7 @@
     <td>Editorial</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="090715.1" data-status="ca">
     <td><a href="./issues/090715.1.html">090715.1</a></td>
     <td>Add a DW_AT_linkage_name attribute</td>
     <td>Ron Brender</td>
@@ -341,7 +361,7 @@
     <td>Enhancement</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="090720.1" data-status="ca">
     <td><a href="./issues/090720.1.html">090720.1</a></td>
     <td>Add DW_LANG_Python</td>
     <td>Cary Coutant</td>
@@ -349,7 +369,7 @@
     <td>Enhancement</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="100308.1" data-status="ca">
     <td><a href="./issues/100308.1.html">100308.1</a></td>
     <td>Typo, pg 37</td>
     <td>David Gross</td>
@@ -357,7 +377,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="100308.2" data-status="ca">
     <td><a href="./issues/100308.2.html">100308.2</a></td>
     <td>Typo, pg 48</td>
     <td>David Gross</td>
@@ -365,7 +385,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="100308.3" data-status="ca">
     <td><a href="./issues/100308.3.html">100308.3</a></td>
     <td>Typo, pg 110</td>
     <td>David Gross</td>
@@ -373,7 +393,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="100308.4" data-status="ca">
     <td><a href="./issues/100308.4.html">100308.4</a></td>
     <td>Typo, pg 188</td>
     <td>David Gross</td>
@@ -381,7 +401,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="100308.5" data-status="ca">
     <td><a href="./issues/100308.5.html">100308.5</a></td>
     <td>Typo, pg 236</td>
     <td>David Gross</td>
@@ -389,7 +409,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="100308.6" data-status="cr">
     <td><a href="./issues/100308.6.html">100308.6</a></td>
     <td>Typo, pg 151</td>
     <td>David Gross</td>
@@ -397,7 +417,7 @@
     <td>Editorial</td>
     <td>Rejected</td>
   </tr>
-  <tr>
+  <tr data-id="100308.7" data-status="ca">
     <td><a href="./issues/100308.7.html">100308.7</a></td>
     <td>Typo, pg 281</td>
     <td>David Gross</td>
@@ -405,7 +425,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="100308.8" data-status="ca">
     <td><a href="./issues/100308.8.html">100308.8</a></td>
     <td>Type signatures for function definitions</td>
     <td>David Gross</td>
@@ -413,7 +433,7 @@
     <td>Clarification</td>
     <td>Accpeted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="100316.1" data-status="ca">
     <td><a href="./issues/100316.1.html">100316.1</a></td>
     <td>Errors in 6.4.2.2, 6.4.3.3</td>
     <td>David Anderson</td>
@@ -421,7 +441,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="100416.1" data-status="ca">
     <td><a href="./issues/100416.1.html">100416.1</a></td>
     <td>Static and Dynamic Values unclear reference+exprloc</td>
     <td>Jan Kratochvil</td>
@@ -429,7 +449,7 @@
     <td>Clarification</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="100416.2" data-status="ca">
     <td><a href="./issues/100416.2.html">100416.2</a></td>
     <td>DW_AT_lower_bound default for DW_LANG_Python</td>
     <td>Jakub Jelinek</td>
@@ -437,7 +457,7 @@
     <td>Ambiguity</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="100419.1" data-status="ca">
     <td><a href="./issues/100419.1.html">100419.1</a></td>
     <td>DW_ATE_UTF</td>
     <td>Jakub Jelinek</td>
@@ -445,7 +465,7 @@
     <td>Ambiguity</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="100419.2" data-status="ca">
     <td><a href="./issues/100419.2.html">100419.2</a></td>
     <td>Typo in Figure 76</td>
     <td>Jakub Jelinek</td>
@@ -453,7 +473,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="100419.3" data-status="ca">
     <td><a href="./issues/100419.3.html">100419.3</a></td>
     <td>Index doesn&#x27;t reference DW_ATE_decimal_float on page 77</td>
     <td>Jakub Jelinek</td>
@@ -461,7 +481,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="100419.4" data-status="ca">
     <td><a href="./issues/100419.4.html">100419.4</a></td>
     <td>DW_AT_linkage_name for DW_TAG_member</td>
     <td>Jakub Jelinek</td>
@@ -469,7 +489,7 @@
     <td>Clarification</td>
     <td>Answered</td>
   </tr>
-  <tr>
+  <tr data-id="100421.1" data-status="ca">
     <td><a href="./issues/100421.1.html">100421.1</a></td>
     <td>DW_AT_linkage_name for DW_TAG_common_block</td>
     <td>Jakub Jelinek</td>
@@ -477,7 +497,7 @@
     <td>Clarification</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="100423.1" data-status="ca">
     <td><a href="./issues/100423.1.html">100423.1</a></td>
     <td>Abstract root clarification</td>
     <td>David Anderson</td>
@@ -485,7 +505,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="100427.1" data-status="ca">
     <td><a href="./issues/100427.1.html">100427.1</a></td>
     <td>formatting error in 6.4.2.2 enumerated list, items 5/6</td>
     <td>Roland McGrath</td>
@@ -493,7 +513,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="100427.2" data-status="ca">
     <td><a href="./issues/100427.2.html">100427.2</a></td>
     <td>clarify CFA ops &quot;keep the old register/offset&quot; cases vs DWARF expression case</td>
     <td>Roland McGrath</td>
@@ -501,7 +521,7 @@
     <td>Clarification</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="100517.1" data-status="ca">
     <td><a href="./issues/100517.1.html">100517.1</a></td>
     <td>Implicit location descriptions not mentioned in DW_OP_bit_piece description</td>
     <td>Jakub Jelinek</td>
@@ -509,7 +529,7 @@
     <td>Clarification</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="101203.1" data-status="cw">
     <td><a href="./issues/101203.1.html">101203.1</a></td>
     <td>Describing Fortran descriptors</td>
     <td>Kendrick Wong</td>
@@ -521,7 +541,7 @@
 </table>
 
 
-<p>Status explanations:</p>
+<p>Status codes:</p>
 <ul>
 <li><strong>Open:</strong>  The issue is open, and is being discussed or is pending evaluation.</li>
 <li><strong>Incomplete:</strong>  The issue is open, but is awaiting revision by its author or its champion.</li>

@@ -6,6 +6,7 @@
   <title>Closed Issues for DWARF Version 6</title>
   <link rel="stylesheet" href="./static/dwarf.css" type="text/css" />
   <link rel="icon" type="image/png" sizes="48x48" href="./images/favicon.png" />
+  <script src="./static/issuefilter.js" type="text/javascript"></script>
 </head>
 <body>
   <div class="pageheader">
@@ -21,11 +22,30 @@
 <li class=""><a href="issues-v3.html">Version 3</a></li>
 <li class=""><a href="issues-v4.html">Version 4</a></li>
 <li class=""><a href="issues-v5.html">Version 5</a></li>
-<li class="self"><a href="issues-closed.html">Version 6</a></li>
 <li class=""><a href="issues.html">Current Issues</a></li>
 </ul>
 
-<table class="issueindex">
+<ul id="issuefilter">
+<li>
+  <label for="by_status">Filter by status:</label>
+  <select id="by_status">
+    <option value="*">All</option>
+    <option value="o">Open</option>
+    <option value="c">Closed</option>
+    <option value="ca">&emsp;Accepted</option>
+    <option value="cr">&emsp;Rejected</option>
+    <option value="cw">&emsp;Withdrawn</option>
+  </select>
+</li>
+<li>
+  <input id="search_box" type="text" size="30" placeholder="Search issues…" />
+  <svg id="search_cancel" style="height: 1em; transform: translateY(.2em);" viewBox="0 0 24.00 24.00" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="" stroke-width="0.00024"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#777" stroke-width="0.096"></g><g id="SVGRepo_iconCarrier"> <path d="M12 2C6.49 2 2 6.49 2 12C2 17.51 6.49 22 12 22C17.51 22 22 17.51 22 12C22 6.49 17.51 2 12 2ZM15.36 14.3C15.65 14.59 15.65 15.07 15.36 15.36C15.21 15.51 15.02 15.58 14.83 15.58C14.64 15.58 14.45 15.51 14.3 15.36L12 13.06L9.7 15.36C9.55 15.51 9.36 15.58 9.17 15.58C8.98 15.58 8.79 15.51 8.64 15.36C8.35 15.07 8.35 14.59 8.64 14.3L10.94 12L8.64 9.7C8.35 9.41 8.35 8.93 8.64 8.64C8.93 8.35 9.41 8.35 9.7 8.64L12 10.94L14.3 8.64C14.59 8.35 15.07 8.35 15.36 8.64C15.65 8.93 15.65 9.41 15.36 9.7L13.06 12L15.36 14.3Z" fill="#777"></path> </g></svg>
+</li>
+</ul>
+
+<div id="resultcount"></div>
+
+<table id="issueindex" class="issueindex">
 <thead>
   <tr>
     <th>Issue #</th>
@@ -37,7 +57,7 @@
   </tr>
 </thead>
 <tbody>
-  <tr>
+  <tr data-id="141117.1" data-status="ca">
     <td><a href="./issues/141117.1.html">141117.1</a></td>
     <td>Arbitrary expressions as formal parameter default values</td>
     <td>Adrian Prantl</td>
@@ -45,7 +65,7 @@
     <td>Enhancement</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="161018.1" data-status="cr">
     <td><a href="./issues/161018.1.html">161018.1</a></td>
     <td>DWARF-embedded source for online-compiled programs</td>
     <td>Simon Brand</td>
@@ -53,7 +73,7 @@
     <td>Enhancement</td>
     <td>Duplicate</td>
   </tr>
-  <tr>
+  <tr data-id="161206.2" data-status="cr">
     <td><a href="./issues/161206.2.html">161206.2</a></td>
     <td>Clarify relationship between DW_OP_piece and DW_OP_bit_piece</td>
     <td>Andreas Arnez</td>
@@ -61,7 +81,7 @@
     <td>Clarification</td>
     <td>Rejected with clarification</td>
   </tr>
-  <tr>
+  <tr data-id="170427.2" data-status="ca">
     <td><a href="./issues/170427.2.html">170427.2</a></td>
     <td>Extending loclists</td>
     <td>Alexandre Oliva</td>
@@ -69,7 +89,7 @@
     <td>Enhancement</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="170427.3" data-status="ca">
     <td><a href="./issues/170427.3.html">170427.3</a></td>
     <td>Extending loclists with common sublists</td>
     <td>Alexandre Oliva</td>
@@ -77,7 +97,7 @@
     <td>Enhancement</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="170503.1" data-status="ca">
     <td><a href="./issues/170503.1.html">170503.1</a></td>
     <td>Adding DW_LANG_Kotlin constant in  DW_AT_laguage attribute</td>
     <td>Vasily Levchenko</td>
@@ -85,7 +105,7 @@
     <td>Enhancement</td>
     <td>Lang code assigned</td>
   </tr>
-  <tr>
+  <tr data-id="170527.1" data-status="ca">
     <td><a href="./issues/170527.1.html">170527.1</a></td>
     <td>DW_IDX_* for static/extern symbols</td>
     <td>Jan Kratochvil</td>
@@ -93,7 +113,7 @@
     <td>Enhancement</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="171103.1" data-status="ca">
     <td><a href="./issues/171103.1.html">171103.1</a></td>
     <td>DW_AT_call_origin should be encoded as reference class, not an exprloc</td>
     <td>Mark Wielaard</td>
@@ -101,7 +121,7 @@
     <td>Accepted</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="171115.1" data-status="ca">
     <td><a href="./issues/171115.1.html">171115.1</a></td>
     <td>DW_LANG_Zig</td>
     <td>Andrew Kelley</td>
@@ -109,7 +129,7 @@
     <td>Enhancement</td>
     <td>Lang code assigned</td>
   </tr>
-  <tr>
+  <tr data-id="171130.1" data-status="ca">
     <td><a href="./issues/171130.1.html">171130.1</a></td>
     <td>Typo - Regression since DWARF3 standard</td>
     <td>Ben Dunbobbin</td>
@@ -117,7 +137,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="171130.2" data-status="cr">
     <td><a href="./issues/171130.2.html">171130.2</a></td>
     <td>Allow $ORIGIN in DW_AT_comp_dir</td>
     <td>Thomas Anderson</td>
@@ -125,7 +145,7 @@
     <td>Enhancement</td>
     <td>Rejected</td>
   </tr>
-  <tr>
+  <tr data-id="171216.1" data-status="cr">
     <td><a href="./issues/171216.1.html">171216.1</a></td>
     <td>Extend DW_TAG_compile_unit entry with DW_TAG_hash_value</td>
     <td>Aleksandr Povaliaev</td>
@@ -133,7 +153,7 @@
     <td>Enhancement</td>
     <td>Rejected</td>
   </tr>
-  <tr>
+  <tr data-id="180201.1" data-status="ca">
     <td><a href="./issues/180201.1.html">180201.1</a></td>
     <td>DWARF and source text embedding</td>
     <td>Scott Linder</td>
@@ -141,7 +161,7 @@
     <td>Enhancement</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="180326.1" data-status="ca">
     <td><a href="./issues/180326.1.html">180326.1</a></td>
     <td>Clarify consistency of DWARF 32/64 format with a CU</td>
     <td>Paul Robinson</td>
@@ -149,7 +169,7 @@
     <td>Clarification</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="180426.1" data-status="ca">
     <td><a href="./issues/180426.1.html">180426.1</a></td>
     <td>Allow DW_FORM_strp_sup in .debug_line vendor defined content descriptions</td>
     <td>Mark Wielaard</td>
@@ -157,7 +177,7 @@
     <td>Ambiguity</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="180426.2" data-status="ca">
     <td><a href="./issues/180426.2.html">180426.2</a></td>
     <td>Line table &quot;comment&quot; opcode</td>
     <td>Paul T Robinson</td>
@@ -165,7 +185,7 @@
     <td>Enhancement</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="180503.1" data-status="ca">
     <td><a href="./issues/180503.1.html">180503.1</a></td>
     <td>Usage suggestion for LEB128 padding</td>
     <td>Paul Robinson</td>
@@ -173,7 +193,7 @@
     <td>Improvement</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="180503.2" data-status="ca">
     <td><a href="./issues/180503.2.html">180503.2</a></td>
     <td>DW_LANG_ code for Ada 2005 and Ada 2012 are missing</td>
     <td>Sture Carlson</td>
@@ -181,7 +201,7 @@
     <td>Ambiguity</td>
     <td>Lang code assigned</td>
   </tr>
-  <tr>
+  <tr data-id="180517.1" data-status="ca">
     <td><a href="./issues/180517.1.html">180517.1</a></td>
     <td>Variant parts without a discriminant</td>
     <td>Tom Tromey</td>
@@ -189,7 +209,7 @@
     <td>Clarification</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="180517.2" data-status="cr">
     <td><a href="./issues/180517.2.html">180517.2</a></td>
     <td>Tagless variant parts</td>
     <td>Tom Tromey</td>
@@ -197,7 +217,7 @@
     <td>Enhancement</td>
     <td>Rejected</td>
   </tr>
-  <tr>
+  <tr data-id="180613.1" data-status="ca">
     <td><a href="./issues/180613.1.html">180613.1</a></td>
     <td>0xffff in tables rendered with spaces</td>
     <td>Andrew Cagney</td>
@@ -205,7 +225,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="180625.1" data-status="ca">
     <td><a href="./issues/180625.1.html">180625.1</a></td>
     <td>Inconsistent initial length description - missing reference and/or TMI</td>
     <td>Andrew Cagney</td>
@@ -213,7 +233,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="180914.1" data-status="ca">
     <td><a href="./issues/180914.1.html">180914.1</a></td>
     <td>Line Number Program Header directories_count field missing note.</td>
     <td>Paul Bowen-Huggett</td>
@@ -221,7 +241,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="181003.1" data-status="ca">
     <td><a href="./issues/181003.1.html">181003.1</a></td>
     <td>Forbid DW_OP_call_ref/DW_FORM_ref_addr in a .dwo section</td>
     <td>Paul T Robinson</td>
@@ -229,7 +249,7 @@
     <td>Error</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="181019.1" data-status="ca">
     <td><a href="./issues/181019.1.html">181019.1</a></td>
     <td>Inconsistency in DW_AT_import descriptions</td>
     <td>Paul Robinson</td>
@@ -237,7 +257,7 @@
     <td>Clarification</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="181026.1" data-status="cr">
     <td><a href="./issues/181026.1.html">181026.1</a></td>
     <td>Move DW_AT_entry_pc from split full to skeleton unit</td>
     <td>Paul Robinson</td>
@@ -245,7 +265,7 @@
     <td>Enhancement</td>
     <td>Rejected</td>
   </tr>
-  <tr>
+  <tr data-id="181026.2" data-status="cw">
     <td><a href="./issues/181026.2.html">181026.2</a></td>
     <td>Replace DW_FORM_strp_sup with strp_sup4 and strp_sup8</td>
     <td>Paul Robinson</td>
@@ -253,7 +273,7 @@
     <td>Enhancement</td>
     <td>Withdrawn</td>
   </tr>
-  <tr>
+  <tr data-id="181205.1" data-status="ca">
     <td><a href="./issues/181205.1.html">181205.1</a></td>
     <td>Clarify DW_OP_piece documentation for parts of values that are optimized out</td>
     <td>Greg Clayton</td>
@@ -261,7 +281,7 @@
     <td>Clarification</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="181223.1" data-status="ca">
     <td><a href="./issues/181223.1.html">181223.1</a></td>
     <td>Add source URL (was Add Microsoft SourceLink support)</td>
     <td>Jordan Frost</td>
@@ -269,7 +289,7 @@
     <td>Enhancement</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="181223.2" data-status="cr">
     <td><a href="./issues/181223.2.html">181223.2</a></td>
     <td>Adopt Microsoft&#x27;s Symbol Server Key concept for elf and sym files</td>
     <td>Jordan Frost</td>
@@ -277,7 +297,7 @@
     <td>Enhancement</td>
     <td>Rejected</td>
   </tr>
-  <tr>
+  <tr data-id="190130.1" data-status="cr">
     <td><a href="./issues/190130.1.html">190130.1</a></td>
     <td>Multiple headers in .debug_loclists and .debug_rnglists</td>
     <td>Philip Craig</td>
@@ -285,7 +305,7 @@
     <td>Ambiguity</td>
     <td>Duplicate</td>
   </tr>
-  <tr>
+  <tr data-id="190225.1" data-status="cr">
     <td><a href="./issues/190225.1.html">190225.1</a></td>
     <td>DW_AT_segment_attribute</td>
     <td>James Harding</td>
@@ -293,7 +313,7 @@
     <td>Clarification</td>
     <td>Closed</td>
   </tr>
-  <tr>
+  <tr data-id="190407.1" data-status="ca">
     <td><a href="./issues/190407.1.html">190407.1</a></td>
     <td>Adding Zig Language Attribute</td>
     <td>Shawn Landden</td>
@@ -301,7 +321,7 @@
     <td>Editorial</td>
     <td>Lang code assigned</td>
   </tr>
-  <tr>
+  <tr data-id="190809.1" data-status="ca">
     <td><a href="./issues/190809.1.html">190809.1</a></td>
     <td>Standardize DW_AT_GNU_bias</td>
     <td>Tom Tromey</td>
@@ -309,7 +329,7 @@
     <td>Enhancement</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="191025.1" data-status="ca">
     <td><a href="./issues/191025.1.html">191025.1</a></td>
     <td>DW_OP_bit_piece offset operand mostly does matter</td>
     <td>Paul T Robinson</td>
@@ -317,7 +337,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="191107.1" data-status="cr">
     <td><a href="./issues/191107.1.html">191107.1</a></td>
     <td>DW_OP_byte_swap</td>
     <td>Chirag Patel</td>
@@ -325,7 +345,7 @@
     <td>Enhancement</td>
     <td>Rejected</td>
   </tr>
-  <tr>
+  <tr data-id="200120.1" data-status="ca">
     <td><a href="./issues/200120.1.html">200120.1</a></td>
     <td>Requesting DW_LANG_Crystal for Crystal Language</td>
     <td>Sergey Kuznetsov</td>
@@ -333,7 +353,7 @@
     <td>Enhancement</td>
     <td>Lang code assigned</td>
   </tr>
-  <tr>
+  <tr data-id="200215.1" data-status="ca">
     <td><a href="./issues/200215.1.html">200215.1</a></td>
     <td>Typo on http://dwarfstd.org/Comment.html</td>
     <td>Gabor Greif</td>
@@ -341,7 +361,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="200427.1" data-status="ca">
     <td><a href="./issues/200427.1.html">200427.1</a></td>
     <td>Missing link in section relationships</td>
     <td>Paul T Robinson</td>
@@ -349,7 +369,7 @@
     <td>Editorial</td>
     <td>Accepted with modification</td>
   </tr>
-  <tr>
+  <tr data-id="200505.1" data-status="ca">
     <td><a href="./issues/200505.1.html">200505.1</a></td>
     <td>Introduction has spurious word unittype</td>
     <td>David Anderson</td>
@@ -357,7 +377,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="200505.2" data-status="ca">
     <td><a href="./issues/200505.2.html">200505.2</a></td>
     <td>Lookup by name</td>
     <td>David Anderson</td>
@@ -365,7 +385,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="200505.3" data-status="ca">
     <td><a href="./issues/200505.3.html">200505.3</a></td>
     <td>Index attribute encodings</td>
     <td>David Anderson</td>
@@ -373,7 +393,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="200505.4" data-status="ca">
     <td><a href="./issues/200505.4.html">200505.4</a></td>
     <td>Augmentation string</td>
     <td>David Anderson</td>
@@ -381,7 +401,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="200505.6" data-status="ca">
     <td><a href="./issues/200505.6.html">200505.6</a></td>
     <td>State Machine Registers</td>
     <td>David Anderson</td>
@@ -389,7 +409,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="200505.7" data-status="ca">
     <td><a href="./issues/200505.7.html">200505.7</a></td>
     <td>Declarations with reduced scope</td>
     <td>David Anderson</td>
@@ -397,7 +417,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="200519.1" data-status="ca">
     <td><a href="./issues/200519.1.html">200519.1</a></td>
     <td>Missing comments for some links in figure B.2</td>
     <td>Igor Kudrin</td>
@@ -405,7 +425,7 @@
     <td>Editorial</td>
     <td>Accepted with modification</td>
   </tr>
-  <tr>
+  <tr data-id="200602.1" data-status="ca">
     <td><a href="./issues/200602.1.html">200602.1</a></td>
     <td>.debug_macro.dwo can refer to .debug_line.dwo?</td>
     <td>Paul T Robinson</td>
@@ -413,7 +433,7 @@
     <td>Clarification</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="200609.1" data-status="ca">
     <td><a href="./issues/200609.1.html">200609.1</a></td>
     <td>Reserve an address value for &quot;not present&quot;</td>
     <td>Paul T Robinson</td>
@@ -421,7 +441,7 @@
     <td>Enhancement</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="200709.1" data-status="ca">
     <td><a href="./issues/200709.1.html">200709.1</a></td>
     <td>DW_AT_rnglists_base in DW_TAG_skeleton_unit</td>
     <td>Simon Marchi</td>
@@ -429,7 +449,7 @@
     <td>Error</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="200710.1" data-status="ca">
     <td><a href="./issues/200710.1.html">200710.1</a></td>
     <td>Inconsistent decription of data representation for the range list table.</td>
     <td>Xing GUO</td>
@@ -437,7 +457,7 @@
     <td>Ambiguity</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="200720.1" data-status="cw">
     <td><a href="./issues/200720.1.html">200720.1</a></td>
     <td>SIMD location expressions</td>
     <td>Markus Metzger</td>
@@ -445,7 +465,7 @@
     <td>Enhancement</td>
     <td>Withdrawn</td>
   </tr>
-  <tr>
+  <tr data-id="200803.1" data-status="cr">
     <td><a href="./issues/200803.1.html">200803.1</a></td>
     <td>Add DW_LNS_jmp - modify file offset of line number program</td>
     <td>Andrew Kelley</td>
@@ -453,7 +473,7 @@
     <td>Enhancement</td>
     <td>Rejected</td>
   </tr>
-  <tr>
+  <tr data-id="201007.1" data-status="ca">
     <td><a href="./issues/201007.1.html">201007.1</a></td>
     <td>Wide Registers in Location Description Expressions</td>
     <td>Markus Metzger</td>
@@ -461,7 +481,7 @@
     <td>Enhancement</td>
     <td>Accepted with modification</td>
   </tr>
-  <tr>
+  <tr data-id="210113.1" data-status="ca">
     <td><a href="./issues/210113.1.html">210113.1</a></td>
     <td>Zero-length entries in .debug_aranges</td>
     <td>Paul Robinson</td>
@@ -469,7 +489,7 @@
     <td>Improvement</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="210204.1" data-status="ca">
     <td><a href="./issues/210204.1.html">210204.1</a></td>
     <td>Create DW_LANG assignment registry</td>
     <td>Michael Eager</td>
@@ -477,7 +497,7 @@
     <td>Enhancement</td>
     <td>Accepted with modification</td>
   </tr>
-  <tr>
+  <tr data-id="210208.1" data-status="ca">
     <td><a href="./issues/210208.1.html">210208.1</a></td>
     <td>Add DW_LANG_C_plus_plus_17 and DW_LANG_C_plus_plus_20</td>
     <td>Jakub Jelinek</td>
@@ -485,7 +505,7 @@
     <td>Enhancement</td>
     <td>Lang code assigned</td>
   </tr>
-  <tr>
+  <tr data-id="210208.2" data-status="ca">
     <td><a href="./issues/210208.2.html">210208.2</a></td>
     <td>Standardize DW_AT_GNU_numerator and DW_AT_GNU_denominator</td>
     <td>Tom Tromey</td>
@@ -493,7 +513,7 @@
     <td>Enhancement</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="210218.1" data-status="ca">
     <td><a href="./issues/210218.1.html">210218.1</a></td>
     <td>Index entry shows up in PDF</td>
     <td>Tom Tromey</td>
@@ -501,7 +521,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="210218.2" data-status="ca">
     <td><a href="./issues/210218.2.html">210218.2</a></td>
     <td>Generalize complex number support</td>
     <td>Tom Tromey</td>
@@ -509,7 +529,7 @@
     <td>Enhancement</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="210219.1" data-status="cr">
     <td><a href="./issues/210219.1.html">210219.1</a></td>
     <td>Representation of Rust type traits</td>
     <td>Tom Tromey</td>
@@ -517,7 +537,7 @@
     <td>Enhancement</td>
     <td>Rejected</td>
   </tr>
-  <tr>
+  <tr data-id="210305.1" data-status="cw">
     <td><a href="./issues/210305.1.html">210305.1</a></td>
     <td>Split DW_AT_language into DW_AT_language and DW_AT_language_version</td>
     <td>Jakub Jelinek</td>
@@ -525,7 +545,7 @@
     <td>Enhancement</td>
     <td>Withdrawn</td>
   </tr>
-  <tr>
+  <tr data-id="210310.1" data-status="ca">
     <td><a href="./issues/210310.1.html">210310.1</a></td>
     <td>Clarify DW_AT_rnglists_base and DW_FORM_rnglistx in Split DWARF</td>
     <td>David Blaikie</td>
@@ -533,7 +553,7 @@
     <td>Ambiguity</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="210314.1" data-status="ca">
     <td><a href="./issues/210314.1.html">210314.1</a></td>
     <td>Eliminate all indefinite antecedent</td>
     <td>David Anderson</td>
@@ -541,7 +561,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="210419.1" data-status="ca">
     <td><a href="./issues/210419.1.html">210419.1</a></td>
     <td>Split DW_AT_language into DW_AT_language and DW_AT_language_version</td>
     <td>Jakub Jelinek</td>
@@ -549,7 +569,7 @@
     <td>Enhancement</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="210429.1" data-status="ca">
     <td><a href="./issues/210429.1.html">210429.1</a></td>
     <td>Clarify Description of Line Number Table Extended Opcodes</td>
     <td>Ron Brender</td>
@@ -557,7 +577,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="210622.1" data-status="ca">
     <td><a href="./issues/210622.1.html">210622.1</a></td>
     <td>.debug_rnglists section header description</td>
     <td>David Anderson</td>
@@ -565,7 +585,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="210628.1" data-status="ca">
     <td><a href="./issues/210628.1.html">210628.1</a></td>
     <td>Clarification of relative paths in DW_AT_comp_dir</td>
     <td>Caroline Tice</td>
@@ -573,7 +593,7 @@
     <td>Clarification</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="210711.1" data-status="cw">
     <td><a href="./issues/210711.1.html">210711.1</a></td>
     <td>debug_names wording inconsistency</td>
     <td>David Anderson</td>
@@ -581,7 +601,7 @@
     <td>Ambiguity</td>
     <td>Withdrawn</td>
   </tr>
-  <tr>
+  <tr data-id="210713.1" data-status="ca">
     <td><a href="./issues/210713.1.html">210713.1</a></td>
     <td>Fix &quot;file 0&quot;</td>
     <td>Paul Robinson</td>
@@ -589,7 +609,7 @@
     <td>Improvement</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="211004.1" data-status="ca">
     <td><a href="./issues/211004.1.html">211004.1</a></td>
     <td>Replace DW_MACRO_define/undef_sup with sized versions</td>
     <td>Paul Robinson</td>
@@ -597,7 +617,7 @@
     <td>Enhancement</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="211022.1" data-status="ca">
     <td><a href="./issues/211022.1.html">211022.1</a></td>
     <td>Empty range list entry</td>
     <td>David Anderson</td>
@@ -605,7 +625,7 @@
     <td>Clarification</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="211101.1" data-status="ca">
     <td><a href="./issues/211101.1.html">211101.1</a></td>
     <td>Allow 64-bit string offsets in DWARF-32</td>
     <td>Paul Robinson</td>
@@ -613,7 +633,7 @@
     <td>Enhancement</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="211102.1" data-status="ca">
     <td><a href="./issues/211102.1.html">211102.1</a></td>
     <td>No DW_FORM_strp in .dwo files</td>
     <td>Paul Robinson</td>
@@ -621,7 +641,7 @@
     <td>Error</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="211103.1" data-status="ca">
     <td><a href="./issues/211103.1.html">211103.1</a></td>
     <td>Call site entries for optimized out functions</td>
     <td>Ben Woodard</td>
@@ -629,7 +649,7 @@
     <td>Clarification</td>
     <td>Accepted with modification</td>
   </tr>
-  <tr>
+  <tr data-id="211108.2" data-status="ca">
     <td><a href="./issues/211108.2.html">211108.2</a></td>
     <td>Allow Non-Uniform Record Formats in the File Name Table</td>
     <td>Cary Coutant</td>
@@ -637,7 +657,7 @@
     <td>Enhancement</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="220212.1" data-status="ca">
     <td><a href="./issues/220212.1.html">220212.1</a></td>
     <td>Disambiguate &quot;ending address/offset&quot; in location lists and range lists</td>
     <td>Ron Brender</td>
@@ -645,7 +665,7 @@
     <td>Editorial</td>
     <td>Accepted with editorial changes</td>
   </tr>
-  <tr>
+  <tr data-id="220304.1" data-status="cr">
     <td><a href="./issues/220304.1.html">220304.1</a></td>
     <td>Allow MD5 hash to be optional in the line table</td>
     <td>Tony Tye</td>
@@ -653,7 +673,7 @@
     <td>Enhancement</td>
     <td>Rejected</td>
   </tr>
-  <tr>
+  <tr data-id="220427.1" data-status="ca">
     <td><a href="./issues/220427.1.html">220427.1</a></td>
     <td>Deprecate the DW_AT_segment attribute</td>
     <td>Zoran Zaric</td>
@@ -661,7 +681,7 @@
     <td>Enhancement</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="220708.1" data-status="ca">
     <td><a href="./issues/220708.1.html">220708.1</a></td>
     <td>Remove edge (fo) from Figure B.2</td>
     <td>David Blaikie</td>
@@ -669,7 +689,7 @@
     <td>Error</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="220708.2" data-status="ca">
     <td><a href="./issues/220708.2.html">220708.2</a></td>
     <td>.debug_{c,t}u_index missing/incomplete DWARF64 support</td>
     <td>David Blaikie</td>
@@ -677,7 +697,7 @@
     <td>Enhancement</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="220711.1" data-status="ca">
     <td><a href="./issues/220711.1.html">220711.1</a></td>
     <td>Name Table index attribute</td>
     <td>David Anderson</td>
@@ -685,7 +705,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="220711.2" data-status="ca">
     <td><a href="./issues/220711.2.html">220711.2</a></td>
     <td>Name Table Figure 6.1</td>
     <td>David Anderson</td>
@@ -693,7 +713,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="220713.1" data-status="ca">
     <td><a href="./issues/220713.1.html">220713.1</a></td>
     <td>Name Table Figure 6.1 page 140</td>
     <td>David Anderson</td>
@@ -701,7 +721,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="220802.1" data-status="ca">
     <td><a href="./issues/220802.1.html">220802.1</a></td>
     <td>Introduce DW_FORM_addr_offset paired form</td>
     <td>David Blaikie</td>
@@ -709,7 +729,7 @@
     <td>Enhancement</td>
     <td>Accepted with modifications</td>
   </tr>
-  <tr>
+  <tr data-id="221031.1" data-status="ca">
     <td><a href="./issues/221031.1.html">221031.1</a></td>
     <td>Future-proof text from 211102.1</td>
     <td>Paul Robinson</td>
@@ -717,7 +737,7 @@
     <td>Editorial</td>
     <td>Accepted</td>
   </tr>
-  <tr>
+  <tr data-id="230120.4" data-status="ca">
     <td><a href="./issues/230120.4.html">230120.4</a></td>
     <td>Add the HIP Programing Language</td>
     <td>Tony Tye</td>
@@ -729,7 +749,7 @@
 </table>
 
 
-<p>Status explanations:</p>
+<p>Status codes:</p>
 <ul>
 <li><strong>Open:</strong>  The issue is open, and is being discussed or is pending evaluation.</li>
 <li><strong>Incomplete:</strong>  The issue is open, but is awaiting revision by its author or its champion.</li>
