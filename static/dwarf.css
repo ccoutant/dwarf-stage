@@ -12,11 +12,12 @@
   --footer-border-color: #d8d8d8;
   --blockquote-border-color: #f0f0f0;
   --pre-background-color: #f0f0f0;
+  --issue-hover-background-color: #f0f0ff;
 }
 
 body, div, h1, h2, h3, h4, h5, h6, th, td, p, li, dd, code {
   font-family: var(--body-font);
-  }
+}
 
 * {
   box-sizing: border-box;
@@ -30,7 +31,7 @@ body {
   margin: 0 auto;
   padding: 1em;
   max-width: 1000px;
-  }
+}
 
 div.pageheader {
   position: relative;
@@ -247,6 +248,10 @@ li.self a {
 
 table.issueindex {
   margin: 2em 0;
+}
+
+table.issueindex tbody tr:hover {
+  background-color: var(--issue-hover-background-color);
 }
 
 /* Responsive layout: for narrow screens, move nav to bottom */
